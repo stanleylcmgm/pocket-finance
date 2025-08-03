@@ -19,8 +19,8 @@ export const homeScreenStyles = StyleSheet.create({
   
   // Header styles
   headerGradient: {
-    paddingTop: 50,
-    paddingBottom: 30,
+    paddingTop: 25, // Further reduced by 30% from 35
+    paddingBottom: 15, // Further reduced by 30% from 21
   },
   
   header: {
