@@ -64,6 +64,7 @@ export const homeScreenStyles = StyleSheet.create({
     flexDirection: 'row',
     paddingHorizontal: 20,
     paddingTop: 20,
+    gap: 12,
   },
   
   statCard: {
@@ -72,7 +73,6 @@ export const homeScreenStyles = StyleSheet.create({
     padding: 16,
     borderRadius: 16,
     alignItems: 'center',
-    marginHorizontal: 6,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
@@ -134,6 +134,7 @@ export const homeScreenStyles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
+    gap: 12,
   },
   
   blockCard: {
@@ -142,7 +143,6 @@ export const homeScreenStyles = StyleSheet.create({
     borderRadius: 20,
     padding: 20,
     justifyContent: 'space-between',
-    marginBottom: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
@@ -173,7 +173,6 @@ export const homeScreenStyles = StyleSheet.create({
     color: '#666',
     lineHeight: 18,
     flexShrink: 1,
-    numberOfLines: 2,
   },
   
   // Quick actions (if needed)

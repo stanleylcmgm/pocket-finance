@@ -89,17 +89,17 @@ const HomeScreen = ({ navigation }) => {
     <SafeAreaView style={homeScreenStyles.container}>
       {/* Gradient Header */}
       <LinearGradient
-         colors={[colors.background.dark, colors.background.darkSecondary]}
-         style={homeScreenStyles.headerGradient}
-       >
+        colors={[colors.background.dark, colors.background.darkSecondary]}
+        style={homeScreenStyles.headerGradient}
+      >
         <View style={homeScreenStyles.header}>
-                     <View style={homeScreenStyles.titleContainer}>
-             <Text style={homeScreenStyles.title}>⭐ Star</Text>
-             <Text style={homeScreenStyles.subtitle}>Your Productivity Companion</Text>
-           </View>
-           <View style={homeScreenStyles.headerIcon}>
-             <Ionicons name="star" size={40} color="rgba(255,255,255,0.3)" />
-           </View>
+          <View style={homeScreenStyles.titleContainer}>
+            <Text style={homeScreenStyles.title}>⭐ Star</Text>
+            <Text style={homeScreenStyles.subtitle}>Your Productivity Companion</Text>
+          </View>
+          <View style={homeScreenStyles.headerIcon}>
+            <Ionicons name="star" size={40} color="rgba(255,255,255,0.3)" />
+          </View>
         </View>
       </LinearGradient>
 
@@ -135,7 +135,7 @@ const HomeScreen = ({ navigation }) => {
             </View>
           </View>
 
-          {/* Financial Tools - Block Style */}
+          {/* Financial Tools */}
           <View style={homeScreenStyles.menuContainer}>
             <View style={homeScreenStyles.sectionHeader}>
               <Text style={homeScreenStyles.menuTitle}>Financial Tools</Text>
@@ -160,81 +160,35 @@ const HomeScreen = ({ navigation }) => {
             </View>
           </View>
 
-
+          {/* Bottom spacing for navigation */}
+          <View style={homeScreenStyles.bottomSpacing} />
         </ScrollView>
       </View>
 
-      {/* Bottom Navigation - ALWAYS VISIBLE */}
+      {/* Bottom Navigation */}
       <View style={homeScreenStyles.bottomNavigation}>
-        <TouchableOpacity
-          style={[homeScreenStyles.tabItem, activeTab === 'home' && homeScreenStyles.activeTabItem]}
-          onPress={() => handleTabPress('home')}
-        >
-          <Ionicons
-            name="home-outline"
-            size={20}
-            color={activeTab === 'home' ? colors.primary[500] : colors.secondary[500]}
-          />
-          <Text style={[homeScreenStyles.tabText, activeTab === 'home' && homeScreenStyles.activeTabText]}>
-            Home
-          </Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity
-          style={[homeScreenStyles.tabItem, activeTab === 'balance-sheet' && homeScreenStyles.activeTabItem]}
-          onPress={() => handleTabPress('balance-sheet')}
-        >
-          <Ionicons
-            name="wallet-outline"
-            size={20}
-            color={activeTab === 'balance-sheet' ? colors.primary[500] : colors.secondary[500]}
-          />
-          <Text style={[homeScreenStyles.tabText, activeTab === 'balance-sheet' && homeScreenStyles.activeTabText]}>
-            Balance
-          </Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity
-          style={[homeScreenStyles.tabItem, activeTab === 'expenses-tracking' && homeScreenStyles.activeTabItem]}
-          onPress={() => handleTabPress('expenses-tracking')}
-        >
-          <Ionicons
-            name="trending-down-outline"
-            size={20}
-            color={activeTab === 'expenses-tracking' ? colors.primary[500] : colors.secondary[500]}
-          />
-          <Text style={[homeScreenStyles.tabText, activeTab === 'expenses-tracking' && homeScreenStyles.activeTabText]}>
-            Expenses
-          </Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity
-          style={[homeScreenStyles.tabItem, activeTab === 'asset-management' && homeScreenStyles.activeTabItem]}
-          onPress={() => handleTabPress('asset-management')}
-        >
-          <Ionicons
-            name="business-outline"
-            size={20}
-            color={activeTab === 'asset-management' ? colors.primary[500] : colors.secondary[500]}
-          />
-          <Text style={[homeScreenStyles.tabText, activeTab === 'asset-management' && homeScreenStyles.activeTabText]}>
-            Assets
-          </Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity
-          style={[homeScreenStyles.tabItem, activeTab === 'reports' && homeScreenStyles.activeTabItem]}
-          onPress={() => handleTabPress('reports')}
-        >
-          <Ionicons
-            name="analytics-outline"
-            size={20}
-            color={activeTab === 'reports' ? colors.primary[500] : colors.secondary[500]}
-          />
-          <Text style={[homeScreenStyles.tabText, activeTab === 'reports' && homeScreenStyles.activeTabText]}>
-            Reports
-          </Text>
-        </TouchableOpacity>
+        {bottomTabs.map((tab) => (
+          <TouchableOpacity
+            key={tab.id}
+            style={[
+              homeScreenStyles.tabItem,
+              activeTab === tab.id && homeScreenStyles.activeTabItem
+            ]}
+            onPress={() => handleTabPress(tab.id)}
+          >
+            <Ionicons
+              name={tab.icon}
+              size={20}
+              color={activeTab === tab.id ? colors.primary[500] : colors.secondary[500]}
+            />
+            <Text style={[
+              homeScreenStyles.tabText,
+              activeTab === tab.id && homeScreenStyles.activeTabText
+            ]}>
+              {tab.title}
+            </Text>
+          </TouchableOpacity>
+        ))}
       </View>
     </SafeAreaView>
   );
