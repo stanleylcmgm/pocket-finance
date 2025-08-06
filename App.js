@@ -5,8 +5,8 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 // Import screens
-import HomeScreen from './components/HomeScreen';
-import BalanceSheet from './components/BalanceSheet';
+import HomeScreen from './components/home-screen';
+import BalanceSheet from './components/balance-sheet';
 
 const Stack = createStackNavigator();
 

@@ -52,8 +52,8 @@ npm start
 Star/
 ├── App.js                 # Main app component with navigation
 ├── components/
-│   ├── HomeScreen.js      # Main dashboard screen
-│   └── BalanceSheet.js    # Monthly balance sheet component
+│   ├── home-screen.js     # Main dashboard screen
+│   └── balance-sheet.js   # Monthly balance sheet component
 ├── assets/                # App icons and images
 └── package.json           # Dependencies and scripts
 ```

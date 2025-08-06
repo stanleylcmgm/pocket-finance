@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../theme';
-import '../styles/HomeScreen.styles.scss';
+import '../styles/home-screen.styles.scss';
 
 const HomeScreen = ({ navigation }) => {
   const [activeTab, setActiveTab] = useState('home');
