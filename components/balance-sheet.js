@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
   TouchableOpacity,
   TextInput,
@@ -10,6 +9,7 @@ import {
   Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { balanceSheetStyles } from '../styles/balance-sheet.styles';
 
 const BalanceSheet = () => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -101,63 +101,63 @@ const BalanceSheet = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={balanceSheetStyles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => changeMonth('prev')} style={styles.monthButton}>
+      <View style={balanceSheetStyles.header}>
+        <TouchableOpacity onPress={() => changeMonth('prev')} style={balanceSheetStyles.monthButton}>
           <Ionicons name="chevron-back" size={24} color="#2c3e50" />
         </TouchableOpacity>
-        <Text style={styles.monthText}>{getMonthName(currentMonth)}</Text>
-        <TouchableOpacity onPress={() => changeMonth('next')} style={styles.monthButton}>
+        <Text style={balanceSheetStyles.monthText}>{getMonthName(currentMonth)}</Text>
+        <TouchableOpacity onPress={() => changeMonth('next')} style={balanceSheetStyles.monthButton}>
           <Ionicons name="chevron-forward" size={24} color="#2c3e50" />
         </TouchableOpacity>
       </View>
 
       {/* Summary Cards */}
-      <View style={styles.summaryContainer}>
-        <View style={styles.summaryCard}>
-          <Text style={styles.summaryLabel}>Total Income</Text>
-          <Text style={styles.summaryAmount}>${getTotalIncome().toFixed(2)}</Text>
+      <View style={balanceSheetStyles.summaryContainer}>
+        <View style={balanceSheetStyles.summaryCard}>
+          <Text style={balanceSheetStyles.summaryLabel}>Total Income</Text>
+          <Text style={balanceSheetStyles.summaryAmount}>${getTotalIncome().toFixed(2)}</Text>
         </View>
-        <View style={styles.summaryCard}>
-          <Text style={styles.summaryLabel}>Total Expenses</Text>
-          <Text style={styles.summaryAmount}>${getTotalExpenses().toFixed(2)}</Text>
+        <View style={balanceSheetStyles.summaryCard}>
+          <Text style={balanceSheetStyles.summaryLabel}>Total Expenses</Text>
+          <Text style={balanceSheetStyles.summaryAmount}>${getTotalExpenses().toFixed(2)}</Text>
         </View>
-        <View style={[styles.summaryCard, { backgroundColor: getBalance() >= 0 ? '#d4edda' : '#f8d7da' }]}>
-          <Text style={styles.summaryLabel}>Balance</Text>
-          <Text style={[styles.summaryAmount, { color: getBalance() >= 0 ? '#155724' : '#721c24' }]}>
+        <View style={[balanceSheetStyles.summaryCard, { backgroundColor: getBalance() >= 0 ? '#d4edda' : '#f8d7da' }]}>
+          <Text style={balanceSheetStyles.summaryLabel}>Balance</Text>
+          <Text style={[balanceSheetStyles.summaryAmount, { color: getBalance() >= 0 ? '#155724' : '#721c24' }]}>
             ${getBalance().toFixed(2)}
           </Text>
         </View>
       </View>
 
       {/* Add Buttons */}
-      <View style={styles.addButtonsContainer}>
-        <TouchableOpacity style={[styles.addButton, { backgroundColor: '#28a745' }]} onPress={() => openModal('income')}>
+      <View style={balanceSheetStyles.addButtonsContainer}>
+        <TouchableOpacity style={[balanceSheetStyles.addButton, { backgroundColor: '#28a745' }]} onPress={() => openModal('income')}>
           <Ionicons name="add" size={20} color="white" />
-          <Text style={styles.addButtonText}>Add Income</Text>
+          <Text style={balanceSheetStyles.addButtonText}>Add Income</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.addButton, { backgroundColor: '#dc3545' }]} onPress={() => openModal('expense')}>
+        <TouchableOpacity style={[balanceSheetStyles.addButton, { backgroundColor: '#dc3545' }]} onPress={() => openModal('expense')}>
           <Ionicons name="remove" size={20} color="white" />
-          <Text style={styles.addButtonText}>Add Expense</Text>
+          <Text style={balanceSheetStyles.addButtonText}>Add Expense</Text>
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={styles.scrollView}>
+      <ScrollView style={balanceSheetStyles.scrollView}>
         {/* Income Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Income</Text>
+        <View style={balanceSheetStyles.section}>
+          <Text style={balanceSheetStyles.sectionTitle}>Income</Text>
           {income.length === 0 ? (
-            <Text style={styles.emptyText}>No income entries yet</Text>
+            <Text style={balanceSheetStyles.emptyText}>No income entries yet</Text>
           ) : (
             income.map((item) => (
-              <View key={item.id} style={styles.itemCard}>
-                <View style={styles.itemInfo}>
-                  <Text style={styles.itemTitle}>{item.title}</Text>
-                  <Text style={styles.itemCategory}>{item.category}</Text>
+              <View key={item.id} style={balanceSheetStyles.itemCard}>
+                <View style={balanceSheetStyles.itemInfo}>
+                  <Text style={balanceSheetStyles.itemTitle}>{item.title}</Text>
+                  <Text style={balanceSheetStyles.itemCategory}>{item.category}</Text>
                 </View>
-                <View style={styles.itemAmount}>
-                  <Text style={[styles.itemAmountText, { color: '#28a745' }]}>+${item.amount.toFixed(2)}</Text>
+                <View style={balanceSheetStyles.itemAmount}>
+                  <Text style={[balanceSheetStyles.itemAmountText, { color: '#28a745' }]}>+${item.amount.toFixed(2)}</Text>
                   <TouchableOpacity onPress={() => deleteItem(item.id, 'income')}>
                     <Ionicons name="trash-outline" size={20} color="#dc3545" />
                   </TouchableOpacity>
@@ -168,19 +168,19 @@ const BalanceSheet = () => {
         </View>
 
         {/* Expenses Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Expenses</Text>
+        <View style={balanceSheetStyles.section}>
+          <Text style={balanceSheetStyles.sectionTitle}>Expenses</Text>
           {expenses.length === 0 ? (
-            <Text style={styles.emptyText}>No expense entries yet</Text>
+            <Text style={balanceSheetStyles.emptyText}>No expense entries yet</Text>
           ) : (
             expenses.map((item) => (
-              <View key={item.id} style={styles.itemCard}>
-                <View style={styles.itemInfo}>
-                  <Text style={styles.itemTitle}>{item.title}</Text>
-                  <Text style={styles.itemCategory}>{item.category}</Text>
+              <View key={item.id} style={balanceSheetStyles.itemCard}>
+                <View style={balanceSheetStyles.itemInfo}>
+                  <Text style={balanceSheetStyles.itemTitle}>{item.title}</Text>
+                  <Text style={balanceSheetStyles.itemCategory}>{item.category}</Text>
                 </View>
-                <View style={styles.itemAmount}>
-                  <Text style={[styles.itemAmountText, { color: '#dc3545' }]}>-${item.amount.toFixed(2)}</Text>
+                <View style={balanceSheetStyles.itemAmount}>
+                  <Text style={[balanceSheetStyles.itemAmountText, { color: '#dc3545' }]}>-${item.amount.toFixed(2)}</Text>
                   <TouchableOpacity onPress={() => deleteItem(item.id, 'expense')}>
                     <Ionicons name="trash-outline" size={20} color="#dc3545" />
                   </TouchableOpacity>
@@ -198,40 +198,40 @@ const BalanceSheet = () => {
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>
+        <View style={balanceSheetStyles.modalOverlay}>
+          <View style={balanceSheetStyles.modalContent}>
+            <Text style={balanceSheetStyles.modalTitle}>
               Add {modalType === 'income' ? 'Income' : 'Expense'}
             </Text>
             
             <TextInput
-              style={styles.input}
+              style={balanceSheetStyles.input}
               placeholder="Title"
               value={newItem.title}
               onChangeText={(text) => setNewItem({ ...newItem, title: text })}
             />
             
             <TextInput
-              style={styles.input}
+              style={balanceSheetStyles.input}
               placeholder="Amount"
               value={newItem.amount}
               onChangeText={(text) => setNewItem({ ...newItem, amount: text })}
               keyboardType="numeric"
             />
             
-            <View style={styles.categoryContainer}>
+            <View style={balanceSheetStyles.categoryContainer}>
               {categories[modalType].map((category) => (
                 <TouchableOpacity
                   key={category}
                   style={[
-                    styles.categoryButton,
-                    newItem.category === category && styles.categoryButtonSelected
+                    balanceSheetStyles.categoryButton,
+                    newItem.category === category && balanceSheetStyles.categoryButtonSelected
                   ]}
                   onPress={() => setNewItem({ ...newItem, category })}
                 >
                   <Text style={[
-                    styles.categoryButtonText,
-                    newItem.category === category && styles.categoryButtonTextSelected
+                    balanceSheetStyles.categoryButtonText,
+                    newItem.category === category && balanceSheetStyles.categoryButtonTextSelected
                   ]}>
                     {category}
                   </Text>
@@ -239,18 +239,18 @@ const BalanceSheet = () => {
               ))}
             </View>
 
-            <View style={styles.modalButtons}>
+            <View style={balanceSheetStyles.modalButtons}>
               <TouchableOpacity
-                style={[styles.modalButton, styles.cancelButton]}
+                style={[balanceSheetStyles.modalButton, balanceSheetStyles.cancelButton]}
                 onPress={() => setModalVisible(false)}
               >
-                <Text style={styles.cancelButtonText}>Cancel</Text>
+                <Text style={balanceSheetStyles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.modalButton, styles.saveButton]}
+                style={[balanceSheetStyles.modalButton, balanceSheetStyles.saveButton]}
                 onPress={addItem}
               >
-                <Text style={styles.saveButtonText}>Save</Text>
+                <Text style={balanceSheetStyles.saveButtonText}>Save</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -259,207 +259,5 @@ const BalanceSheet = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f8f9fa',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: 'white',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e9ecef',
-  },
-  monthButton: {
-    padding: 10,
-  },
-  monthText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#2c3e50',
-  },
-  summaryContainer: {
-    flexDirection: 'row',
-    padding: 15,
-    gap: 10,
-  },
-  summaryCard: {
-    flex: 1,
-    backgroundColor: 'white',
-    padding: 15,
-    borderRadius: 10,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  summaryLabel: {
-    fontSize: 12,
-    color: '#6c757d',
-    marginBottom: 5,
-  },
-  summaryAmount: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#2c3e50',
-  },
-  addButtonsContainer: {
-    flexDirection: 'row',
-    padding: 15,
-    gap: 10,
-  },
-  addButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 15,
-    borderRadius: 10,
-    gap: 8,
-  },
-  addButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  scrollView: {
-    flex: 1,
-    padding: 15,
-  },
-  section: {
-    marginBottom: 20,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#2c3e50',
-    marginBottom: 10,
-  },
-  emptyText: {
-    textAlign: 'center',
-    color: '#6c757d',
-    fontStyle: 'italic',
-    padding: 20,
-  },
-  itemCard: {
-    backgroundColor: 'white',
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 10,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  itemInfo: {
-    flex: 1,
-  },
-  itemTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#2c3e50',
-  },
-  itemCategory: {
-    fontSize: 12,
-    color: '#6c757d',
-    marginTop: 2,
-  },
-  itemAmount: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  itemAmountText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    backgroundColor: 'white',
-    borderRadius: 15,
-    padding: 20,
-    width: '90%',
-    maxWidth: 400,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#2c3e50',
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 15,
-    fontSize: 16,
-  },
-  categoryContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 20,
-  },
-  categoryButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    backgroundColor: 'white',
-  },
-  categoryButtonSelected: {
-    backgroundColor: '#007bff',
-    borderColor: '#007bff',
-  },
-  categoryButtonText: {
-    color: '#6c757d',
-    fontSize: 14,
-  },
-  categoryButtonTextSelected: {
-    color: 'white',
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  modalButton: {
-    flex: 1,
-    padding: 15,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  cancelButton: {
-    backgroundColor: '#6c757d',
-  },
-  saveButton: {
-    backgroundColor: '#007bff',
-  },
-  cancelButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
-  saveButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
-});
 
 export default BalanceSheet; 
