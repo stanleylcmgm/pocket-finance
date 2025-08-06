@@ -1,15 +1,7 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-  SafeAreaView,
-} from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { homeScreenStyles } from '../styles/HomeScreen.styles';
 import { colors } from '../theme';
+import '../styles/HomeScreen.styles.scss';
 
 const HomeScreen = ({ navigation }) => {
   const [activeTab, setActiveTab] = useState('home');
@@ -86,111 +78,101 @@ const HomeScreen = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={homeScreenStyles.container}>
+    <div className="container">
       {/* Gradient Header */}
-      <LinearGradient
-        colors={[colors.background.dark, colors.background.darkSecondary]}
-        style={homeScreenStyles.headerGradient}
-      >
-        <View style={homeScreenStyles.header}>
-          <View style={homeScreenStyles.titleContainer}>
-            <Text style={homeScreenStyles.title}>⭐ Star</Text>
-            <Text style={homeScreenStyles.subtitle}>Your Productivity Companion</Text>
-          </View>
-          <View style={homeScreenStyles.headerIcon}>
+      <div className="header-gradient">
+        <div className="header">
+          <div className="title-container">
+            <h1 className="title">⭐ Star</h1>
+            <p className="subtitle">Your Productivity Companion</p>
+          </div>
+          <div className="header-icon">
             <Ionicons name="star" size={40} color="rgba(255,255,255,0.3)" />
-          </View>
-        </View>
-      </LinearGradient>
+          </div>
+        </div>
+      </div>
 
       {/* Main Content Area */}
-      <View style={homeScreenStyles.mainContent}>
-        <ScrollView 
-          style={homeScreenStyles.scrollView} 
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={homeScreenStyles.scrollContent}
-        >
-          {/* Quick Stats */}
-          <View style={homeScreenStyles.statsContainer}>
-            <View style={homeScreenStyles.statCard}>
-              <View style={homeScreenStyles.statIconContainer}>
-                <Ionicons name="trending-up" size={20} color={colors.success[500]} />
-              </View>
-              <Text style={homeScreenStyles.statNumber}>$0</Text>
-              <Text style={homeScreenStyles.statLabel}>This Month</Text>
-            </View>
-            <View style={homeScreenStyles.statCard}>
-              <View style={homeScreenStyles.statIconContainer}>
-                <Ionicons name="trending-down" size={20} color={colors.error[500]} />
-              </View>
-              <Text style={homeScreenStyles.statNumber}>$0</Text>
-              <Text style={homeScreenStyles.statLabel}>Spent</Text>
-            </View>
-            <View style={homeScreenStyles.statCard}>
-              <View style={homeScreenStyles.statIconContainer}>
-                <Ionicons name="wallet" size={20} color={colors.info[500]} />
-              </View>
-              <Text style={homeScreenStyles.statNumber}>$0</Text>
-              <Text style={homeScreenStyles.statLabel}>Balance</Text>
-            </View>
-          </View>
+      <div className="main-content">
+        <div className="scroll-view">
+          <div className="scroll-content">
+            {/* Quick Stats */}
+            <div className="stats-container">
+              <div className="stat-card">
+                <div className="stat-icon-container">
+                  <Ionicons name="trending-up" size={20} color={colors.success[500]} />
+                </div>
+                <div className="stat-number">$0</div>
+                <div className="stat-label">This Month</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-icon-container">
+                  <Ionicons name="trending-down" size={20} color={colors.error[500]} />
+                </div>
+                <div className="stat-number">$0</div>
+                <div className="stat-label">Spent</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-icon-container">
+                  <Ionicons name="wallet" size={20} color={colors.info[500]} />
+                </div>
+                <div className="stat-number">$0</div>
+                <div className="stat-label">Balance</div>
+              </div>
+            </div>
 
-          {/* Financial Tools */}
-          <View style={homeScreenStyles.menuContainer}>
-            <View style={homeScreenStyles.sectionHeader}>
-              <Text style={homeScreenStyles.menuTitle}>Financial Tools</Text>
-              <View style={homeScreenStyles.sectionLine} />
-            </View>
-            
-            {/* 2x2 Grid Layout */}
-            <View style={homeScreenStyles.gridContainer}>
-              {menuItems.map((item, index) => (
-                <TouchableOpacity
-                  key={item.id}
-                  style={[homeScreenStyles.blockCard, { backgroundColor: item.color }]}
-                  onPress={() => navigateToScreen(item.screen)}
-                >
-                  <View style={homeScreenStyles.blockIconContainer}>
-                    <Ionicons name={item.icon} size={32} color="#333" />
-                  </View>
-                  <Text style={homeScreenStyles.blockTitle}>{item.title}</Text>
-                  <Text style={homeScreenStyles.blockSubtitle} numberOfLines={2}>{item.subtitle}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
+            {/* Financial Tools */}
+            <div className="menu-container">
+              <div className="section-header">
+                <h2 className="menu-title">Financial Tools</h2>
+                <div className="section-line"></div>
+              </div>
+              
+              {/* 2x2 Grid Layout */}
+              <div className="grid-container">
+                {menuItems.map((item, index) => (
+                  <div
+                    key={item.id}
+                    className="block-card"
+                    style={{ backgroundColor: item.color }}
+                    onClick={() => navigateToScreen(item.screen)}
+                  >
+                    <div className="block-icon-container">
+                      <Ionicons name={item.icon} size={32} color="#333" />
+                    </div>
+                    <h3 className="block-title">{item.title}</h3>
+                    <p className="block-subtitle">{item.subtitle}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
 
-          {/* Bottom spacing for navigation */}
-          <View style={homeScreenStyles.bottomSpacing} />
-        </ScrollView>
-      </View>
+            {/* Bottom spacing for navigation */}
+            <div className="bottom-spacing"></div>
+          </div>
+        </div>
+      </div>
 
       {/* Bottom Navigation */}
-      <View style={homeScreenStyles.bottomNavigation}>
+      <div className="bottom-navigation">
         {bottomTabs.map((tab) => (
-          <TouchableOpacity
+          <div
             key={tab.id}
-            style={[
-              homeScreenStyles.tabItem,
-              activeTab === tab.id && homeScreenStyles.activeTabItem
-            ]}
-            onPress={() => handleTabPress(tab.id)}
+            className={`tab-item ${activeTab === tab.id ? 'active-tab-item' : ''}`}
+            onClick={() => handleTabPress(tab.id)}
           >
             <Ionicons
               name={tab.icon}
               size={20}
               color={activeTab === tab.id ? colors.primary[500] : colors.secondary[500]}
             />
-            <Text style={[
-              homeScreenStyles.tabText,
-              activeTab === tab.id && homeScreenStyles.activeTabText
-            ]}>
+            <span className={`tab-text ${activeTab === tab.id ? 'active-tab-text' : ''}`}>
               {tab.title}
-            </Text>
-          </TouchableOpacity>
+            </span>
+          </div>
         ))}
-      </View>
-    </SafeAreaView>
+      </div>
+    </div>
   );
 };
 
