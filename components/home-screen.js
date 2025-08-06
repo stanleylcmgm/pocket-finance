@@ -1,7 +1,13 @@
 import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../theme';
-import '../styles/home-screen.styles.scss';
+import { homeScreenStyles } from '../styles/home-screen.styles';
 
 const HomeScreen = ({ navigation }) => {
   const [activeTab, setActiveTab] = useState('home');
@@ -78,101 +84,106 @@ const HomeScreen = ({ navigation }) => {
   };
 
   return (
-    <div className="container">
+    <View style={homeScreenStyles.container}>
       {/* Gradient Header */}
-      <div className="header-gradient">
-        <div className="header">
-          <div className="title-container">
-            <h1 className="title">⭐ Star</h1>
-            <p className="subtitle">Your Productivity Companion</p>
-          </div>
-          <div className="header-icon">
+      <View style={homeScreenStyles.headerGradient}>
+        <View style={homeScreenStyles.header}>
+          <View style={homeScreenStyles.titleContainer}>
+            <Text style={homeScreenStyles.title}>⭐ Star</Text>
+            <Text style={homeScreenStyles.subtitle}>Your Productivity Companion</Text>
+          </View>
+          <View style={homeScreenStyles.headerIcon}>
             <Ionicons name="star" size={40} color="rgba(255,255,255,0.3)" />
-          </div>
-        </div>
-      </div>
+          </View>
+        </View>
+      </View>
 
       {/* Main Content Area */}
-      <div className="main-content">
-        <div className="scroll-view">
-          <div className="scroll-content">
+      <View style={homeScreenStyles.mainContent}>
+        <ScrollView style={homeScreenStyles.scrollView}>
+          <View style={homeScreenStyles.scrollContent}>
             {/* Quick Stats */}
-            <div className="stats-container">
-              <div className="stat-card">
-                <div className="stat-icon-container">
+            <View style={homeScreenStyles.statsContainer}>
+              <View style={homeScreenStyles.statCard}>
+                <View style={homeScreenStyles.statIconContainer}>
                   <Ionicons name="trending-up" size={20} color={colors.success[500]} />
-                </div>
-                <div className="stat-number">$0</div>
-                <div className="stat-label">This Month</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-icon-container">
+                </View>
+                <Text style={homeScreenStyles.statNumber}>$0</Text>
+                <Text style={homeScreenStyles.statLabel}>This Month</Text>
+              </View>
+              <View style={homeScreenStyles.statCard}>
+                <View style={homeScreenStyles.statIconContainer}>
                   <Ionicons name="trending-down" size={20} color={colors.error[500]} />
-                </div>
-                <div className="stat-number">$0</div>
-                <div className="stat-label">Spent</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-icon-container">
+                </View>
+                <Text style={homeScreenStyles.statNumber}>$0</Text>
+                <Text style={homeScreenStyles.statLabel}>Spent</Text>
+              </View>
+              <View style={homeScreenStyles.statCard}>
+                <View style={homeScreenStyles.statIconContainer}>
                   <Ionicons name="wallet" size={20} color={colors.info[500]} />
-                </div>
-                <div className="stat-number">$0</div>
-                <div className="stat-label">Balance</div>
-              </div>
-            </div>
+                </View>
+                <Text style={homeScreenStyles.statNumber}>$0</Text>
+                <Text style={homeScreenStyles.statLabel}>Balance</Text>
+              </View>
+            </View>
 
             {/* Financial Tools */}
-            <div className="menu-container">
-              <div className="section-header">
-                <h2 className="menu-title">Financial Tools</h2>
-                <div className="section-line"></div>
-              </div>
+            <View style={homeScreenStyles.menuContainer}>
+              <View style={homeScreenStyles.sectionHeader}>
+                <Text style={homeScreenStyles.menuTitle}>Financial Tools</Text>
+                <View style={homeScreenStyles.sectionLine}></View>
+              </View>
               
               {/* 2x2 Grid Layout */}
-              <div className="grid-container">
+              <View style={homeScreenStyles.gridContainer}>
                 {menuItems.map((item, index) => (
-                  <div
+                  <TouchableOpacity
                     key={item.id}
-                    className="block-card"
-                    style={{ backgroundColor: item.color }}
-                    onClick={() => navigateToScreen(item.screen)}
+                    style={[homeScreenStyles.blockCard, { backgroundColor: item.color }]}
+                    onPress={() => navigateToScreen(item.screen)}
                   >
-                    <div className="block-icon-container">
+                    <View style={homeScreenStyles.blockIconContainer}>
                       <Ionicons name={item.icon} size={32} color="#333" />
-                    </div>
-                    <h3 className="block-title">{item.title}</h3>
-                    <p className="block-subtitle">{item.subtitle}</p>
-                  </div>
+                    </View>
+                    <Text style={homeScreenStyles.blockTitle}>{item.title}</Text>
+                    <Text style={homeScreenStyles.blockSubtitle}>{item.subtitle}</Text>
+                  </TouchableOpacity>
                 ))}
-              </div>
-            </div>
+              </View>
+            </View>
 
             {/* Bottom spacing for navigation */}
-            <div className="bottom-spacing"></div>
-          </div>
-        </div>
-      </div>
+            <View style={homeScreenStyles.bottomSpacing}></View>
+          </View>
+        </ScrollView>
+      </View>
 
       {/* Bottom Navigation */}
-      <div className="bottom-navigation">
+      <View style={homeScreenStyles.bottomNavigation}>
         {bottomTabs.map((tab) => (
-          <div
+          <TouchableOpacity
             key={tab.id}
-            className={`tab-item ${activeTab === tab.id ? 'active-tab-item' : ''}`}
-            onClick={() => handleTabPress(tab.id)}
+            style={[
+              homeScreenStyles.tabItem,
+              activeTab === tab.id && homeScreenStyles.activeTabItem
+            ]}
+            onPress={() => handleTabPress(tab.id)}
           >
             <Ionicons
               name={tab.icon}
               size={20}
               color={activeTab === tab.id ? colors.primary[500] : colors.secondary[500]}
             />
-            <span className={`tab-text ${activeTab === tab.id ? 'active-tab-text' : ''}`}>
+            <Text style={[
+              homeScreenStyles.tabText,
+              activeTab === tab.id && homeScreenStyles.activeTabText
+            ]}>
               {tab.title}
-            </span>
-          </div>
+            </Text>
+          </TouchableOpacity>
         ))}
-      </div>
-    </div>
+      </View>
+    </View>
   );
 };
 
