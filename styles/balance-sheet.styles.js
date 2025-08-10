@@ -7,6 +7,26 @@ export const balanceSheetStyles = StyleSheet.create({
     backgroundColor: '#f8f9fa',
   },
 
+  // Top Banner
+  topBanner: {
+    backgroundColor: 'white',
+    paddingTop: 28,
+    paddingBottom: 16,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e9ecef',
+  },
+  topBannerTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#2c3e50',
+  },
+  topBannerSubtitle: {
+    marginTop: 4,
+    fontSize: 13,
+    color: '#6c757d',
+  },
+
   // Header
   header: {
     flexDirection: 'row',
@@ -129,11 +149,21 @@ export const balanceSheetStyles = StyleSheet.create({
   section: {
     marginBottom: 24,
   },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 16,
+  },
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     color: '#2c3e50',
-    marginBottom: 16,
+  },
+  sectionDivider: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#ced4da',
   },
 
   // Empty States
@@ -219,12 +249,19 @@ export const balanceSheetStyles = StyleSheet.create({
     fontSize: 13,
     color: '#6c757d',
   },
-  itemAmount: {
+  itemActions: {
     alignItems: 'flex-end',
+    gap: 8,
   },
   itemAmountText: {
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  deleteButton: {
+    marginTop: 6,
+    padding: 6,
+    borderRadius: 8,
+    backgroundColor: 'transparent',
   },
 
   // Month Picker Modal

@@ -111,7 +111,7 @@ const BalanceSheet = () => {
     if (transaction) {
       // Edit mode
       setFormData({
-        amount: transaction.amountOriginal.toString(),
+        amount: formatAmountForInput(transaction.amountOriginal),
         categoryId: transaction.categoryId,
         accountId: transaction.accountId || '',
         note: transaction.note || '',
@@ -137,7 +137,7 @@ const BalanceSheet = () => {
       return;
     }
 
-    const amount = parseFloat(formData.amount);
+    const amount = parseAmountFromInput(formData.amount);
     if (amount <= 0) {
       Alert.alert('Error', 'Amount must be greater than 0');
       return;
@@ -203,6 +203,69 @@ const BalanceSheet = () => {
     };
     transactions.push(duplicated);
     loadMonthlyTransactions();
+  };
+
+  // Amount input formatting
+  const formatAmountForInput = (value) => {
+    const stringValue = String(value ?? '');
+    let sanitized = stringValue.replace(/[^0-9.]/g, '');
+    const firstDotIndex = sanitized.indexOf('.');
+    if (firstDotIndex !== -1) {
+      sanitized =
+        sanitized.slice(0, firstDotIndex + 1) +
+        sanitized.slice(firstDotIndex + 1).replace(/\./g, '');
+    }
+    let [integerPart, fractionalPart] = sanitized.split('.');
+    integerPart = String(parseInt(integerPart || '0', 10) || 0);
+    if (fractionalPart !== undefined) {
+      fractionalPart = fractionalPart.slice(0, 2);
+    }
+    const formattedInteger = Number(integerPart).toLocaleString('en-US');
+    return `$${formattedInteger}` +
+      (fractionalPart !== undefined && fractionalPart.length > 0
+        ? `.${fractionalPart}`
+        : fractionalPart === ''
+        ? '.'
+        : '');
+  };
+
+  const parseAmountFromInput = (inputText) => {
+    const sanitized = (inputText || '').replace(/[^0-9.]/g, '');
+    const parts = sanitized.split('.');
+    const merged = parts.length > 1 ? `${parts[0]}.${parts.slice(1).join('')}` : parts[0];
+    const value = parseFloat(merged);
+    return isNaN(value) ? 0 : value;
+  };
+
+  const handleAmountChange = (inputText) => {
+    // Keep only digits and a single dot
+    let sanitized = inputText.replace(/[^0-9.]/g, '');
+    const firstDotIndex = sanitized.indexOf('.');
+    if (firstDotIndex !== -1) {
+      sanitized =
+        sanitized.slice(0, firstDotIndex + 1) +
+        sanitized.slice(firstDotIndex + 1).replace(/\./g, '');
+    }
+    // Split into integer and fraction, limit to 2 decimals
+    let [integerPart, fractionalPart] = sanitized.split('.');
+    // Remove leading zeros from integer unless it's zero
+    if (integerPart) {
+      integerPart = String(parseInt(integerPart, 10) || 0);
+    } else {
+      integerPart = '0';
+    }
+    if (fractionalPart !== undefined) {
+      fractionalPart = fractionalPart.slice(0, 2);
+    }
+    const formattedInteger = Number(integerPart).toLocaleString('en-US');
+    const formatted =
+      `$${formattedInteger}` +
+      (fractionalPart !== undefined && fractionalPart.length > 0
+        ? `.${fractionalPart}`
+        : fractionalPart === ''
+        ? '.'
+        : '');
+    setFormData({ ...formData, amount: formatted });
   };
 
   // Render functions
@@ -274,18 +337,24 @@ const BalanceSheet = () => {
           <View style={balanceSheetStyles.itemDetails}>
             <Text style={balanceSheetStyles.itemCategory}>{category?.name}</Text>
             {account && <Text style={balanceSheetStyles.itemAccount}>• {account.name}</Text>}
-            <Text style={balanceSheetStyles.itemDate}>
-              {new Date(item.date).toLocaleDateString()}
-            </Text>
           </View>
         </View>
-        <View style={balanceSheetStyles.itemAmount}>
-          <Text style={[
-            balanceSheetStyles.itemAmountText,
-            { color: item.type === 'income' ? '#28a745' : '#dc3545' }
-          ]}>
-            {item.type === 'income' ? '+' : '-'}{formatCurrency(item.amountConverted)}
+        <View style={balanceSheetStyles.itemActions}>
+          <Text
+            style={[
+              balanceSheetStyles.itemAmountText,
+              { color: item.type === 'income' ? '#28a745' : '#dc3545' },
+            ]}
+          >
+            {item.type === 'income' ? '+' : '-'}
+            {formatCurrency(item.amountConverted)}
           </Text>
+          <TouchableOpacity
+            onPress={() => deleteTransaction(item.id)}
+            style={balanceSheetStyles.deleteButton}
+          >
+            <Ionicons name="trash" size={20} color="#dc3545" />
+          </TouchableOpacity>
         </View>
       </TouchableOpacity>
     );
@@ -293,7 +362,10 @@ const BalanceSheet = () => {
 
   const renderSection = (title, data, type) => (
     <View style={balanceSheetStyles.section}>
-      <Text style={balanceSheetStyles.sectionTitle}>{title}</Text>
+      <View style={balanceSheetStyles.sectionHeader}>
+        <Text style={balanceSheetStyles.sectionTitle}>{title}</Text>
+        <View style={balanceSheetStyles.sectionDivider} />
+      </View>
       {data.length === 0 ? (
         <View style={balanceSheetStyles.emptyState}>
           <Ionicons 
@@ -302,7 +374,7 @@ const BalanceSheet = () => {
             color="#6c757d" 
           />
           <Text style={balanceSheetStyles.emptyText}>
-            No {type} entries for {currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
+            No {type} entries yet
           </Text>
           <TouchableOpacity
             style={[balanceSheetStyles.emptyStateButton, { backgroundColor: type === 'income' ? '#28a745' : '#dc3545' }]}
@@ -422,9 +494,9 @@ const BalanceSheet = () => {
                 ? balanceSheetStyles.inputFocused
                 : balanceSheetStyles.inputUnfocused,
             ]}
-            placeholder="Amount"
+            placeholder="Amount $"
             value={formData.amount}
-            onChangeText={(text) => setFormData({ ...formData, amount: text })}
+            onChangeText={handleAmountChange}
             keyboardType="numeric"
             onFocus={() => setIsAmountFocused(true)}
             onBlur={() => setIsAmountFocused(false)}
@@ -482,6 +554,12 @@ const BalanceSheet = () => {
   return (
     <View style={balanceSheetStyles.container}>
       {/* Month Navigator removed per request */}
+
+      {/* Top Banner */}
+      <View style={balanceSheetStyles.topBanner}>
+        <Text style={balanceSheetStyles.topBannerTitle}>Balance Sheet</Text>
+        <Text style={balanceSheetStyles.topBannerSubtitle}>Overview of your month</Text>
+      </View>
 
       {/* Summary Cards */}
       <View style={balanceSheetStyles.summaryContainer}>
