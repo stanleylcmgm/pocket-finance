@@ -108,7 +108,7 @@ export const balanceSheetStyles = StyleSheet.create({
     fontWeight: '500',
   },
   summaryAmount: {
-    fontSize: 18,
+    fontSize: 14,
     fontWeight: 'bold',
     color: '#2c3e50',
   },
@@ -136,7 +136,7 @@ export const balanceSheetStyles = StyleSheet.create({
   addButtonText: {
     color: 'white',
     fontWeight: 'bold',
-    fontSize: 16,
+    fontSize: 14,
   },
 
   // Scroll View
@@ -456,5 +456,90 @@ export const balanceSheetStyles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+
+  // Simple toggle group (Income / Expense)
+  toggleGroup: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 16,
+  },
+  toggleButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+    alignItems: 'center',
+    backgroundColor: '#f8f9fa',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  toggleButtonActive: {
+    backgroundColor: '#007bff',
+    borderColor: '#007bff',
+  },
+  toggleButtonText: {
+    color: '#495057',
+    fontWeight: '700',
+  },
+  toggleButtonTextActive: {
+    color: 'white',
+  },
+
+  // Category list item in manager
+  categoryListItem: {
+    backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: '#f1f3f5',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 14,
+    marginBottom: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+
+  // Icon options
+  iconOption: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+    backgroundColor: '#f8f9fa',
+  },
+  iconOptionSelected: {
+    backgroundColor: '#007bff',
+    borderColor: '#007bff',
+  },
+
+  // Color swatches
+  colorRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginBottom: 16,
+  },
+  colorSwatch: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    borderWidth: 2,
+    borderColor: 'transparent',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  colorSwatchSelected: {
+    borderColor: '#00000030',
   },
 }); 
