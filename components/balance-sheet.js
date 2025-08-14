@@ -311,6 +311,23 @@ const BalanceSheet = () => {
     );
   };
 
+  const renderCombinedSummaryCard = (incomeAmount, expenseAmount) => {
+    return (
+      <View style={[balanceSheetStyles.summaryCard, balanceSheetStyles.summaryCardCombined, { flex: 2 }]}>
+        <View style={balanceSheetStyles.combinedTwoLines}>
+          <Text style={balanceSheetStyles.combinedLineText}>
+            Total Income:
+            <Text style={{ fontWeight: 'bold', color: '#155724' }}> {formatCurrency(incomeAmount)}</Text>
+          </Text>
+          <Text style={balanceSheetStyles.combinedLineText}>
+            Total Expenses:
+            <Text style={{ fontWeight: 'bold', color: '#721c24' }}> {formatCurrency(expenseAmount)}</Text>
+          </Text>
+        </View>
+      </View>
+    );
+  };
+
   const renderTransactionItem = ({ item }) => {
     const category = categories.find(cat => cat.id === item.categoryId);
     const account = accounts.find(acc => acc.id === item.accountId);
@@ -597,8 +614,9 @@ const BalanceSheet = () => {
   const renderCategoriesModal = () => {
     const incomeIconOptions = ['cash', 'trending-up', 'wallet', 'gift'];
     const expenseIconOptions = ['restaurant', 'cart', 'car', 'home', 'heart', 'game-controller', 'medical', 'bag', 'document-text', 'pricetag'];
-    const colorOptions = ['#6c757d', '#007bff', '#28a745', '#dc3545', '#fd7e14', '#6f42c1', '#20c997', '#e83e8c', '#ffc107'];
+    const colorOptions = ['#6c757d', '#007bff', '#28a745', '#dc3545', '#fd7e14', '#6f42c1', '#ffc107', '#20c997'];
     const activeIconOptions = newCategoryType === 'income' ? incomeIconOptions : expenseIconOptions;
+    const filtered = categories.filter((c) => c.type === newCategoryType);
 
     return (
       <Modal
@@ -651,25 +669,41 @@ const BalanceSheet = () => {
               </TouchableOpacity>
             </View>
 
-            <Text style={balanceSheetStyles.inputLabel}>Existing</Text>
-            <View style={{ marginBottom: 16 }}>
-              {(categories.filter((c) => c.type === newCategoryType)).map((c) => (
-                <View key={c.id} style={balanceSheetStyles.categoryListItem}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                    <Ionicons name={c.icon} size={18} color={c.color} />
-                    <Text style={{ fontSize: 15, color: '#2c3e50', fontWeight: '600' }}>{c.name}</Text>
+            {/* Existing categories grid (no title per request) */}
+            <View style={balanceSheetStyles.categoryGridFixed}>
+              <ScrollView
+                nestedScrollEnabled
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={balanceSheetStyles.categoryGrid}
+              >
+                {filtered.map((c) => (
+                  <View key={c.id} style={balanceSheetStyles.categoryTile}>
+                    <View style={balanceSheetStyles.categoryTileLeft}>
+                      <View style={[balanceSheetStyles.categoryAvatar, { backgroundColor: c.color }]}>
+                        <Ionicons name={c.icon} size={16} color="#ffffff" />
+                      </View>
+                      <Text style={balanceSheetStyles.categoryTileName}>{c.name}</Text>
+                    </View>
+                    <TouchableOpacity onPress={() => requestDeleteCategory(c.id)} style={balanceSheetStyles.categoryTileDelete}>
+                      <Ionicons name="trash" size={18} color="#dc3545" />
+                    </TouchableOpacity>
                   </View>
-                  <TouchableOpacity onPress={() => requestDeleteCategory(c.id)} style={balanceSheetStyles.deleteButton}>
-                    <Ionicons name="trash" size={18} color="#dc3545" />
-                  </TouchableOpacity>
-                </View>
-              ))}
-              {categories.filter((c) => c.type === newCategoryType).length === 0 && (
-                <Text style={{ color: '#6c757d' }}>No categories yet.</Text>
-              )}
+                ))}
+                {filtered.length === 0 && (
+                  <Text style={{ color: '#6c757d' }}>No categories found.</Text>
+                )}
+              </ScrollView>
             </View>
 
-            <Text style={balanceSheetStyles.inputLabel}>Add New</Text>
+            <View style={balanceSheetStyles.divider} />
+
+            <Text style={balanceSheetStyles.sectionLabel}>Add New</Text>
+            <View style={balanceSheetStyles.newPreviewRow}>
+              <View style={[balanceSheetStyles.categoryAvatar, { backgroundColor: newCategoryColor }]}>
+                <Ionicons name={newCategoryIcon} size={18} color="#ffffff" />
+              </View>
+              <Text style={balanceSheetStyles.newPreviewText}>{newCategoryName || 'Preview'}</Text>
+            </View>
             <TextInput
               style={[balanceSheetStyles.input, balanceSheetStyles.inputUnfocused]}
               placeholder="Category name"
@@ -744,12 +778,13 @@ const BalanceSheet = () => {
 
       {/* Summary Cards */}
       <View style={balanceSheetStyles.summaryContainer}>
-        {renderSummaryCard('Total Income', monthlySummary.totalIncome, 'positive')}
-        {renderSummaryCard('Total Expenses', monthlySummary.totalExpenses, 'negative')}
+        {renderCombinedSummaryCard(monthlySummary.totalIncome, monthlySummary.totalExpenses)}
+        <View style={{ flex: 1 }}>
         {renderSummaryCard('Balance', monthlySummary.balance, 
           monthlySummary.balance > 0 ? 'positive' : 
           monthlySummary.balance < 0 ? 'negative' : 'neutral'
         )}
+        </View>
       </View>
 
       {/* Add Buttons */}

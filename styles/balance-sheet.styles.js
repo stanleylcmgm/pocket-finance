@@ -89,7 +89,7 @@ export const balanceSheetStyles = StyleSheet.create({
   },
   summaryCard: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: '#D2E2E8',
     padding: 15,
     borderRadius: 12,
     alignItems: 'center',
@@ -100,6 +100,37 @@ export const balanceSheetStyles = StyleSheet.create({
     elevation: 3,
     borderWidth: 1,
     borderColor: '#e9ecef',
+  },
+  summaryCardCombined: {
+    alignItems: 'stretch',
+    justifyContent: 'center',
+  },
+  summaryCardCombinedTint: {
+    backgroundColor: '#eef7ff', // soft blue tint that keeps text readable
+    borderColor: '#d6ecff',
+  },
+  combinedInnerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  combinedMetric: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  combinedTwoLines: {
+    width: '100%',
+    gap: 6,
+  },
+  combinedLineText: {
+    fontSize: 14,
+    color: '#2c3e50',
+  },
+  verticalDivider: {
+    width: 1,
+    alignSelf: 'stretch',
+    backgroundColor: '#e9ecef',
   },
   summaryLabel: {
     fontSize: 12,
@@ -335,7 +366,9 @@ export const balanceSheetStyles = StyleSheet.create({
     padding: 24,
     width: '90%',
     maxWidth: 400,
-    maxHeight: '80%',
+    maxHeight: '88%',
+    borderWidth: 1,
+    borderColor: '#e9ecef',
   },
   modalHeader: {
     flexDirection: 'row',
@@ -370,6 +403,12 @@ export const balanceSheetStyles = StyleSheet.create({
     color: '#2c3e50',
     marginBottom: 8,
   },
+  sectionLabel: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#2c3e50',
+    marginBottom: 8,
+  },
 
   // Categories
   categoryContainer: {
@@ -377,6 +416,63 @@ export const balanceSheetStyles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: 8,
     marginBottom: 20,
+  },
+  categoryGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginBottom: 16,
+  },
+  categoryGridFixed: {
+    height: 3 * 54, // approx 3 rows of tiles
+    marginBottom: 12,
+  },
+  categoryTile: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: '#f1f3f5',
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    minWidth: '48%',
+    flexGrow: 1,
+  },
+  categoryTileLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    flexShrink: 1,
+  },
+  categoryTileName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#2c3e50',
+    flexShrink: 1,
+  },
+  categoryTileDelete: {
+    padding: 6,
+    borderRadius: 8,
+  },
+  categoryAvatar: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  newPreviewRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 8,
+  },
+  newPreviewText: {
+    fontSize: 14,
+    color: '#495057',
+    fontWeight: '600',
   },
   categoryButton: {
     flexDirection: 'row',
@@ -450,12 +546,12 @@ export const balanceSheetStyles = StyleSheet.create({
   cancelButtonText: {
     color: 'white',
     fontWeight: 'bold',
-    fontSize: 16,
+    fontSize: 14,
   },
   saveButtonText: {
     color: 'white',
     fontWeight: 'bold',
-    fontSize: 16,
+    fontSize: 14,
   },
 
   // Simple toggle group (Income / Expense)
@@ -463,6 +559,9 @@ export const balanceSheetStyles = StyleSheet.create({
     flexDirection: 'row',
     gap: 8,
     marginBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e9ecef',
+    paddingBottom: 8,
   },
   toggleButton: {
     flex: 1,
@@ -527,13 +626,13 @@ export const balanceSheetStyles = StyleSheet.create({
   colorRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 10,
+    gap: 9,
     marginBottom: 16,
   },
   colorSwatch: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     borderWidth: 2,
     borderColor: 'transparent',
     alignItems: 'center',
@@ -541,5 +640,14 @@ export const balanceSheetStyles = StyleSheet.create({
   },
   colorSwatchSelected: {
     borderColor: '#00000030',
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#e9ecef',
+    marginVertical: 8,
+  },
+  searchInput: {
+    backgroundColor: '#fff',
+    marginBottom: 12,
   },
 }); 
