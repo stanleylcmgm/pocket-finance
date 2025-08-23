@@ -24,6 +24,7 @@ export const toMonthKey = (date) => {
 export const getMonthStartEnd = (monthKey) => {
   const [year, month] = monthKey.split('-').map(Number);
   const startDate = new Date(year, month - 1, 1);
+  // Fix: Use the correct way to get the last day of the current month
   const endDate = new Date(year, month, 0, 23, 59, 59, 999);
   return { startDate, endDate };
 };

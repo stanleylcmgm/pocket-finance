@@ -118,12 +118,12 @@ const ExpensesTracking = () => {
         description: expense.description || '',
       });
     } else {
-      // Add mode
+      // Add mode - use current month being viewed
       setFormData({
         name: '',
         categoryId: '',
         amount: '',
-        date: new Date(),
+        date: currentMonth,
         description: '',
       });
     }
