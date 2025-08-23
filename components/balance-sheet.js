@@ -497,6 +497,9 @@ const BalanceSheet = () => {
           </View>
           
           {/* Description moved to top */}
+          <Text style={balanceSheetStyles.inputLabel}>
+            {modalType === 'income' ? 'Income Description' : 'Expense Description'}
+          </Text>
           <TextInput
             style={[
               balanceSheetStyles.input,
@@ -504,7 +507,8 @@ const BalanceSheet = () => {
                 ? balanceSheetStyles.inputFocused
                 : balanceSheetStyles.inputUnfocused,
             ]}
-            placeholder="Description"
+            placeholder={modalType === 'income' ? "e.g., Salary, Freelance work, Bonus" : "e.g., Groceries, Rent, Utilities"}
+            placeholderTextColor="#6c757d"
             value={formData.note}
             onChangeText={(text) => setFormData({ ...formData, note: text })}
             multiline
@@ -513,6 +517,7 @@ const BalanceSheet = () => {
             autoFocus
           />
 
+          <Text style={balanceSheetStyles.inputLabel}>Amount</Text>
           <TextInput
             style={[
               balanceSheetStyles.input,
@@ -520,7 +525,8 @@ const BalanceSheet = () => {
                 ? balanceSheetStyles.inputFocused
                 : balanceSheetStyles.inputUnfocused,
             ]}
-            placeholder="Amount $"
+            placeholder="Enter amount (e.g., 100.50)"
+            placeholderTextColor="#6c757d"
             value={formData.amount}
             onChangeText={handleAmountChange}
             keyboardType="numeric"
@@ -801,7 +807,7 @@ const BalanceSheet = () => {
           onPress={() => openModal('expense')}
         >
           <Ionicons name="remove" size={20} color="white" />
-          <Text style={balanceSheetStyles.addButtonText}>Add Expense</Text>
+          <Text style={balanceSheetStyles.addButtonText}>Add Expenses</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[balanceSheetStyles.addButton, { backgroundColor: '#007bff' }]}
