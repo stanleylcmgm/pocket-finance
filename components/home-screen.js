@@ -62,8 +62,7 @@ const HomeScreen = ({ navigation }) => {
       // For future screens
       alert('Expenses Tracking screen coming soon!');
     } else if (screenName === 'AssetManagement') {
-      // For future screens
-      alert('Asset Management screen coming soon!');
+      navigation.navigate('AssetManagement');
     } else {
       // For future screens
       alert(`${screenName} screen coming soon!`);
