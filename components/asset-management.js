@@ -10,6 +10,8 @@ import {
   FlatList,
   KeyboardAvoidingView,
   Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { assetManagementStyles } from '../styles/asset-management.styles';
@@ -352,11 +354,13 @@ const AssetManagement = () => {
       visible={modalVisible}
       onRequestClose={() => setModalVisible(false)}
     >
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={assetManagementStyles.modalOverlay}
-      >
-        <View style={assetManagementStyles.modalContent}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={assetManagementStyles.modalOverlay}
+        >
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={assetManagementStyles.modalContent}>
           <View style={assetManagementStyles.modalHeader}>
             <Text style={assetManagementStyles.modalTitle}>
               {editingAsset ? 'Edit' : 'Add'} Asset
@@ -380,7 +384,6 @@ const AssetManagement = () => {
             onChangeText={(text) => setFormData({ ...formData, name: text })}
             onFocus={() => setIsNameFocused(true)}
             onBlur={() => setIsNameFocused(false)}
-            autoFocus
           />
 
           <Text style={assetManagementStyles.inputLabel}>Amount *</Text>
@@ -440,24 +443,26 @@ const AssetManagement = () => {
             numberOfLines={3}
           />
           
-          <View style={assetManagementStyles.modalButtons}>
-            <TouchableOpacity
-              style={[assetManagementStyles.modalButton, assetManagementStyles.cancelButton]}
-              onPress={() => setModalVisible(false)}
-            >
-              <Text style={assetManagementStyles.cancelButtonText}>Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[assetManagementStyles.modalButton, assetManagementStyles.saveButton]}
-              onPress={saveAsset}
-            >
-              <Text style={assetManagementStyles.saveButtonText}>Save</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </KeyboardAvoidingView>
-    </Modal>
-  );
+                     <View style={assetManagementStyles.modalButtons}>
+             <TouchableOpacity
+               style={[assetManagementStyles.modalButton, assetManagementStyles.cancelButton]}
+               onPress={() => setModalVisible(false)}
+             >
+               <Text style={assetManagementStyles.cancelButtonText}>Cancel</Text>
+             </TouchableOpacity>
+             <TouchableOpacity
+               style={[assetManagementStyles.modalButton, assetManagementStyles.saveButton]}
+               onPress={saveAsset}
+             >
+               <Text style={assetManagementStyles.saveButtonText}>Save</Text>
+             </TouchableOpacity>
+           </View>
+         </View>
+         </TouchableWithoutFeedback>
+       </KeyboardAvoidingView>
+       </TouchableWithoutFeedback>
+     </Modal>
+   );
 
   const addCategory = () => {
     const trimmedName = (newCategoryName || '').trim();
@@ -504,8 +509,10 @@ const AssetManagement = () => {
         visible={categoriesModalVisible}
         onRequestClose={() => setCategoriesModalVisible(false)}
       >
-        <View style={assetManagementStyles.modalOverlay}>
-          <View style={assetManagementStyles.modalContent}>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={assetManagementStyles.modalOverlay}>
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+              <View style={assetManagementStyles.modalContent}>
             <View style={assetManagementStyles.modalHeader}>
               <Text style={assetManagementStyles.modalTitle}>Manage Asset Categories</Text>
               <TouchableOpacity onPress={() => setCategoriesModalVisible(false)}>
@@ -597,18 +604,20 @@ const AssetManagement = () => {
               >
                 <Text style={assetManagementStyles.cancelButtonText}>Close</Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                style={[assetManagementStyles.modalButton, assetManagementStyles.saveButton]}
-                onPress={addCategory}
-              >
-                <Text style={assetManagementStyles.saveButtonText}>Add Category</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
-    );
-  };
+                             <TouchableOpacity
+                 style={[assetManagementStyles.modalButton, assetManagementStyles.saveButton]}
+                 onPress={addCategory}
+               >
+                 <Text style={assetManagementStyles.saveButtonText}>Add Category</Text>
+               </TouchableOpacity>
+             </View>
+           </View>
+           </TouchableWithoutFeedback>
+         </View>
+         </TouchableWithoutFeedback>
+       </Modal>
+     );
+   };
 
   return (
     <View style={assetManagementStyles.container}>
