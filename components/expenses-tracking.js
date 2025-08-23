@@ -62,6 +62,8 @@ const ExpensesTracking = () => {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
 
+
+
   // Load expenses for current month
   const loadMonthlyExpenses = useCallback(() => {
     const monthExpenses = filterTransactionsByMonth(expenses, monthKey);
@@ -102,6 +104,85 @@ const ExpensesTracking = () => {
     setCurrentMonth(newDate);
     setMonthKey(toMonthKey(newDate));
     setMonthPickerVisible(false);
+  };
+
+  // Date picker functions - Simple approach
+  const openDatePicker = () => {
+    // Create a simple date picker using Alert with custom buttons
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    Alert.alert(
+      'Select Date',
+      'Choose a date for this expense:',
+      [
+        {
+          text: 'Yesterday',
+          onPress: () => selectDate(yesterday),
+        },
+        {
+          text: 'Today',
+          onPress: () => selectDate(today),
+        },
+        {
+          text: 'Tomorrow',
+          onPress: () => selectDate(tomorrow),
+        },
+        {
+          text: 'Custom Date',
+          onPress: () => openCustomDatePicker(),
+        },
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+      ]
+    );
+  };
+
+  const openCustomDatePicker = () => {
+    // For custom date, we'll use a simple input approach
+    Alert.prompt(
+      'Enter Date',
+      'Enter date in MM/DD/YYYY format:',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'OK',
+          onPress: (dateString) => {
+            if (dateString) {
+              const date = new Date(dateString);
+              if (!isNaN(date.getTime())) {
+                selectDate(date);
+              } else {
+                Alert.alert('Invalid Date', 'Please enter a valid date in MM/DD/YYYY format.');
+              }
+            }
+          },
+        },
+      ],
+      'plain-text',
+      formData.date.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })
+    );
+  };
+
+  const selectDate = (date) => {
+    setFormData({ ...formData, date: date });
+  };
+
+  const formatDateForDisplay = (date) => {
+    return date.toLocaleDateString('en-US', {
+      weekday: 'short',
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
   };
 
   // Expense management
@@ -350,57 +431,59 @@ const ExpensesTracking = () => {
     );
   };
 
-  const renderMonthPicker = () => (
-    <Modal
-      animationType="slide"
-      transparent={true}
-      visible={monthPickerVisible}
-      onRequestClose={() => setMonthPickerVisible(false)}
-    >
-      <View style={expensesTrackingStyles.modalOverlay}>
-        <View style={expensesTrackingStyles.monthPickerContent}>
-          <Text style={expensesTrackingStyles.monthPickerTitle}>Select Month</Text>
-          
-          <View style={expensesTrackingStyles.yearSelector}>
-            <TouchableOpacity onPress={() => setSelectedYear(selectedYear - 1)}>
-              <Ionicons name="chevron-back" size={24} color="#007bff" />
-            </TouchableOpacity>
-            <Text style={expensesTrackingStyles.yearText}>{selectedYear}</Text>
-            <TouchableOpacity onPress={() => setSelectedYear(selectedYear + 1)}>
-              <Ionicons name="chevron-forward" size={24} color="#007bff" />
-            </TouchableOpacity>
-          </View>
-          
-          <View style={expensesTrackingStyles.monthGrid}>
-            {Array.from({ length: 12 }, (_, i) => (
-              <TouchableOpacity
-                key={i}
-                style={[
-                  expensesTrackingStyles.monthButton,
-                  selectedMonth === i && expensesTrackingStyles.monthButtonSelected
-                ]}
-                onPress={() => selectMonth(selectedYear, i)}
-              >
-                <Text style={[
-                  expensesTrackingStyles.monthButtonText,
-                  selectedMonth === i && expensesTrackingStyles.monthButtonTextSelected
-                ]}>
-                  {new Date(2000, i).toLocaleString('default', { month: 'short' })}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-          
-          <TouchableOpacity
-            style={expensesTrackingStyles.cancelButton}
-            onPress={() => setMonthPickerVisible(false)}
-          >
-            <Text style={expensesTrackingStyles.cancelButtonText}>Cancel</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
-  );
+     const renderMonthPicker = () => (
+     <Modal
+       animationType="slide"
+       transparent={true}
+       visible={monthPickerVisible}
+       onRequestClose={() => setMonthPickerVisible(false)}
+     >
+       <View style={expensesTrackingStyles.modalOverlay}>
+         <View style={expensesTrackingStyles.monthPickerContent}>
+           <Text style={expensesTrackingStyles.monthPickerTitle}>Select Month</Text>
+           
+           <View style={expensesTrackingStyles.yearSelector}>
+             <TouchableOpacity onPress={() => setSelectedYear(selectedYear - 1)}>
+               <Ionicons name="chevron-back" size={24} color="#007bff" />
+             </TouchableOpacity>
+             <Text style={expensesTrackingStyles.yearText}>{selectedYear}</Text>
+             <TouchableOpacity onPress={() => setSelectedYear(selectedYear + 1)}>
+               <Ionicons name="chevron-forward" size={24} color="#007bff" />
+             </TouchableOpacity>
+           </View>
+           
+           <View style={expensesTrackingStyles.monthGrid}>
+             {Array.from({ length: 12 }, (_, i) => (
+               <TouchableOpacity
+                 key={i}
+                 style={[
+                   expensesTrackingStyles.monthButton,
+                   selectedMonth === i && expensesTrackingStyles.monthButtonSelected
+                 ]}
+                 onPress={() => selectMonth(selectedYear, i)}
+               >
+                 <Text style={[
+                   expensesTrackingStyles.monthButtonText,
+                   selectedMonth === i && expensesTrackingStyles.monthButtonTextSelected
+                 ]}>
+                   {new Date(2000, i).toLocaleString('default', { month: 'short' })}
+                 </Text>
+               </TouchableOpacity>
+             ))}
+           </View>
+           
+           <TouchableOpacity
+             style={expensesTrackingStyles.cancelButton}
+             onPress={() => setMonthPickerVisible(false)}
+           >
+             <Text style={expensesTrackingStyles.cancelButtonText}>Cancel</Text>
+           </TouchableOpacity>
+         </View>
+       </View>
+     </Modal>
+   );
+
+                       
 
   const renderEntryModal = () => (
     <Modal
@@ -446,22 +529,40 @@ const ExpensesTracking = () => {
             onBlur={() => setIsNameFocused(false)}
           />
 
-          <Text style={expensesTrackingStyles.inputLabel}>Amount *</Text>
-          <TextInput
-            style={[
-              expensesTrackingStyles.input,
-              isAmountFocused
-                ? expensesTrackingStyles.inputFocused
-                : expensesTrackingStyles.inputUnfocused,
-            ]}
-            placeholder="Enter amount (e.g., 25.50)"
-            placeholderTextColor="#6c757d"
-            value={formData.amount}
-            onChangeText={handleAmountChange}
-            keyboardType="numeric"
-            onFocus={() => setIsAmountFocused(true)}
-            onBlur={() => setIsAmountFocused(false)}
-          />
+                     <Text style={expensesTrackingStyles.inputLabel}>Amount *</Text>
+           <TextInput
+             style={[
+               expensesTrackingStyles.input,
+               isAmountFocused
+                 ? expensesTrackingStyles.inputFocused
+                 : expensesTrackingStyles.inputUnfocused,
+             ]}
+             placeholder="Enter amount (e.g., 25.50)"
+             placeholderTextColor="#6c757d"
+             value={formData.amount}
+             onChangeText={handleAmountChange}
+             keyboardType="numeric"
+             onFocus={() => setIsAmountFocused(true)}
+             onBlur={() => setIsAmountFocused(false)}
+           />
+
+           <Text style={expensesTrackingStyles.inputLabel}>Date *</Text>
+                       <TouchableOpacity
+              style={[
+                expensesTrackingStyles.input,
+                expensesTrackingStyles.dateInput,
+                expensesTrackingStyles.inputUnfocused,
+              ]}
+              onPress={(e) => {
+                e.stopPropagation();
+                openDatePicker();
+              }}
+            >
+             <Text style={expensesTrackingStyles.dateInputText}>
+               {formatDateForDisplay(formData.date)}
+             </Text>
+             <Ionicons name="calendar" size={20} color="#6c757d" />
+           </TouchableOpacity>
           
           <Text style={expensesTrackingStyles.inputLabel}>Category *</Text>
           <View style={expensesTrackingStyles.categoryContainer}>
@@ -761,10 +862,10 @@ const ExpensesTracking = () => {
         )}
       </ScrollView>
 
-      {/* Modals */}
-      {renderEntryModal()}
-      {renderMonthPicker()}
-      {renderCategoriesModal()}
+                    {/* Modals */}
+        {renderEntryModal()}
+        {renderMonthPicker()}
+        {renderCategoriesModal()}
     </View>
   );
 };
