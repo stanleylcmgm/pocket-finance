@@ -59,8 +59,7 @@ const HomeScreen = ({ navigation }) => {
     if (screenName === 'BalanceSheet') {
       navigation.navigate('BalanceSheet');
     } else if (screenName === 'ExpensesTracking') {
-      // For future screens
-      alert('Expenses Tracking screen coming soon!');
+      navigation.navigate('ExpensesTracking');
     } else if (screenName === 'AssetManagement') {
       navigation.navigate('AssetManagement');
     } else {

@@ -7,6 +7,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 // Import screens
 import HomeScreen from './components/home-screen';
 import BalanceSheet from './components/balance-sheet';
+import ExpensesTracking from './components/expenses-tracking';
 import AssetManagement from './components/asset-management';
 
 const Stack = createStackNavigator();
@@ -40,6 +41,13 @@ export default function App() {
             component={BalanceSheet}
             options={{
               title: 'Balance Sheet',
+            }}
+          />
+          <Stack.Screen
+            name="ExpensesTracking"
+            component={ExpensesTracking}
+            options={{
+              title: 'Expenses Tracking',
             }}
           />
           <Stack.Screen
