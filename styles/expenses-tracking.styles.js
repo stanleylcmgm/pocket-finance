@@ -299,6 +299,7 @@ export const expensesTrackingStyles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 20,
   },
   modalContent: {
     backgroundColor: 'white',
@@ -531,6 +532,11 @@ export const expensesTrackingStyles = StyleSheet.create({
     alignSelf: 'center',
     borderWidth: 1,
     borderColor: '#e9ecef',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 8,
   },
   datePickerTitle: {
     fontSize: 18,
@@ -590,6 +596,8 @@ export const expensesTrackingStyles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 8,
     margin: 1,
+    minHeight: 40,
+    minWidth: 40,
   },
   calendarDayEmpty: {
     backgroundColor: 'transparent',

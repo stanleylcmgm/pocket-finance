@@ -112,11 +112,24 @@ const ExpensesTracking = () => {
   const [datePickerVisible, setDatePickerVisible] = useState(false);
 
   const openDatePicker = () => {
+    console.log('Opening date picker...');
+    console.log('Current datePickerVisible:', datePickerVisible);
+    console.log('Platform:', Platform.OS);
+    console.log('modalVisible state:', modalVisible);
+    
     setDatePickerVisible(true);
+    console.log('Set datePickerVisible to true');
+    
+    // Log after state update
+    setTimeout(() => {
+      console.log('DatePicker visible state after update:', datePickerVisible);
+    }, 100);
   };
 
   const handleDateSelect = (selectedDate) => {
+    console.log('Date selected:', selectedDate);
     setFormData({ ...formData, date: selectedDate });
+    setDatePickerVisible(false); // Close the picker after selection
   };
 
   const formatDateForDisplay = (date) => {
@@ -490,22 +503,44 @@ const ExpensesTracking = () => {
            />
 
            <Text style={expensesTrackingStyles.inputLabel}>Date *</Text>
-                       <TouchableOpacity
+           <TouchableOpacity
               style={[
                 expensesTrackingStyles.input,
                 expensesTrackingStyles.dateInput,
                 expensesTrackingStyles.inputUnfocused,
               ]}
-              onPress={(e) => {
-                e.stopPropagation();
-                openDatePicker();
-              }}
+              onPress={openDatePicker}
             >
              <Text style={expensesTrackingStyles.dateInputText}>
                {formatDateForDisplay(formData.date)}
              </Text>
              <Ionicons name="calendar" size={20} color="#6c757d" />
            </TouchableOpacity>
+           
+           {/* Inline Date Picker */}
+           {datePickerVisible && (
+             <View style={{
+               backgroundColor: 'white',
+               borderRadius: 8,
+               padding: 16,
+               marginTop: 8,
+               borderWidth: 1,
+               borderColor: '#ddd',
+               elevation: 3,
+               shadowColor: '#000',
+               shadowOffset: { width: 0, height: 2 },
+               shadowOpacity: 0.1,
+               shadowRadius: 4,
+             }}>
+               <CustomDatePicker
+                 visible={true}
+                 onClose={() => setDatePickerVisible(false)}
+                 onDateSelect={handleDateSelect}
+                 initialDate={formData.date}
+                 inline={true}
+               />
+             </View>
+           )}
           
           <Text style={expensesTrackingStyles.inputLabel}>Category *</Text>
           <View style={expensesTrackingStyles.categoryContainer}>
@@ -811,15 +846,10 @@ const ExpensesTracking = () => {
         {renderEntryModal()}
         {renderMonthPicker()}
         {renderCategoriesModal()}
-        <CustomDatePicker
-          visible={datePickerVisible}
-          onClose={() => setDatePickerVisible(false)}
-          onDateSelect={handleDateSelect}
-          initialDate={formData.date}
-          styles={expensesTrackingStyles}
-        />
-    </View>
-  );
+        
+
+      </View>
+    );
 };
 
 export default ExpensesTracking;
