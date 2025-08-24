@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { expensesTrackingStyles } from '../styles/expenses-tracking.styles';
+import CustomDatePicker from './datepicker';
 
 import { 
   formatCurrency, 
@@ -64,6 +65,7 @@ const ExpensesTracking = () => {
 
 
 
+
   // Load expenses for current month
   const loadMonthlyExpenses = useCallback(() => {
     const monthExpenses = filterTransactionsByMonth(expenses, monthKey);
@@ -106,74 +108,15 @@ const ExpensesTracking = () => {
     setMonthPickerVisible(false);
   };
 
-  // Date picker functions - Simple approach
+  // Date Picker functions
+  const [datePickerVisible, setDatePickerVisible] = useState(false);
+
   const openDatePicker = () => {
-    // Create a simple date picker using Alert with custom buttons
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    
-    Alert.alert(
-      'Select Date',
-      'Choose a date for this expense:',
-      [
-        {
-          text: 'Yesterday',
-          onPress: () => selectDate(yesterday),
-        },
-        {
-          text: 'Today',
-          onPress: () => selectDate(today),
-        },
-        {
-          text: 'Tomorrow',
-          onPress: () => selectDate(tomorrow),
-        },
-        {
-          text: 'Custom Date',
-          onPress: () => openCustomDatePicker(),
-        },
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-      ]
-    );
+    setDatePickerVisible(true);
   };
 
-  const openCustomDatePicker = () => {
-    // For custom date, we'll use a simple input approach
-    Alert.prompt(
-      'Enter Date',
-      'Enter date in MM/DD/YYYY format:',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'OK',
-          onPress: (dateString) => {
-            if (dateString) {
-              const date = new Date(dateString);
-              if (!isNaN(date.getTime())) {
-                selectDate(date);
-              } else {
-                Alert.alert('Invalid Date', 'Please enter a valid date in MM/DD/YYYY format.');
-              }
-            }
-          },
-        },
-      ],
-      'plain-text',
-      formData.date.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })
-    );
-  };
-
-  const selectDate = (date) => {
-    setFormData({ ...formData, date: date });
+  const handleDateSelect = (selectedDate) => {
+    setFormData({ ...formData, date: selectedDate });
   };
 
   const formatDateForDisplay = (date) => {
@@ -786,6 +729,8 @@ const ExpensesTracking = () => {
     );
   };
 
+
+
   return (
     <View style={expensesTrackingStyles.container}>
       {/* Top Banner */}
@@ -866,6 +811,13 @@ const ExpensesTracking = () => {
         {renderEntryModal()}
         {renderMonthPicker()}
         {renderCategoriesModal()}
+        <CustomDatePicker
+          visible={datePickerVisible}
+          onClose={() => setDatePickerVisible(false)}
+          onDateSelect={handleDateSelect}
+          initialDate={formData.date}
+          styles={expensesTrackingStyles}
+        />
     </View>
   );
 };

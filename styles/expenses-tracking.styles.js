@@ -524,11 +524,13 @@ export const expensesTrackingStyles = StyleSheet.create({
   // Date Picker Modal
   datePickerContent: {
     backgroundColor: 'white',
-    borderRadius: 12,
+    borderRadius: 20,
     padding: 24,
-    margin: 20,
     width: '90%',
+    maxWidth: 400,
     alignSelf: 'center',
+    borderWidth: 1,
+    borderColor: '#e9ecef',
   },
   datePickerTitle: {
     fontSize: 18,
@@ -541,23 +543,79 @@ export const expensesTrackingStyles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 30,
+    marginBottom: 24,
   },
   datePickerCurrentDate: {
     fontSize: 18,
     fontWeight: '600',
     color: '#2c3e50',
     textAlign: 'center',
+    flex: 1,
   },
   datePickerButtons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     gap: 12,
+    marginTop: 20,
   },
   datePickerButton: {
     flex: 1,
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: 'center',
+  },
+
+  // Calendar Styles
+  calendarHeader: {
+    flexDirection: 'row',
+    marginBottom: 16,
+  },
+  calendarDayHeader: {
+    flex: 1,
+    textAlign: 'center',
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#6c757d',
+    paddingVertical: 8,
+  },
+  calendarGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 16,
+  },
+  calendarDay: {
+    width: '14.28%',
+    aspectRatio: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 8,
+    margin: 1,
+  },
+  calendarDayEmpty: {
+    backgroundColor: 'transparent',
+  },
+  calendarDayToday: {
+    backgroundColor: '#e3f2fd',
+    borderWidth: 2,
+    borderColor: '#2196f3',
+  },
+  calendarDaySelected: {
+    backgroundColor: '#007bff',
+  },
+  calendarDayText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#2c3e50',
+  },
+  calendarDayTextEmpty: {
+    color: 'transparent',
+  },
+  calendarDayTextToday: {
+    color: '#2196f3',
+    fontWeight: 'bold',
+  },
+  calendarDayTextSelected: {
+    color: 'white',
+    fontWeight: 'bold',
   },
 });
