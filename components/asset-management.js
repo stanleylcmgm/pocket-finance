@@ -62,7 +62,7 @@ let assetCategories = [
   {
     id: 'cat-bank',
     name: 'Bank',
-    icon: 'card',
+    icon: 'library',
     color: '#007bff',
   },
   {
@@ -86,7 +86,7 @@ let assetCategories = [
   {
     id: 'cat-other',
     name: 'Other',
-    icon: 'ellipsis-horizontal',
+    icon: 'diamond',
     color: '#fd7e14',
   },
 ];
@@ -111,7 +111,7 @@ const AssetManagement = () => {
   const [categoriesModalVisible, setCategoriesModalVisible] = useState(false);
   const [categoriesVersion, setCategoriesVersion] = useState(0);
   const [newCategoryName, setNewCategoryName] = useState('');
-  const [newCategoryIcon, setNewCategoryIcon] = useState('ellipsis-horizontal');
+  const [newCategoryIcon, setNewCategoryIcon] = useState('star');
   const [newCategoryColor, setNewCategoryColor] = useState('#6c757d');
 
   // Load assets
@@ -319,7 +319,7 @@ const AssetManagement = () => {
         <View style={assetManagementStyles.itemInfo}>
           <View style={assetManagementStyles.itemHeader}>
             <Ionicons 
-              name={category?.icon || 'help-circle'} 
+              name={category?.icon || 'star'} 
               size={20} 
               color={category?.color || '#6c757d'} 
             />
@@ -480,7 +480,7 @@ const AssetManagement = () => {
     const created = {
       id: `cat-${generateId()}`,
       name: trimmedName,
-      icon: newCategoryIcon || 'ellipsis-horizontal',
+      icon: newCategoryIcon || 'star',
       color: newCategoryColor || '#6c757d',
     };
     assetCategories.push(created);
@@ -499,8 +499,8 @@ const AssetManagement = () => {
   };
 
   const renderCategoriesModal = () => {
-    const iconOptions = ['home', 'card', 'trending-up', 'car', 'business', 'ellipsis-horizontal', 'building', 'cash', 'wallet', 'gift'];
-    const colorOptions = ['#6c757d', '#007bff', '#28a745', '#dc3545', '#fd7e14', '#6f42c1', '#ffc107', '#20c997'];
+    const iconOptions = ['home', 'library', 'trending-up', 'car', 'briefcase', 'business', 'cash', 'wallet', 'gift', 'diamond', 'star', 'heart'];
+    const colorOptions = ['#6c757d', '#007bff', '#28a745', '#dc3545', '#fd7e14', '#6f42c1', '#ffc107', '#20c997', '#e83e8c', '#17a2b8', '#343a40', '#495057', '#dee2e6', '#6a5acd', '#ff69b4', '#00ced1'];
 
     return (
       <Modal
@@ -514,7 +514,7 @@ const AssetManagement = () => {
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
               <View style={assetManagementStyles.modalContent}>
             <View style={assetManagementStyles.modalHeader}>
-              <Text style={assetManagementStyles.modalTitle}>Manage Asset Categories</Text>
+                             <Text style={assetManagementStyles.modalTitle}>Manage Categories</Text>
               <TouchableOpacity onPress={() => setCategoriesModalVisible(false)}>
                 <Ionicons name="close" size={24} color="#6c757d" />
               </TouchableOpacity>

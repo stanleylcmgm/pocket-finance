@@ -196,7 +196,7 @@ export const assetManagementStyles = StyleSheet.create({
     padding: 24,
     width: '90%',
     maxWidth: 400,
-    maxHeight: '88%',
+    maxHeight: '95%',
     borderWidth: 1,
     borderColor: '#e9ecef',
   },
@@ -254,7 +254,7 @@ export const assetManagementStyles = StyleSheet.create({
     marginBottom: 16,
   },
   categoryGridFixed: {
-    height: 3 * 54, // approx 3 rows of tiles
+    height: 3 * 54, // exactly 3 rows of tiles
     marginBottom: 12,
   },
   categoryTile: {
