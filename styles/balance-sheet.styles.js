@@ -366,7 +366,7 @@ export const balanceSheetStyles = StyleSheet.create({
     padding: 24,
     width: '90%',
     maxWidth: 400,
-    maxHeight: '88%',
+    maxHeight: '95%',
     borderWidth: 1,
     borderColor: '#e9ecef',
   },
@@ -414,8 +414,9 @@ export const balanceSheetStyles = StyleSheet.create({
   categoryContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: 10,
     marginBottom: 20,
+    justifyContent: 'space-between',
   },
   categoryGrid: {
     flexDirection: 'row',
@@ -426,6 +427,42 @@ export const balanceSheetStyles = StyleSheet.create({
   categoryGridFixed: {
     height: 3 * 54, // approx 3 rows of tiles
     marginBottom: 12,
+  },
+  // New category list styles for one-per-row layout
+  categoryListContainer: {
+    maxHeight: 210,
+    marginBottom: 12,
+  },
+  categoryList: {
+    gap: 8,
+  },
+  categoryRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: '#f1f3f5',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    width: '100%',
+  },
+  categoryRowLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    flex: 1,
+  },
+  categoryRowName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#2c3e50',
+    flex: 1,
+  },
+  categoryRowDelete: {
+    padding: 8,
+    borderRadius: 8,
   },
   categoryTile: {
     flexDirection: 'row',
