@@ -228,4 +228,29 @@ export const homeScreenStyles = StyleSheet.create({
     color: '#667eea',
     fontWeight: '600',
   },
+
+  // Test button styles
+  testButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 15,
+    gap: 10,
+  },
+
+  testButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    gap: 8,
+  },
+
+  testButtonText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '600',
+  },
 }); 

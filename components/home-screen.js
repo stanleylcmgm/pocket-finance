@@ -4,13 +4,44 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../theme';
 import { homeScreenStyles } from '../styles/home-screen.styles';
+import { verifyDatabaseUsage, testDatabaseWrite } from '../utils/database-test';
 
 const HomeScreen = ({ navigation }) => {
   const [activeTab, setActiveTab] = useState('home');
+
+  // Database verification functions
+  const handleVerifyDatabase = async () => {
+    const result = await verifyDatabaseUsage();
+    Alert.alert(
+      'Database Verification',
+      `Database Working: ${result.databaseWorking ? '✅ YES' : '❌ NO'}\n\n` +
+      `Database Data:\n` +
+      `- Categories: ${result.dbCategories}\n` +
+      `- Accounts: ${result.dbAccounts}\n` +
+      `- Transactions: ${result.dbTransactions}\n\n` +
+      `Sample Data:\n` +
+      `- First Category: ${result.sampleCategory?.name || 'None'}\n` +
+      `- First Account: ${result.sampleAccount?.name || 'None'}\n` +
+      `- First Transaction: ${result.sampleTransaction?.note || 'None'}`,
+      [{ text: 'OK' }]
+    );
+  };
+
+  const handleTestDatabaseWrite = async () => {
+    const result = await testDatabaseWrite();
+    Alert.alert(
+      'Database Write Test',
+      result.success 
+        ? `✅ SUCCESS!\n\nNew transaction created.\nTotal transactions: ${result.totalTransactions}`
+        : `❌ FAILED!\n\nError: ${result.error}`,
+      [{ text: 'OK' }]
+    );
+  };
 
   const menuItems = [
     {
@@ -122,6 +153,30 @@ const HomeScreen = ({ navigation }) => {
                 </View>
                 <Text style={homeScreenStyles.statNumber}>$0</Text>
                 <Text style={homeScreenStyles.statLabel}>Balance</Text>
+              </View>
+            </View>
+
+            {/* Database Test Section */}
+            <View style={homeScreenStyles.menuContainer}>
+              <View style={homeScreenStyles.sectionHeader}>
+                <Text style={homeScreenStyles.menuTitle}>Database Test</Text>
+                <View style={homeScreenStyles.sectionLine}></View>
+              </View>
+              <View style={homeScreenStyles.testButtonsContainer}>
+                <TouchableOpacity 
+                  style={[homeScreenStyles.testButton, { backgroundColor: colors.info[500] }]}
+                  onPress={handleVerifyDatabase}
+                >
+                  <Ionicons name="checkmark-circle" size={20} color="white" />
+                  <Text style={homeScreenStyles.testButtonText}>Verify Database</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={[homeScreenStyles.testButton, { backgroundColor: colors.success[500] }]}
+                  onPress={handleTestDatabaseWrite}
+                >
+                  <Ionicons name="add-circle" size={20} color="white" />
+                  <Text style={homeScreenStyles.testButtonText}>Test Write</Text>
+                </TouchableOpacity>
               </View>
             </View>
 

@@ -24,16 +24,15 @@ import {
   calculateMonthlySummary, 
   sortTransactions, 
   filterTransactionsByMonth,
-  sampleCategories,
-  sampleAccounts,
-  sampleTransactions,
+  getCategories,
+  getAccounts,
+  getTransactions,
+  getTransactionsByMonth,
+  createTransaction,
+  updateTransaction,
+  deleteTransaction,
   generateId
 } from '../utils/data-utils';
-
-// Mock data storage (replace with actual persistence later)
-let transactions = [...sampleTransactions];
-let categories = [...sampleCategories];
-let accounts = [...sampleAccounts];
 
 const BalanceSheet = () => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -44,6 +43,12 @@ const BalanceSheet = () => {
     totalExpenses: 0,
     balance: 0,
   });
+  
+  // Database data state
+  const [categories, setCategories] = useState([]);
+  const [accounts, setAccounts] = useState([]);
+  const [transactions, setTransactions] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   
   // Modal states
   const [modalVisible, setModalVisible] = useState(false);
@@ -72,8 +77,41 @@ const BalanceSheet = () => {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
 
-  // Load transactions for current month
+  // Load data from database
+  const loadDataFromDatabase = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const [categoriesData, accountsData, transactionsData] = await Promise.all([
+        getCategories(),
+        getAccounts(),
+        getTransactions()
+      ]);
+      
+      setCategories(categoriesData);
+      setAccounts(accountsData);
+      setTransactions(transactionsData);
+      
+      // Load monthly transactions
+      const monthTransactions = filterTransactionsByMonth(transactionsData, monthKey);
+      const sortedTransactions = sortTransactions(monthTransactions);
+      setMonthlyTransactions(sortedTransactions);
+      
+      // Compute summary using utility function
+      const summary = calculateMonthlySummary(sortedTransactions);
+      setMonthlySummary(summary);
+      
+    } catch (error) {
+      console.error('Error loading data from database:', error);
+      Alert.alert('Error', 'Failed to load data from database');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [monthKey]);
+
+  // Load transactions for current month (when month changes)
   const loadMonthlyTransactions = useCallback(() => {
+    if (transactions.length === 0) return;
+    
     const monthTransactions = filterTransactionsByMonth(transactions, monthKey);
     const sortedTransactions = sortTransactions(monthTransactions);
     
@@ -82,9 +120,14 @@ const BalanceSheet = () => {
     // Compute summary using utility function
     const summary = calculateMonthlySummary(sortedTransactions);
     setMonthlySummary(summary);
-  }, [monthKey]);
+  }, [monthKey, transactions]);
 
   // Initialize and load data
+  useEffect(() => {
+    loadDataFromDatabase();
+  }, []);
+
+  // Reload monthly data when month changes
   useEffect(() => {
     loadMonthlyTransactions();
   }, [loadMonthlyTransactions]);
@@ -142,7 +185,7 @@ const BalanceSheet = () => {
     setModalVisible(true);
   };
 
-  const saveTransaction = () => {
+  const saveTransaction = async () => {
     if (!formData.amount || !formData.categoryId) {
       Alert.alert('Error', 'Please fill in amount and category');
       return;
@@ -154,39 +197,41 @@ const BalanceSheet = () => {
       return;
     }
 
-    const transaction = {
-      id: editingTransaction?.id || `tx-${Date.now()}`,
-      type: modalType,
-      amountOriginal: amount,
-      currencyCode: 'USD',
-      amountConverted: amount,
-      fxRateToBase: null,
-      categoryId: formData.categoryId,
-      accountId: formData.accountId || null,
-      note: formData.note || null,
-      date: formData.date.toISOString(),
-      createdAt: editingTransaction?.createdAt || new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      attachmentUris: [],
-    };
+    try {
+      const transactionData = {
+        type: modalType,
+        amountOriginal: amount,
+        currencyCode: 'USD',
+        amountConverted: amount,
+        fxRateToBase: null,
+        categoryId: formData.categoryId,
+        accountId: formData.accountId || null,
+        note: formData.note || null,
+        date: formData.date.toISOString(),
+        attachmentUris: [],
+      };
 
-    if (editingTransaction) {
-      // Update existing transaction
-      const index = transactions.findIndex(tx => tx.id === transaction.id);
-      if (index !== -1) {
-        transactions[index] = transaction;
+      if (editingTransaction) {
+        // Update existing transaction
+        await updateTransaction(editingTransaction.id, transactionData);
+      } else {
+        // Add new transaction
+        await createTransaction(transactionData);
       }
-    } else {
-      // Add new transaction
-      transactions.push(transaction);
-    }
 
-    setModalVisible(false);
-    setEditingTransaction(null);
-    loadMonthlyTransactions();
+      // Reload data from database
+      await loadDataFromDatabase();
+      
+      setModalVisible(false);
+      setEditingTransaction(null);
+      
+    } catch (error) {
+      console.error('Error saving transaction:', error);
+      Alert.alert('Error', 'Failed to save transaction');
+    }
   };
 
-  const deleteTransaction = (id) => {
+  const handleDeleteTransaction = (id) => {
     Alert.alert(
       'Delete Transaction',
       'Are you sure you want to delete this transaction?',
@@ -195,25 +240,35 @@ const BalanceSheet = () => {
         {
           text: 'Delete',
           style: 'destructive',
-          onPress: () => {
-            transactions = transactions.filter(tx => tx.id !== id);
-            loadMonthlyTransactions();
+          onPress: async () => {
+            try {
+              await deleteTransaction(id);
+              await loadDataFromDatabase();
+            } catch (error) {
+              console.error('Error deleting transaction:', error);
+              Alert.alert('Error', 'Failed to delete transaction');
+            }
           },
         },
       ]
     );
   };
 
-  const duplicateTransaction = (transaction) => {
-    const duplicated = {
-      ...transaction,
-      id: `tx-${Date.now()}`,
-      date: new Date().toISOString(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    transactions.push(duplicated);
-    loadMonthlyTransactions();
+  const duplicateTransaction = async (transaction) => {
+    try {
+      const duplicated = {
+        ...transaction,
+        id: undefined, // Let database generate new ID
+        date: new Date().toISOString(),
+        createdAt: undefined,
+        updatedAt: undefined,
+      };
+      await createTransaction(duplicated);
+      await loadDataFromDatabase();
+    } catch (error) {
+      console.error('Error duplicating transaction:', error);
+      Alert.alert('Error', 'Failed to duplicate transaction');
+    }
   };
 
   // Amount input formatting
@@ -345,7 +400,7 @@ const BalanceSheet = () => {
             [
               { text: 'Edit', onPress: () => openModal(item.type, item) },
               { text: 'Duplicate', onPress: () => duplicateTransaction(item) },
-              { text: 'Delete', style: 'destructive', onPress: () => deleteTransaction(item.id) },
+              { text: 'Delete', style: 'destructive', onPress: () => handleDeleteTransaction(item.id) },
               { text: 'Cancel', style: 'cancel' },
             ]
           );
@@ -776,6 +831,15 @@ const BalanceSheet = () => {
       </Modal>
     );
   };
+
+  // Show loading state while data is being fetched
+  if (isLoading) {
+    return (
+      <View style={[balanceSheetStyles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <Text style={{ fontSize: 18, color: '#666' }}>Loading data...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={balanceSheetStyles.container}>

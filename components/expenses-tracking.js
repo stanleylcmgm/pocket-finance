@@ -23,19 +23,22 @@ import {
   getMonthStartEnd, 
   sortTransactions, 
   filterTransactionsByMonth,
-  sampleCategories,
+  getCategories,
   generateId
 } from '../utils/data-utils';
 
 // Mock data storage (replace with actual persistence later)
 let expenses = [];
-let expenseCategories = sampleCategories.filter(cat => cat.type === 'expense');
 
 const ExpensesTracking = () => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [monthKey, setMonthKey] = useState(toMonthKey(new Date()));
   const [monthlyExpenses, setMonthlyExpenses] = useState([]);
   const [monthlyTotal, setMonthlyTotal] = useState(0);
+  
+  // Database data state
+  const [expenseCategories, setExpenseCategories] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   
   // Modal states
   const [modalVisible, setModalVisible] = useState(false);
@@ -67,6 +70,21 @@ const ExpensesTracking = () => {
   const [datePickerVisible, setDatePickerVisible] = useState(false);
   const [tempFormData, setTempFormData] = useState(null); // Store form data while date picker is open
 
+  // Load categories from database
+  const loadCategoriesFromDatabase = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const allCategories = await getCategories();
+      const expenseCategoriesData = allCategories.filter(cat => cat.type === 'expense');
+      setExpenseCategories(expenseCategoriesData);
+    } catch (error) {
+      console.error('Error loading categories from database:', error);
+      Alert.alert('Error', 'Failed to load categories from database');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   // Load expenses for current month
   const loadMonthlyExpenses = useCallback(() => {
     const monthExpenses = filterTransactionsByMonth(expenses, monthKey);
@@ -81,8 +99,9 @@ const ExpensesTracking = () => {
 
   // Initialize and load data
   useEffect(() => {
+    loadCategoriesFromDatabase();
     loadMonthlyExpenses();
-  }, [loadMonthlyExpenses]);
+  }, [loadCategoriesFromDatabase, loadMonthlyExpenses]);
 
   // Navigation functions
   const changeMonth = (direction) => {
@@ -760,6 +779,15 @@ const ExpensesTracking = () => {
       </Modal>
     );
   };
+
+  // Show loading state while data is being fetched
+  if (isLoading) {
+    return (
+      <View style={[expensesTrackingStyles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <Text style={{ fontSize: 18, color: '#666' }}>Loading data...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={expensesTrackingStyles.container}>
