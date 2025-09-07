@@ -1,4 +1,5 @@
 // Data utility functions for Balance Sheet
+import databaseService from './database-service';
 
 // Generate a unique ID
 export const generateId = () => {
@@ -110,7 +111,65 @@ export const getBalanceColor = (balance) => {
   return 'neutral';
 };
 
-// Sample data for testing
+// Database-based data functions
+export const getCategories = async () => {
+  return await databaseService.getCategories();
+};
+
+export const getAccounts = async () => {
+  return await databaseService.getAccounts();
+};
+
+export const getTransactions = async () => {
+  return await databaseService.getTransactions();
+};
+
+export const getTransactionsByMonth = async (monthKey) => {
+  return await databaseService.getTransactionsByMonth(monthKey);
+};
+
+export const createTransaction = async (transaction) => {
+  return await databaseService.createTransaction(transaction);
+};
+
+export const updateTransaction = async (id, updates) => {
+  return await databaseService.updateTransaction(id, updates);
+};
+
+export const deleteTransaction = async (id) => {
+  return await databaseService.deleteTransaction(id);
+};
+
+export const createCategory = async (category) => {
+  return await databaseService.createCategory(category);
+};
+
+export const updateCategory = async (id, updates) => {
+  return await databaseService.updateCategory(id, updates);
+};
+
+export const deleteCategory = async (id) => {
+  return await databaseService.deleteCategory(id);
+};
+
+export const createAccount = async (account) => {
+  return await databaseService.createAccount(account);
+};
+
+export const updateAccount = async (id, updates) => {
+  return await databaseService.updateAccount(id, updates);
+};
+
+export const deleteAccount = async (id) => {
+  return await databaseService.deleteAccount(id);
+};
+
+// Initialize database
+export const initializeDatabase = async () => {
+  return await databaseService.init();
+};
+
+// Sample data for testing (kept for reference and initial seeding)
 export const sampleCategories = [
   { id: 'cat-salary', name: 'Salary', type: 'income', icon: 'cash', color: '#28a745' },
   { id: 'cat-freelance', name: 'Freelance', type: 'income', icon: 'laptop', color: '#17a2b8' },
