@@ -79,6 +79,11 @@ const ExpensesTracking = () => {
       const expenseCategoriesData = allCategories.filter(cat => 
         cat.type === 'expense' && cat.subtype === 'daily'
       );
+      
+      // Debug logging
+      console.log('All categories loaded:', allCategories.length);
+      console.log('Daily expense categories:', expenseCategoriesData.map(c => c.name));
+      
       setExpenseCategories(expenseCategoriesData);
     } catch (error) {
       console.error('Error loading categories from database:', error);
@@ -668,7 +673,8 @@ const ExpensesTracking = () => {
   };
 
   const renderCategoriesModal = () => {
-    const iconOptions = ['restaurant', 'cart', 'car', 'home', 'heart', 'game-controller', 'medical', 'bag', 'document-text', 'pricetag'];
+    // Icon options specifically for daily expense categories
+    const iconOptions = ['airplane', 'sunny', 'restaurant', 'moon', 'phone-portrait', 'game-controller', 'home', 'cart', 'pricetag', 'heart', 'medical', 'bag', 'document-text'];
     const colorOptions = ['#6c757d', '#007bff', '#28a745', '#dc3545', '#fd7e14', '#6f42c1', '#ffc107', '#20c997', '#e83e8c', '#17a2b8', '#343a40', '#495057', '#dee2e6', '#6a5acd'];
 
     return (
