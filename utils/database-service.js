@@ -37,55 +37,11 @@ const sampleAccounts = [
 ];
 
 const sampleAssetCategories = [
-  // Real Estate & Property
-  { id: 'cat-primary-residence', name: 'Primary Residence', icon: 'home', color: '#28a745' },
-  { id: 'cat-rental-property', name: 'Rental Property', icon: 'business', color: '#17a2b8' },
-  { id: 'cat-vacation-home', name: 'Vacation Home', icon: 'umbrella', color: '#20c997' },
-  { id: 'cat-land', name: 'Land', icon: 'leaf', color: '#28a745' },
-  
-  // Financial Assets
-  { id: 'cat-savings-account', name: 'Savings Account', icon: 'library', color: '#007bff' },
-  { id: 'cat-checking-account', name: 'Checking Account', icon: 'card', color: '#6c757d' },
-  { id: 'cat-money-market', name: 'Money Market', icon: 'trending-up', color: '#007bff' },
-  { id: 'cat-certificate-deposit', name: 'Certificate of Deposit', icon: 'document-text', color: '#007bff' },
-  
-  // Investment Assets
-  { id: 'cat-stocks', name: 'Stocks', icon: 'trending-up', color: '#ffc107' },
-  { id: 'cat-bonds', name: 'Bonds', icon: 'shield-checkmark', color: '#28a745' },
-  { id: 'cat-mutual-funds', name: 'Mutual Funds', icon: 'bar-chart', color: '#ffc107' },
-  { id: 'cat-etf', name: 'ETF', icon: 'analytics', color: '#ffc107' },
-  { id: 'cat-crypto', name: 'Cryptocurrency', icon: 'logo-bitcoin', color: '#fd7e14' },
-  { id: 'cat-retirement-401k', name: '401(k)', icon: 'time', color: '#6f42c1' },
-  { id: 'cat-retirement-ira', name: 'IRA', icon: 'time', color: '#6f42c1' },
-  { id: 'cat-pension', name: 'Pension', icon: 'time', color: '#6f42c1' },
-  
-  // Physical Assets
-  { id: 'cat-vehicle', name: 'Vehicle', icon: 'car', color: '#6c757d' },
-  { id: 'cat-boat', name: 'Boat', icon: 'boat', color: '#17a2b8' },
-  { id: 'cat-aircraft', name: 'Aircraft', icon: 'airplane', color: '#17a2b8' },
-  { id: 'cat-motorcycle', name: 'Motorcycle', icon: 'bicycle', color: '#6c757d' },
-  
-  // Collectibles & Valuables
-  { id: 'cat-jewelry', name: 'Jewelry', icon: 'diamond', color: '#e83e8c' },
-  { id: 'cat-art', name: 'Art & Antiques', icon: 'color-palette', color: '#e83e8c' },
-  { id: 'cat-collectibles', name: 'Collectibles', icon: 'gift', color: '#e83e8c' },
-  { id: 'cat-precious-metals', name: 'Precious Metals', icon: 'diamond', color: '#ffc107' },
-  { id: 'cat-watches', name: 'Watches', icon: 'time', color: '#6c757d' },
-  
-  // Business & Professional
-  { id: 'cat-business-equipment', name: 'Business Equipment', icon: 'desktop', color: '#6f42c1' },
-  { id: 'cat-intellectual-property', name: 'Intellectual Property', icon: 'bulb', color: '#6f42c1' },
-  { id: 'cat-business-ownership', name: 'Business Ownership', icon: 'business', color: '#6f42c1' },
-  { id: 'cat-franchise', name: 'Franchise', icon: 'storefront', color: '#6f42c1' },
-  
-  // Insurance & Annuities
-  { id: 'cat-life-insurance', name: 'Life Insurance', icon: 'heart', color: '#dc3545' },
-  { id: 'cat-annuity', name: 'Annuity', icon: 'calendar', color: '#dc3545' },
-  { id: 'cat-long-term-care', name: 'Long-term Care', icon: 'medical', color: '#dc3545' },
-  
-  // Other Assets
-  { id: 'cat-loans-receivable', name: 'Loans Receivable', icon: 'cash', color: '#28a745' },
-  { id: 'cat-other', name: 'Other', icon: 'ellipsis-horizontal', color: '#6c757d' },
+  // Asset Management Categories as requested
+  { id: 'cat-bank', name: 'Bank', icon: 'library', color: '#007bff' },
+  { id: 'cat-investment', name: 'Investment', icon: 'trending-up', color: '#ffc107' },
+  { id: 'cat-insurance', name: 'Insurance', icon: 'umbrella', color: '#17a2b8' },
+  { id: 'cat-mpf', name: 'MPF', icon: 'shield-checkmark', color: '#28a745' },
 ];
 
 class DatabaseService {
