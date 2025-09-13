@@ -416,7 +416,7 @@ export const balanceSheetStyles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: 10,
     marginBottom: 20,
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
   },
   categoryGrid: {
     flexDirection: 'row',
@@ -521,6 +521,8 @@ export const balanceSheetStyles = StyleSheet.create({
     borderColor: '#e9ecef',
     backgroundColor: 'white',
     gap: 6,
+    minWidth: 100,
+    marginBottom: 8,
   },
   categoryButtonSelected: {
     backgroundColor: '#007bff',
