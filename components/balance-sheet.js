@@ -564,7 +564,7 @@ const BalanceSheet = () => {
                 ? balanceSheetStyles.inputFocused
                 : balanceSheetStyles.inputUnfocused,
             ]}
-            placeholder={modalType === 'income' ? "e.g., Salary, Freelance work, Bonus" : "e.g., Groceries, Rent, Utilities"}
+            placeholder={modalType === 'income' ? "Enter Income" : "Enter Expense"}
             placeholderTextColor="#6c757d"
             value={formData.note}
             onChangeText={(text) => setFormData({ ...formData, note: text })}
@@ -582,7 +582,7 @@ const BalanceSheet = () => {
                 ? balanceSheetStyles.inputFocused
                 : balanceSheetStyles.inputUnfocused,
             ]}
-            placeholder="Enter amount (e.g., 100.50)"
+            placeholder="Enter Amount"
             placeholderTextColor="#6c757d"
             value={formData.amount}
             onChangeText={handleAmountChange}
@@ -770,7 +770,7 @@ const BalanceSheet = () => {
                 </View>
                 <TextInput
                   style={[balanceSheetStyles.input, balanceSheetStyles.inputUnfocused]}
-                  placeholder="Category name"
+                  placeholder="Category Name"
                   value={newCategoryName}
                   onChangeText={setNewCategoryName}
                 />

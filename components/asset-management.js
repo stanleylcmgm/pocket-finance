@@ -358,7 +358,7 @@ const AssetManagement = () => {
                 ? assetManagementStyles.inputFocused
                 : assetManagementStyles.inputUnfocused,
             ]}
-            placeholder="e.g., Primary Residence, Savings Account"
+            placeholder="Enter Asset Name"
             placeholderTextColor="#6c757d"
             value={formData.name}
             onChangeText={(text) => setFormData({ ...formData, name: text })}
@@ -374,7 +374,7 @@ const AssetManagement = () => {
                 ? assetManagementStyles.inputFocused
                 : assetManagementStyles.inputUnfocused,
             ]}
-            placeholder="Enter amount (e.g., 100000.50)"
+            placeholder="Enter Amount"
             placeholderTextColor="#6c757d"
             value={formData.amount}
             onChangeText={handleAmountChange}
@@ -415,7 +415,7 @@ const AssetManagement = () => {
               assetManagementStyles.input,
               assetManagementStyles.inputUnfocused,
             ]}
-            placeholder="e.g., Family home in downtown, Emergency fund"
+            placeholder="Enter Description"
             placeholderTextColor="#6c757d"
             value={formData.note}
             onChangeText={(text) => setFormData({ ...formData, note: text })}
@@ -550,7 +550,7 @@ const AssetManagement = () => {
             </View>
             <TextInput
               style={[assetManagementStyles.input, assetManagementStyles.inputUnfocused]}
-              placeholder="Category name"
+              placeholder="Category Name"
               value={newCategoryName}
               onChangeText={setNewCategoryName}
             />

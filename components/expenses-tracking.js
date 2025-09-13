@@ -519,7 +519,7 @@ const ExpensesTracking = () => {
                 ? expensesTrackingStyles.inputFocused
                 : expensesTrackingStyles.inputUnfocused,
             ]}
-            placeholder="e.g., Grocery Shopping, Coffee, Gas"
+            placeholder="Enter Expense Name"
             placeholderTextColor="#6c757d"
             value={formData.name}
             onChangeText={(text) => setFormData({ ...formData, name: text })}
@@ -535,7 +535,7 @@ const ExpensesTracking = () => {
                 ? expensesTrackingStyles.inputFocused
                 : expensesTrackingStyles.inputUnfocused,
             ]}
-            placeholder="Enter amount (e.g., 25.50)"
+            placeholder="Enter Amount"
             placeholderTextColor="#6c757d"
             value={formData.amount}
             onChangeText={handleAmountChange}
@@ -594,7 +594,7 @@ const ExpensesTracking = () => {
                 ? expensesTrackingStyles.inputFocused
                 : expensesTrackingStyles.inputUnfocused,
             ]}
-            placeholder="Add any additional details..."
+            placeholder="Enter Description"
             placeholderTextColor="#6c757d"
             value={formData.description}
             onChangeText={(text) => setFormData({ ...formData, description: text })}
@@ -720,7 +720,7 @@ const ExpensesTracking = () => {
             </View>
             <TextInput
               style={[expensesTrackingStyles.input, expensesTrackingStyles.inputUnfocused]}
-              placeholder="Category name"
+              placeholder="Category Name"
               value={newCategoryName}
               onChangeText={setNewCategoryName}
             />
