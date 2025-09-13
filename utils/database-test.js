@@ -2,7 +2,8 @@
 import { 
   getCategories, 
   getAccounts, 
-  getTransactions
+  getTransactions,
+  deleteAllRecords
 } from './data-utils';
 
 export const verifyDatabaseUsage = async () => {
@@ -84,6 +85,54 @@ export const testDatabaseWrite = async () => {
     
   } catch (error) {
     console.error('Database write test failed:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+};
+
+// Function to delete all records from all tables
+export const deleteAllDatabaseRecords = async () => {
+  console.log('\n=== DELETE ALL RECORDS ===');
+  
+  try {
+    console.log('Deleting all records from all tables...');
+    const result = await deleteAllRecords();
+    console.log('Delete result:', result);
+    
+    if (result.success) {
+      console.log('All records deleted successfully');
+      
+      // Verify deletion by checking record counts
+      const categories = await getCategories();
+      const accounts = await getAccounts();
+      const transactions = await getTransactions();
+      
+      console.log('Verification - Remaining records:');
+      console.log('- Categories:', categories.length);
+      console.log('- Accounts:', accounts.length);
+      console.log('- Transactions:', transactions.length);
+      
+      return {
+        success: true,
+        message: 'All records deleted successfully',
+        remainingRecords: {
+          categories: categories.length,
+          accounts: accounts.length,
+          transactions: transactions.length
+        }
+      };
+    } else {
+      console.error('Failed to delete records:', result.error);
+      return {
+        success: false,
+        error: result.error
+      };
+    }
+    
+  } catch (error) {
+    console.error('Delete all records failed:', error);
     return {
       success: false,
       error: error.message

@@ -678,6 +678,26 @@ class DatabaseService {
     console.log('Asset categories force seeded successfully');
   }
 
+  // Delete all records from all tables
+  async deleteAllRecords() {
+    try {
+      console.log('Deleting all records from all tables...');
+      
+      // Delete from all tables in the correct order (respecting foreign key constraints)
+      await this.db.runAsync('DELETE FROM transactions');
+      await this.db.runAsync('DELETE FROM assets');
+      await this.db.runAsync('DELETE FROM asset_categories');
+      await this.db.runAsync('DELETE FROM categories');
+      await this.db.runAsync('DELETE FROM accounts');
+      
+      console.log('All records deleted successfully');
+      return { success: true, message: 'All records deleted successfully' };
+    } catch (error) {
+      console.error('Error deleting all records:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
   // Close database connection
   async close() {
     if (this.db) {
