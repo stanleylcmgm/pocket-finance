@@ -593,7 +593,7 @@ const BalanceSheet = () => {
           <Text style={balanceSheetStyles.inputLabel}>Category *</Text>
           <View style={balanceSheetStyles.categoryContainer}>
             {categories
-              .filter(cat => cat.type === modalType)
+              .filter(cat => cat.type === modalType && (cat.subtype === 'formal' || cat.subtype === 'other'))
               .map((category) => (
                 <TouchableOpacity
                   key={category.id}
@@ -655,6 +655,7 @@ const BalanceSheet = () => {
       id: `cat-${generateId()}`,
       name: trimmedName,
       type: newCategoryType,
+      subtype: newCategoryType === 'income' ? 'formal' : 'formal', // Balance Sheet uses formal categories
       icon: newCategoryIcon || (newCategoryType === 'income' ? 'cash' : 'pricetag'),
       color: newCategoryColor || (newCategoryType === 'income' ? '#28a745' : '#dc3545'),
     };
@@ -677,7 +678,11 @@ const BalanceSheet = () => {
     const iconOptions = ['restaurant', 'cart', 'car', 'home', 'heart', 'game-controller', 'medical', 'bag', 'document-text', 'pricetag', 'airplane', 'school'];
     const colorOptions = ['#6c757d', '#007bff', '#28a745', '#dc3545', '#fd7e14', '#6f42c1', '#ffc107', '#20c997'];
     const activeIconOptions = iconOptions;
-    const filtered = categories.filter((c) => c.type === newCategoryType);
+    // Filter categories by type AND subtype for Balance Sheet
+    const filtered = categories.filter((c) => 
+      c.type === newCategoryType && 
+      (c.subtype === 'formal' || c.subtype === 'other')
+    );
 
     return (
       <Modal

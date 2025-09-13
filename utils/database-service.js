@@ -2,21 +2,32 @@ import * as SQLite from 'expo-sqlite';
 
 // Sample data for initial database seeding
 const sampleCategories = [
-  { id: 'cat-salary', name: 'Salary', type: 'income', icon: 'briefcase', color: '#28a745' },
-  { id: 'cat-part-time', name: 'Part Time', type: 'income', icon: 'time', color: '#17a2b8' },
-  { id: 'cat-investment', name: 'Investment', type: 'income', icon: 'trending-up', color: '#ffc107' },
+  { id: 'cat-salary', name: 'Salary', type: 'income', subtype: 'formal', icon: 'briefcase', color: '#28a745' },
+  { id: 'cat-part-time', name: 'Part Time', type: 'income', subtype: 'formal', icon: 'time', color: '#17a2b8' },
+  { id: 'cat-investment', name: 'Investment', type: 'income', subtype: 'formal', icon: 'trending-up', color: '#ffc107' },
   
-  { id: 'cat-mpf', name: 'MPF', type: 'expense', icon: 'shield-checkmark', color: '#007bff' },
-  { id: 'cat-insurance', name: 'Insurance', type: 'expense', icon: 'umbrella', color: '#17a2b8' },
-  { id: 'cat-tax', name: 'Tax', type: 'expense', icon: 'document-text', color: '#dc3545' },
-  { id: 'cat-housing', name: 'Housing', type: 'expense', icon: 'home', color: '#6f42c1' },
-  { id: 'cat-water', name: 'Water', type: 'expense', icon: 'water', color: '#007bff' },
-  { id: 'cat-electricity', name: 'Electricity', type: 'expense', icon: 'flash', color: '#ffc107' },
-  { id: 'cat-towngas', name: 'Towngas', type: 'expense', icon: 'flame', color: '#fd7e14' },
-  { id: 'cat-mobile-network', name: 'Mobile Network', type: 'expense', icon: 'phone-portrait', color: '#28a745' },
-  { id: 'cat-broadband', name: 'Broadband', type: 'expense', icon: 'wifi', color: '#6c757d' },
-  { id: 'cat-family', name: 'Family', type: 'expense', icon: 'people', color: '#e83e8c' },
-  { id: 'cat-personal-expenses', name: 'Personal Expenses', type: 'expense', icon: 'person', color: '#6c757d' },
+  // Daily expense categories for Expenses Tracking
+  { id: 'cat-travel', name: 'Travel', type: 'expense', subtype: 'daily', icon: 'airplane', color: '#007bff' },
+  { id: 'cat-breakfast', name: 'Breakfast', type: 'expense', subtype: 'daily', icon: 'sunny', color: '#ffc107' },
+  { id: 'cat-lunch', name: 'Lunch', type: 'expense', subtype: 'daily', icon: 'restaurant', color: '#fd7e14' },
+  { id: 'cat-dinner', name: 'Dinner', type: 'expense', subtype: 'daily', icon: 'moon', color: '#6f42c1' },
+  { id: 'cat-mobile', name: 'Mobile', type: 'expense', subtype: 'daily', icon: 'phone-portrait', color: '#28a745' },
+  { id: 'cat-entertainment', name: 'Entertainment', type: 'expense', subtype: 'daily', icon: 'game-controller', color: '#e83e8c' },
+  { id: 'cat-household', name: 'Household', type: 'expense', subtype: 'daily', icon: 'home', color: '#17a2b8' },
+  { id: 'cat-buy', name: 'Buy', type: 'expense', subtype: 'daily', icon: 'cart', color: '#dc3545' },
+  
+  // Formal expense categories for Balance Sheet
+  { id: 'cat-mpf', name: 'MPF', type: 'expense', subtype: 'formal', icon: 'shield-checkmark', color: '#007bff' },
+  { id: 'cat-insurance', name: 'Insurance', type: 'expense', subtype: 'formal', icon: 'umbrella', color: '#17a2b8' },
+  { id: 'cat-tax', name: 'Tax', type: 'expense', subtype: 'formal', icon: 'document-text', color: '#dc3545' },
+  { id: 'cat-housing', name: 'Housing', type: 'expense', subtype: 'formal', icon: 'home', color: '#6f42c1' },
+  { id: 'cat-water', name: 'Water', type: 'expense', subtype: 'formal', icon: 'water', color: '#007bff' },
+  { id: 'cat-electricity', name: 'Electricity', type: 'expense', subtype: 'formal', icon: 'flash', color: '#ffc107' },
+  { id: 'cat-towngas', name: 'Towngas', type: 'expense', subtype: 'formal', icon: 'flame', color: '#fd7e14' },
+  { id: 'cat-mobile-network', name: 'Mobile Network', type: 'expense', subtype: 'formal', icon: 'phone-portrait', color: '#28a745' },
+  { id: 'cat-broadband', name: 'Broadband', type: 'expense', subtype: 'formal', icon: 'wifi', color: '#6c757d' },
+  { id: 'cat-family', name: 'Family', type: 'expense', subtype: 'formal', icon: 'people', color: '#e83e8c' },
+  { id: 'cat-personal-expenses', name: 'Personal Expenses', type: 'expense', subtype: 'other', icon: 'person', color: '#6c757d' },
 ];
 
 const sampleAccounts = [
@@ -108,11 +119,17 @@ class DatabaseService {
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
         type TEXT NOT NULL CHECK (type IN ('income', 'expense')),
+        subtype TEXT CHECK (subtype IN ('formal', 'daily', 'other')),
         icon TEXT,
         color TEXT,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
       );
+    `;
+
+    // Add subtype column to existing categories table if it doesn't exist
+    const addSubtypeColumn = `
+      ALTER TABLE categories ADD COLUMN subtype TEXT CHECK (subtype IN ('formal', 'daily', 'other'));
     `;
 
     const createAccountsTable = `
@@ -170,10 +187,80 @@ class DatabaseService {
     `;
 
     await this.db.execAsync(createCategoriesTable);
+    
+    // Try to add subtype column to existing categories table
+    try {
+      await this.db.execAsync(addSubtypeColumn);
+    } catch (error) {
+      // Column might already exist, ignore the error
+      console.log('Subtype column may already exist:', error.message);
+    }
+    
     await this.db.execAsync(createAccountsTable);
     await this.db.execAsync(createTransactionsTable);
     await this.db.execAsync(createAssetCategoriesTable);
     await this.db.execAsync(createAssetsTable);
+    
+    // Migrate existing categories to have appropriate subtypes
+    await this.migrateExistingCategories();
+  }
+
+  // Migrate existing categories to have appropriate subtypes
+  async migrateExistingCategories() {
+    try {
+      // Check if there are categories without subtypes
+      const categoriesWithoutSubtype = await this.db.getAllAsync(
+        'SELECT * FROM categories WHERE subtype IS NULL'
+      );
+      
+      if (categoriesWithoutSubtype.length > 0) {
+        console.log(`Migrating ${categoriesWithoutSubtype.length} categories with subtypes...`);
+        
+        // Define category mappings
+        const categoryMappings = {
+          // Income categories
+          'cat-salary': 'formal',
+          'cat-part-time': 'formal', 
+          'cat-investment': 'formal',
+          
+          // Daily expense categories
+          'cat-travel': 'daily',
+          'cat-breakfast': 'daily',
+          'cat-lunch': 'daily',
+          'cat-dinner': 'daily',
+          'cat-mobile': 'daily',
+          'cat-entertainment': 'daily',
+          'cat-household': 'daily',
+          'cat-buy': 'daily',
+          
+          // Formal expense categories
+          'cat-mpf': 'formal',
+          'cat-insurance': 'formal',
+          'cat-tax': 'formal',
+          'cat-housing': 'formal',
+          'cat-water': 'formal',
+          'cat-electricity': 'formal',
+          'cat-towngas': 'formal',
+          'cat-mobile-network': 'formal',
+          'cat-broadband': 'formal',
+          'cat-family': 'formal',
+          'cat-personal-expenses': 'other'
+        };
+        
+        // Update each category with its appropriate subtype
+        for (const category of categoriesWithoutSubtype) {
+          const subtype = categoryMappings[category.id] || 'other';
+          await this.db.runAsync(
+            'UPDATE categories SET subtype = ? WHERE id = ?',
+            [subtype, category.id]
+          );
+        }
+        
+        console.log('Category migration completed successfully');
+      }
+    } catch (error) {
+      console.error('Error migrating categories:', error);
+    }
   }
 
   // Seed initial data
@@ -190,8 +277,8 @@ class DatabaseService {
     if (categoryCount.count === 0) {
       for (const category of sampleCategories) {
         await this.db.runAsync(
-          'INSERT INTO categories (id, name, type, icon, color) VALUES (?, ?, ?, ?, ?)',
-          [category.id, category.name, category.type, category.icon, category.color]
+          'INSERT INTO categories (id, name, type, subtype, icon, color) VALUES (?, ?, ?, ?, ?, ?)',
+          [category.id, category.name, category.type, category.subtype, category.icon, category.color]
         );
       }
     }
@@ -255,6 +342,7 @@ class DatabaseService {
       id: cat.id,
       name: cat.name,
       type: cat.type,
+      subtype: cat.subtype,
       icon: cat.icon,
       color: cat.color
     }));
@@ -268,6 +356,7 @@ class DatabaseService {
       id: category.id,
       name: category.name,
       type: category.type,
+      subtype: category.subtype,
       icon: category.icon,
       color: category.color
     };
@@ -277,8 +366,8 @@ class DatabaseService {
     await this.init();
     const id = `cat-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     await this.db.runAsync(
-      'INSERT INTO categories (id, name, type, icon, color) VALUES (?, ?, ?, ?, ?)',
-      [id, category.name, category.type, category.icon, category.color]
+      'INSERT INTO categories (id, name, type, subtype, icon, color) VALUES (?, ?, ?, ?, ?, ?)',
+      [id, category.name, category.type, category.subtype || 'other', category.icon, category.color]
     );
     return { ...category, id };
   }

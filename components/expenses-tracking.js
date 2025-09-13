@@ -75,7 +75,10 @@ const ExpensesTracking = () => {
     try {
       setIsLoading(true);
       const allCategories = await getCategories();
-      const expenseCategoriesData = allCategories.filter(cat => cat.type === 'expense');
+      // Only show daily expense categories for Expenses Tracking
+      const expenseCategoriesData = allCategories.filter(cat => 
+        cat.type === 'expense' && cat.subtype === 'daily'
+      );
       setExpenseCategories(expenseCategoriesData);
     } catch (error) {
       console.error('Error loading categories from database:', error);
@@ -645,6 +648,7 @@ const ExpensesTracking = () => {
       id: `cat-${generateId()}`,
       name: trimmedName,
       type: 'expense',
+      subtype: 'daily', // Set as daily expense category
       icon: newCategoryIcon || 'pricetag',
       color: newCategoryColor || '#6c757d',
     };
