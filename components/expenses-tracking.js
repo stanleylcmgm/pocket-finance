@@ -79,11 +79,6 @@ const ExpensesTracking = () => {
       const expenseCategoriesData = allCategories.filter(cat => 
         cat.type === 'expense' && cat.subtype === 'daily'
       );
-      
-      // Debug logging
-      console.log('All categories loaded:', allCategories.length);
-      console.log('Daily expense categories:', expenseCategoriesData.map(c => c.name));
-      
       setExpenseCategories(expenseCategoriesData);
     } catch (error) {
       console.error('Error loading categories from database:', error);

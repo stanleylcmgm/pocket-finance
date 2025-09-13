@@ -193,7 +193,6 @@ class DatabaseService {
       await this.db.execAsync(addSubtypeColumn);
     } catch (error) {
       // Column might already exist, ignore the error
-      console.log('Subtype column may already exist:', error.message);
     }
     
     await this.db.execAsync(createAccountsTable);
@@ -214,8 +213,6 @@ class DatabaseService {
       );
       
       if (categoriesWithoutSubtype.length > 0) {
-        console.log(`Migrating ${categoriesWithoutSubtype.length} categories with subtypes...`);
-        
         // Define category mappings
         const categoryMappings = {
           // Income categories
@@ -255,8 +252,6 @@ class DatabaseService {
             [subtype, category.id]
           );
         }
-        
-        console.log('Category migration completed successfully');
       }
     } catch (error) {
       console.error('Error migrating categories:', error);
