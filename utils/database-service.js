@@ -192,7 +192,10 @@ class DatabaseService {
     try {
       await this.db.execAsync(addSubtypeColumn);
     } catch (error) {
-      // Column might already exist, ignore the error
+      // Column might already exist, ignore the error silently
+      if (!error.message.includes('duplicate column name')) {
+        console.error('Unexpected error adding subtype column:', error);
+      }
     }
     
     await this.db.execAsync(createAccountsTable);
