@@ -507,8 +507,12 @@ const AssetManagement = () => {
             {/* Fixed Header */}
             <View style={assetManagementStyles.modalHeader}>
               <Text style={assetManagementStyles.modalTitle}>Manage Categories</Text>
-              <TouchableOpacity onPress={() => setCategoriesModalVisible(false)}>
-                <Ionicons name="close" size={24} color="#6c757d" />
+              <TouchableOpacity 
+                onPress={() => setCategoriesModalVisible(false)}
+                style={{ padding: 12, margin: -12 }}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <Ionicons name="close" size={28} color="#6c757d" />
               </TouchableOpacity>
             </View>
 
