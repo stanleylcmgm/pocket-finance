@@ -22,6 +22,39 @@ const sampleAccounts = [
   { id: 'acc-card', name: 'Credit Card', type: 'card' },
 ];
 
+const sampleAssetCategories = [
+  { id: 'cat-property', name: 'Property', icon: 'home', color: '#28a745' },
+  { id: 'cat-bank', name: 'Bank', icon: 'library', color: '#007bff' },
+  { id: 'cat-investment', name: 'Investment', icon: 'trending-up', color: '#ffc107' },
+  { id: 'cat-vehicle', name: 'Vehicle', icon: 'car', color: '#6c757d' },
+  { id: 'cat-business', name: 'Business', icon: 'business', color: '#6f42c1' },
+  { id: 'cat-other', name: 'Other', icon: 'diamond', color: '#fd7e14' },
+];
+
+const sampleAssets = [
+  {
+    id: 'asset-1',
+    name: 'Primary Residence',
+    amount: 450000,
+    categoryId: 'cat-property',
+    note: 'Family home in downtown',
+  },
+  {
+    id: 'asset-2',
+    name: 'Savings Account',
+    amount: 25000,
+    categoryId: 'cat-bank',
+    note: 'Emergency fund',
+  },
+  {
+    id: 'asset-3',
+    name: 'Investment Portfolio',
+    amount: 150000,
+    categoryId: 'cat-investment',
+    note: 'Stock and bond portfolio',
+  },
+];
+
 const sampleTransactions = [
   {
     id: 'tx-1',
@@ -124,9 +157,35 @@ class DatabaseService {
       );
     `;
 
+    const createAssetCategoriesTable = `
+      CREATE TABLE IF NOT EXISTS asset_categories (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        icon TEXT,
+        color TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      );
+    `;
+
+    const createAssetsTable = `
+      CREATE TABLE IF NOT EXISTS assets (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        amount REAL NOT NULL,
+        category_id TEXT NOT NULL,
+        note TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (category_id) REFERENCES asset_categories (id)
+      );
+    `;
+
     await this.db.execAsync(createCategoriesTable);
     await this.db.execAsync(createAccountsTable);
     await this.db.execAsync(createTransactionsTable);
+    await this.db.execAsync(createAssetCategoriesTable);
+    await this.db.execAsync(createAssetsTable);
   }
 
   // Seed initial data
@@ -151,6 +210,22 @@ class DatabaseService {
       await this.db.runAsync(
         'INSERT INTO accounts (id, name, type) VALUES (?, ?, ?)',
         [account.id, account.name, account.type]
+      );
+    }
+
+    // Insert sample asset categories
+    for (const category of sampleAssetCategories) {
+      await this.db.runAsync(
+        'INSERT INTO asset_categories (id, name, icon, color) VALUES (?, ?, ?, ?)',
+        [category.id, category.name, category.icon, category.color]
+      );
+    }
+
+    // Insert sample assets
+    for (const asset of sampleAssets) {
+      await this.db.runAsync(
+        'INSERT INTO assets (id, name, amount, category_id, note) VALUES (?, ?, ?, ?, ?)',
+        [asset.id, asset.name, asset.amount, asset.categoryId, asset.note]
       );
     }
 
@@ -415,17 +490,154 @@ class DatabaseService {
     return { startDate, endDate };
   }
 
+  // Asset Categories CRUD operations
+  async getAssetCategories() {
+    await this.init();
+    const categories = await this.db.getAllAsync('SELECT * FROM asset_categories ORDER BY name');
+    return categories.map(cat => ({
+      id: cat.id,
+      name: cat.name,
+      icon: cat.icon,
+      color: cat.color
+    }));
+  }
+
+  async getAssetCategoryById(id) {
+    await this.init();
+    const category = await this.db.getFirstAsync('SELECT * FROM asset_categories WHERE id = ?', [id]);
+    if (!category) return null;
+    return {
+      id: category.id,
+      name: category.name,
+      icon: category.icon,
+      color: category.color
+    };
+  }
+
+  async createAssetCategory(category) {
+    await this.init();
+    const id = `cat-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    await this.db.runAsync(
+      'INSERT INTO asset_categories (id, name, icon, color) VALUES (?, ?, ?, ?)',
+      [id, category.name, category.icon, category.color]
+    );
+    return { ...category, id };
+  }
+
+  async updateAssetCategory(id, updates) {
+    await this.init();
+    const setClause = Object.keys(updates).map(key => `${key} = ?`).join(', ');
+    const values = Object.values(updates);
+    await this.db.runAsync(
+      `UPDATE asset_categories SET ${setClause}, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
+      [...values, id]
+    );
+    return this.getAssetCategoryById(id);
+  }
+
+  async deleteAssetCategory(id) {
+    await this.init();
+    await this.db.runAsync('DELETE FROM asset_categories WHERE id = ?', [id]);
+  }
+
+  // Assets CRUD operations
+  async getAssets() {
+    await this.init();
+    const assets = await this.db.getAllAsync(`
+      SELECT a.*, ac.name as category_name, ac.icon as category_icon, ac.color as category_color
+      FROM assets a
+      LEFT JOIN asset_categories ac ON a.category_id = ac.id
+      ORDER BY a.created_at DESC
+    `);
+    
+    return assets.map(asset => ({
+      id: asset.id,
+      name: asset.name,
+      amount: asset.amount,
+      categoryId: asset.category_id,
+      note: asset.note,
+      createdAt: asset.created_at,
+      updatedAt: asset.updated_at,
+      categoryName: asset.category_name,
+      categoryIcon: asset.category_icon,
+      categoryColor: asset.category_color
+    }));
+  }
+
+  async getAssetById(id) {
+    await this.init();
+    const asset = await this.db.getFirstAsync(`
+      SELECT a.*, ac.name as category_name, ac.icon as category_icon, ac.color as category_color
+      FROM assets a
+      LEFT JOIN asset_categories ac ON a.category_id = ac.id
+      WHERE a.id = ?
+    `, [id]);
+    
+    if (!asset) return null;
+    
+    return {
+      id: asset.id,
+      name: asset.name,
+      amount: asset.amount,
+      categoryId: asset.category_id,
+      note: asset.note,
+      createdAt: asset.created_at,
+      updatedAt: asset.updated_at,
+      categoryName: asset.category_name,
+      categoryIcon: asset.category_icon,
+      categoryColor: asset.category_color
+    };
+  }
+
+  async createAsset(asset) {
+    await this.init();
+    const id = `asset-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    await this.db.runAsync(
+      'INSERT INTO assets (id, name, amount, category_id, note) VALUES (?, ?, ?, ?, ?)',
+      [id, asset.name, asset.amount, asset.categoryId, asset.note]
+    );
+    return this.getAssetById(id);
+  }
+
+  async updateAsset(id, updates) {
+    await this.init();
+    const setClause = Object.keys(updates).map(key => {
+      if (key === 'categoryId') return 'category_id = ?';
+      return `${key} = ?`;
+    }).join(', ');
+    
+    const values = Object.entries(updates).map(([key, value]) => {
+      if (key === 'categoryId') return value;
+      return value;
+    });
+    
+    await this.db.runAsync(
+      `UPDATE assets SET ${setClause}, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
+      [...values, id]
+    );
+    return this.getAssetById(id);
+  }
+
+  async deleteAsset(id) {
+    await this.init();
+    await this.db.runAsync('DELETE FROM assets WHERE id = ?', [id]);
+  }
+
   // Get database statistics
   async getStats() {
     await this.init();
     const categoryCount = await this.db.getFirstAsync('SELECT COUNT(*) as count FROM categories');
     const accountCount = await this.db.getFirstAsync('SELECT COUNT(*) as count FROM accounts');
     const transactionCount = await this.db.getFirstAsync('SELECT COUNT(*) as count FROM transactions');
+    const assetCategoryCount = await this.db.getFirstAsync('SELECT COUNT(*) as count FROM asset_categories');
+    const assetCount = await this.db.getFirstAsync('SELECT COUNT(*) as count FROM assets');
     
     return {
       categories: categoryCount.count,
       accounts: accountCount.count,
-      transactions: transactionCount.count
+      transactions: transactionCount.count,
+      assetCategories: assetCategoryCount.count,
+      assets: assetCount.count
     };
   }
 

@@ -164,6 +164,71 @@ export const deleteAccount = async (id) => {
   return await databaseService.deleteAccount(id);
 };
 
+// Asset utility functions
+export const getAssetCategories = async () => {
+  return await databaseService.getAssetCategories();
+};
+
+export const getAssetCategoryById = async (id) => {
+  return await databaseService.getAssetCategoryById(id);
+};
+
+export const createAssetCategory = async (category) => {
+  return await databaseService.createAssetCategory(category);
+};
+
+export const updateAssetCategory = async (id, updates) => {
+  return await databaseService.updateAssetCategory(id, updates);
+};
+
+export const deleteAssetCategory = async (id) => {
+  return await databaseService.deleteAssetCategory(id);
+};
+
+export const getAssets = async () => {
+  return await databaseService.getAssets();
+};
+
+export const getAssetById = async (id) => {
+  return await databaseService.getAssetById(id);
+};
+
+export const createAsset = async (asset) => {
+  return await databaseService.createAsset(asset);
+};
+
+export const updateAsset = async (id, updates) => {
+  return await databaseService.updateAsset(id, updates);
+};
+
+export const deleteAsset = async (id) => {
+  return await databaseService.deleteAsset(id);
+};
+
+// Calculate total assets value
+export const calculateTotalAssets = (assets) => {
+  return assets.reduce((total, asset) => total + (asset.amount || 0), 0);
+};
+
+// Validate asset data
+export const validateAsset = (asset) => {
+  const errors = [];
+  
+  if (!asset.name || asset.name.trim() === '') {
+    errors.push('Asset name is required');
+  }
+  
+  if (!asset.amount || asset.amount <= 0) {
+    errors.push('Amount must be greater than 0');
+  }
+  
+  if (!asset.categoryId) {
+    errors.push('Category is required');
+  }
+  
+  return errors;
+};
+
 // Initialize database
 export const initializeDatabase = async () => {
   return await databaseService.init();

@@ -18,82 +18,23 @@ import { assetManagementStyles } from '../styles/asset-management.styles';
 
 import { 
   formatCurrency, 
-  generateId
+  generateId,
+  getAssets,
+  createAsset,
+  updateAsset,
+  deleteAsset as deleteAssetFromDB,
+  getAssetCategories,
+  createAssetCategory,
+  deleteAssetCategory,
+  calculateTotalAssets,
+  validateAsset
 } from '../utils/data-utils';
-
-// Mock data storage (replace with actual persistence later)
-let assets = [
-  {
-    id: 'asset-1',
-    name: 'Primary Residence',
-    amount: 450000,
-    categoryId: 'cat-property',
-    note: 'Family home in downtown',
-    createdAt: '2024-01-01T00:00:00.000Z',
-    updatedAt: '2024-01-01T00:00:00.000Z',
-  },
-  {
-    id: 'asset-2',
-    name: 'Savings Account',
-    amount: 25000,
-    categoryId: 'cat-bank',
-    note: 'Emergency fund',
-    createdAt: '2024-01-01T00:00:00.000Z',
-    updatedAt: '2024-01-01T00:00:00.000Z',
-  },
-  {
-    id: 'asset-3',
-    name: 'Investment Portfolio',
-    amount: 150000,
-    categoryId: 'cat-investment',
-    note: 'Stock and bond portfolio',
-    createdAt: '2024-01-01T00:00:00.000Z',
-    updatedAt: '2024-01-01T00:00:00.000Z',
-  },
-];
-
-let assetCategories = [
-  {
-    id: 'cat-property',
-    name: 'Property',
-    icon: 'home',
-    color: '#28a745',
-  },
-  {
-    id: 'cat-bank',
-    name: 'Bank',
-    icon: 'library',
-    color: '#007bff',
-  },
-  {
-    id: 'cat-investment',
-    name: 'Investment',
-    icon: 'trending-up',
-    color: '#ffc107',
-  },
-  {
-    id: 'cat-vehicle',
-    name: 'Vehicle',
-    icon: 'car',
-    color: '#6c757d',
-  },
-  {
-    id: 'cat-business',
-    name: 'Business',
-    icon: 'business',
-    color: '#6f42c1',
-  },
-  {
-    id: 'cat-other',
-    name: 'Other',
-    icon: 'diamond',
-    color: '#fd7e14',
-  },
-];
 
 const AssetManagement = () => {
   const [assetsList, setAssetsList] = useState([]);
   const [totalAssets, setTotalAssets] = useState(0);
+  const [assetCategories, setAssetCategories] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   
   // Modal states
   const [modalVisible, setModalVisible] = useState(false);
@@ -114,19 +55,40 @@ const AssetManagement = () => {
   const [newCategoryIcon, setNewCategoryIcon] = useState('star');
   const [newCategoryColor, setNewCategoryColor] = useState('#6c757d');
 
-  // Load assets
-  const loadAssets = useCallback(() => {
-    setAssetsList([...assets]);
-    
-    // Calculate total assets
-    const total = assets.reduce((sum, asset) => sum + (asset.amount || 0), 0);
-    setTotalAssets(total);
+  // Load assets from database
+  const loadAssets = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const assets = await getAssets();
+      setAssetsList(assets);
+      
+      // Calculate total assets
+      const total = calculateTotalAssets(assets);
+      setTotalAssets(total);
+    } catch (error) {
+      console.error('Error loading assets:', error);
+      Alert.alert('Error', 'Failed to load assets');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Load asset categories from database
+  const loadAssetCategories = useCallback(async () => {
+    try {
+      const categories = await getAssetCategories();
+      setAssetCategories(categories);
+    } catch (error) {
+      console.error('Error loading asset categories:', error);
+      Alert.alert('Error', 'Failed to load asset categories');
+    }
   }, []);
 
   // Initialize and load data
   useEffect(() => {
     loadAssets();
-  }, [loadAssets]);
+    loadAssetCategories();
+  }, [loadAssets, loadAssetCategories]);
 
   // Asset management
   const openModal = (asset = null) => {
@@ -153,7 +115,7 @@ const AssetManagement = () => {
     setModalVisible(true);
   };
 
-  const saveAsset = () => {
+  const saveAsset = async () => {
     if (!formData.name || !formData.amount || !formData.categoryId) {
       Alert.alert('Error', 'Please fill in name, amount and category');
       return;
@@ -165,30 +127,36 @@ const AssetManagement = () => {
       return;
     }
 
-    const asset = {
-      id: editingAsset?.id || `asset-${Date.now()}`,
+    const assetData = {
       name: formData.name.trim(),
       amount: amount,
       categoryId: formData.categoryId,
       note: formData.note?.trim() || null,
-      createdAt: editingAsset?.createdAt || new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
     };
 
-    if (editingAsset) {
-      // Update existing asset
-      const index = assets.findIndex(a => a.id === asset.id);
-      if (index !== -1) {
-        assets[index] = asset;
-      }
-    } else {
-      // Add new asset
-      assets.push(asset);
+    // Validate asset data
+    const validationErrors = validateAsset(assetData);
+    if (validationErrors.length > 0) {
+      Alert.alert('Validation Error', validationErrors.join('\n'));
+      return;
     }
 
-    setModalVisible(false);
-    setEditingAsset(null);
-    loadAssets();
+    try {
+      if (editingAsset) {
+        // Update existing asset
+        await updateAsset(editingAsset.id, assetData);
+      } else {
+        // Create new asset
+        await createAsset(assetData);
+      }
+
+      setModalVisible(false);
+      setEditingAsset(null);
+      await loadAssets();
+    } catch (error) {
+      console.error('Error saving asset:', error);
+      Alert.alert('Error', 'Failed to save asset');
+    }
   };
 
   const deleteAsset = (id) => {
@@ -200,25 +168,34 @@ const AssetManagement = () => {
         {
           text: 'Delete',
           style: 'destructive',
-          onPress: () => {
-            assets = assets.filter(a => a.id !== id);
-            loadAssets();
+          onPress: async () => {
+            try {
+              await deleteAssetFromDB(id);
+              await loadAssets();
+            } catch (error) {
+              console.error('Error deleting asset:', error);
+              Alert.alert('Error', 'Failed to delete asset');
+            }
           },
         },
       ]
     );
   };
 
-  const duplicateAsset = (asset) => {
-    const duplicated = {
-      ...asset,
-      id: `asset-${Date.now()}`,
-      name: `${asset.name} (Copy)`,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    assets.push(duplicated);
-    loadAssets();
+  const duplicateAsset = async (asset) => {
+    try {
+      const duplicatedData = {
+        name: `${asset.name} (Copy)`,
+        amount: asset.amount,
+        categoryId: asset.categoryId,
+        note: asset.note,
+      };
+      await createAsset(duplicatedData);
+      await loadAssets();
+    } catch (error) {
+      console.error('Error duplicating asset:', error);
+      Alert.alert('Error', 'Failed to duplicate asset');
+    }
   };
 
   // Amount input formatting
@@ -464,7 +441,7 @@ const AssetManagement = () => {
      </Modal>
    );
 
-  const addCategory = () => {
+  const addCategory = async () => {
     const trimmedName = (newCategoryName || '').trim();
     if (!trimmedName) {
       Alert.alert('Category', 'Please enter a category name.');
@@ -477,25 +454,38 @@ const AssetManagement = () => {
       Alert.alert('Category', 'A category with this name already exists.');
       return;
     }
-    const created = {
-      id: `cat-${generateId()}`,
-      name: trimmedName,
-      icon: newCategoryIcon || 'star',
-      color: newCategoryColor || '#6c757d',
-    };
-    assetCategories.push(created);
-    setNewCategoryName('');
-    setCategoriesVersion((v) => v + 1);
+    
+    try {
+      const categoryData = {
+        name: trimmedName,
+        icon: newCategoryIcon || 'star',
+        color: newCategoryColor || '#6c757d',
+      };
+      await createAssetCategory(categoryData);
+      setNewCategoryName('');
+      setCategoriesVersion((v) => v + 1);
+      await loadAssetCategories();
+    } catch (error) {
+      console.error('Error creating category:', error);
+      Alert.alert('Error', 'Failed to create category');
+    }
   };
 
-  const requestDeleteCategory = (categoryId) => {
-    const inUse = assets.some((asset) => asset.categoryId === categoryId);
+  const requestDeleteCategory = async (categoryId) => {
+    const inUse = assetsList.some((asset) => asset.categoryId === categoryId);
     if (inUse) {
       Alert.alert('Cannot Delete', 'This category is used by existing assets.');
       return;
     }
-    assetCategories = assetCategories.filter((c) => c.id !== categoryId);
-    setCategoriesVersion((v) => v + 1);
+    
+    try {
+      await deleteAssetCategory(categoryId);
+      setCategoriesVersion((v) => v + 1);
+      await loadAssetCategories();
+    } catch (error) {
+      console.error('Error deleting category:', error);
+      Alert.alert('Error', 'Failed to delete category');
+    }
   };
 
   const renderCategoriesModal = () => {
@@ -618,6 +608,14 @@ const AssetManagement = () => {
        </Modal>
      );
    };
+
+  if (isLoading) {
+    return (
+      <View style={[assetManagementStyles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <Text style={assetManagementStyles.topBannerTitle}>Loading...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={assetManagementStyles.container}>
