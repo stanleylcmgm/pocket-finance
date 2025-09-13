@@ -571,7 +571,6 @@ const BalanceSheet = () => {
             multiline
             onFocus={() => setIsDescriptionFocused(true)}
             onBlur={() => setIsDescriptionFocused(false)}
-            autoFocus
           />
 
           <Text style={balanceSheetStyles.inputLabel}>Amount</Text>
