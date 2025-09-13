@@ -558,29 +558,36 @@ const ExpensesTracking = () => {
           </TouchableOpacity>
           
           <Text style={expensesTrackingStyles.inputLabel}>Category *</Text>
-          <View style={expensesTrackingStyles.categoryContainer}>
-            {expenseCategories.map((category) => (
-              <TouchableOpacity
-                key={category.id}
-                style={[
-                  expensesTrackingStyles.categoryButton,
-                  formData.categoryId === category.id && expensesTrackingStyles.categoryButtonSelected
-                ]}
-                onPress={() => setFormData({ ...formData, categoryId: category.id })}
-              >
-                <Ionicons 
-                  name={category.icon} 
-                  size={16} 
-                  color={formData.categoryId === category.id ? 'white' : category.color} 
-                />
-                <Text style={[
-                  expensesTrackingStyles.categoryButtonText,
-                  formData.categoryId === category.id && expensesTrackingStyles.categoryButtonTextSelected
-                ]}>
-                  {category.name}
-                </Text>
-              </TouchableOpacity>
-            ))}
+          <View style={expensesTrackingStyles.categoryScrollContainer}>
+            <ScrollView
+              style={expensesTrackingStyles.categoryScrollView}
+              contentContainerStyle={expensesTrackingStyles.categoryContainer}
+              showsVerticalScrollIndicator={true}
+              nestedScrollEnabled={true}
+            >
+              {expenseCategories.map((category) => (
+                <TouchableOpacity
+                  key={category.id}
+                  style={[
+                    expensesTrackingStyles.categoryButton,
+                    formData.categoryId === category.id && expensesTrackingStyles.categoryButtonSelected
+                  ]}
+                  onPress={() => setFormData({ ...formData, categoryId: category.id })}
+                >
+                  <Ionicons 
+                    name={category.icon} 
+                    size={16} 
+                    color={formData.categoryId === category.id ? 'white' : category.color} 
+                  />
+                  <Text style={[
+                    expensesTrackingStyles.categoryButtonText,
+                    formData.categoryId === category.id && expensesTrackingStyles.categoryButtonTextSelected
+                  ]}>
+                    {category.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
           </View>
 
           <Text style={expensesTrackingStyles.inputLabel}>Description (Optional)</Text>

@@ -307,7 +307,6 @@ export const expensesTrackingStyles = StyleSheet.create({
     padding: 24,
     width: '90%',
     maxWidth: 400,
-    maxHeight: '88%',
     borderWidth: 1,
     borderColor: '#e9ecef',
   },
@@ -360,7 +359,18 @@ export const expensesTrackingStyles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
+    paddingBottom: 8,
+  },
+  categoryScrollContainer: {
+    height: 130, 
     marginBottom: 20,
+    borderWidth: 0, 
+    borderRadius: 12,
+    backgroundColor: 'white',
+  },
+  categoryScrollView: {
+    flex: 1,
+    padding: 8,
   },
   categoryGrid: {
     flexDirection: 'row',
@@ -447,6 +457,7 @@ export const expensesTrackingStyles = StyleSheet.create({
   modalButtons: {
     flexDirection: 'row',
     gap: 12,
+    marginBottom: 20,
   },
   modalButton: {
     flex: 1,
