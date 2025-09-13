@@ -23,69 +23,55 @@ const sampleAccounts = [
 ];
 
 const sampleAssetCategories = [
-  { id: 'cat-property', name: 'Property', icon: 'home', color: '#28a745' },
-  { id: 'cat-bank', name: 'Bank', icon: 'library', color: '#007bff' },
-  { id: 'cat-investment', name: 'Investment', icon: 'trending-up', color: '#ffc107' },
+  // Real Estate & Property
+  { id: 'cat-primary-residence', name: 'Primary Residence', icon: 'home', color: '#28a745' },
+  { id: 'cat-rental-property', name: 'Rental Property', icon: 'business', color: '#17a2b8' },
+  { id: 'cat-vacation-home', name: 'Vacation Home', icon: 'umbrella', color: '#20c997' },
+  { id: 'cat-land', name: 'Land', icon: 'leaf', color: '#28a745' },
+  
+  // Financial Assets
+  { id: 'cat-savings-account', name: 'Savings Account', icon: 'library', color: '#007bff' },
+  { id: 'cat-checking-account', name: 'Checking Account', icon: 'card', color: '#6c757d' },
+  { id: 'cat-money-market', name: 'Money Market', icon: 'trending-up', color: '#007bff' },
+  { id: 'cat-certificate-deposit', name: 'Certificate of Deposit', icon: 'document-text', color: '#007bff' },
+  
+  // Investment Assets
+  { id: 'cat-stocks', name: 'Stocks', icon: 'trending-up', color: '#ffc107' },
+  { id: 'cat-bonds', name: 'Bonds', icon: 'shield-checkmark', color: '#28a745' },
+  { id: 'cat-mutual-funds', name: 'Mutual Funds', icon: 'bar-chart', color: '#ffc107' },
+  { id: 'cat-etf', name: 'ETF', icon: 'analytics', color: '#ffc107' },
+  { id: 'cat-crypto', name: 'Cryptocurrency', icon: 'logo-bitcoin', color: '#fd7e14' },
+  { id: 'cat-retirement-401k', name: '401(k)', icon: 'time', color: '#6f42c1' },
+  { id: 'cat-retirement-ira', name: 'IRA', icon: 'time', color: '#6f42c1' },
+  { id: 'cat-pension', name: 'Pension', icon: 'time', color: '#6f42c1' },
+  
+  // Physical Assets
   { id: 'cat-vehicle', name: 'Vehicle', icon: 'car', color: '#6c757d' },
-  { id: 'cat-business', name: 'Business', icon: 'business', color: '#6f42c1' },
-  { id: 'cat-other', name: 'Other', icon: 'diamond', color: '#fd7e14' },
-];
-
-const sampleAssets = [
-  {
-    id: 'asset-1',
-    name: 'Primary Residence',
-    amount: 450000,
-    categoryId: 'cat-property',
-    note: 'Family home in downtown',
-  },
-  {
-    id: 'asset-2',
-    name: 'Savings Account',
-    amount: 25000,
-    categoryId: 'cat-bank',
-    note: 'Emergency fund',
-  },
-  {
-    id: 'asset-3',
-    name: 'Investment Portfolio',
-    amount: 150000,
-    categoryId: 'cat-investment',
-    note: 'Stock and bond portfolio',
-  },
-];
-
-const sampleTransactions = [
-  {
-    id: 'tx-1',
-    type: 'income',
-    amountOriginal: 5000,
-    currencyCode: 'USD',
-    amountConverted: 5000,
-    fxRateToBase: null,
-    categoryId: 'cat-salary',
-    accountId: 'acc-bank',
-    note: 'Monthly Salary',
-    date: new Date().toISOString(),
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    attachmentUris: [],
-  },
-  {
-    id: 'tx-2',
-    type: 'expense',
-    amountOriginal: 120,
-    currencyCode: 'USD',
-    amountConverted: 120,
-    fxRateToBase: null,
-    categoryId: 'cat-food',
-    accountId: 'acc-cash',
-    note: 'Grocery Shopping',
-    date: new Date().toISOString(),
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    attachmentUris: [],
-  },
+  { id: 'cat-boat', name: 'Boat', icon: 'boat', color: '#17a2b8' },
+  { id: 'cat-aircraft', name: 'Aircraft', icon: 'airplane', color: '#17a2b8' },
+  { id: 'cat-motorcycle', name: 'Motorcycle', icon: 'bicycle', color: '#6c757d' },
+  
+  // Collectibles & Valuables
+  { id: 'cat-jewelry', name: 'Jewelry', icon: 'diamond', color: '#e83e8c' },
+  { id: 'cat-art', name: 'Art & Antiques', icon: 'color-palette', color: '#e83e8c' },
+  { id: 'cat-collectibles', name: 'Collectibles', icon: 'gift', color: '#e83e8c' },
+  { id: 'cat-precious-metals', name: 'Precious Metals', icon: 'diamond', color: '#ffc107' },
+  { id: 'cat-watches', name: 'Watches', icon: 'time', color: '#6c757d' },
+  
+  // Business & Professional
+  { id: 'cat-business-equipment', name: 'Business Equipment', icon: 'desktop', color: '#6f42c1' },
+  { id: 'cat-intellectual-property', name: 'Intellectual Property', icon: 'bulb', color: '#6f42c1' },
+  { id: 'cat-business-ownership', name: 'Business Ownership', icon: 'business', color: '#6f42c1' },
+  { id: 'cat-franchise', name: 'Franchise', icon: 'storefront', color: '#6f42c1' },
+  
+  // Insurance & Annuities
+  { id: 'cat-life-insurance', name: 'Life Insurance', icon: 'heart', color: '#dc3545' },
+  { id: 'cat-annuity', name: 'Annuity', icon: 'calendar', color: '#dc3545' },
+  { id: 'cat-long-term-care', name: 'Long-term Care', icon: 'medical', color: '#dc3545' },
+  
+  // Other Assets
+  { id: 'cat-loans-receivable', name: 'Loans Receivable', icon: 'cash', color: '#28a745' },
+  { id: 'cat-other', name: 'Other', icon: 'ellipsis-horizontal', color: '#6c757d' },
 ];
 
 class DatabaseService {
@@ -190,66 +176,73 @@ class DatabaseService {
 
   // Seed initial data
   async seedInitialData() {
-    // Check if data already exists
+    // Check if transaction categories already exist
     const categoryCount = await this.db.getFirstAsync('SELECT COUNT(*) as count FROM categories');
-    if (categoryCount.count > 0) {
+    const assetCategoryCount = await this.db.getFirstAsync('SELECT COUNT(*) as count FROM asset_categories');
+    
+    if (categoryCount.count > 0 && assetCategoryCount.count > 0) {
       console.log('Database already has data, skipping seed');
       return;
     }
 
-    // Insert sample categories
-    for (const category of sampleCategories) {
-      await this.db.runAsync(
-        'INSERT INTO categories (id, name, type, icon, color) VALUES (?, ?, ?, ?, ?)',
-        [category.id, category.name, category.type, category.icon, category.color]
-      );
+    // Insert sample categories (only if they don't exist)
+    if (categoryCount.count === 0) {
+      for (const category of sampleCategories) {
+        await this.db.runAsync(
+          'INSERT INTO categories (id, name, type, icon, color) VALUES (?, ?, ?, ?, ?)',
+          [category.id, category.name, category.type, category.icon, category.color]
+        );
+      }
     }
 
-    // Insert sample accounts
-    for (const account of sampleAccounts) {
-      await this.db.runAsync(
-        'INSERT INTO accounts (id, name, type) VALUES (?, ?, ?)',
-        [account.id, account.name, account.type]
-      );
+    // Insert sample accounts (only if they don't exist)
+    const accountCount = await this.db.getFirstAsync('SELECT COUNT(*) as count FROM accounts');
+    if (accountCount.count === 0) {
+      for (const account of sampleAccounts) {
+        await this.db.runAsync(
+          'INSERT INTO accounts (id, name, type) VALUES (?, ?, ?)',
+          [account.id, account.name, account.type]
+        );
+      }
     }
 
-    // Insert sample asset categories
-    for (const category of sampleAssetCategories) {
-      await this.db.runAsync(
-        'INSERT INTO asset_categories (id, name, icon, color) VALUES (?, ?, ?, ?)',
-        [category.id, category.name, category.icon, category.color]
-      );
+    // Insert sample asset categories (only if they don't exist)
+    if (assetCategoryCount.count === 0) {
+      for (const category of sampleAssetCategories) {
+        await this.db.runAsync(
+          'INSERT INTO asset_categories (id, name, icon, color) VALUES (?, ?, ?, ?)',
+          [category.id, category.name, category.icon, category.color]
+        );
+      }
     }
 
-    // Insert sample assets
-    for (const asset of sampleAssets) {
-      await this.db.runAsync(
-        'INSERT INTO assets (id, name, amount, category_id, note) VALUES (?, ?, ?, ?, ?)',
-        [asset.id, asset.name, asset.amount, asset.categoryId, asset.note]
-      );
-    }
+    // Note: Sample assets are not seeded by default
+    // Users can add their own assets through the UI
 
-    // Insert sample transactions
-    for (const transaction of sampleTransactions) {
-      await this.db.runAsync(
-        `INSERT INTO transactions (
-          id, type, amount_original, currency_code, amount_converted, 
-          fx_rate_to_base, category_id, account_id, note, date, attachment_uris
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
-          transaction.id,
-          transaction.type,
-          transaction.amountOriginal,
-          transaction.currencyCode,
-          transaction.amountConverted,
-          transaction.fxRateToBase,
-          transaction.categoryId,
-          transaction.accountId,
-          transaction.note,
-          transaction.date,
-          JSON.stringify(transaction.attachmentUris || [])
-        ]
-      );
+    // Insert sample transactions (only if they don't exist)
+    const transactionCount = await this.db.getFirstAsync('SELECT COUNT(*) as count FROM transactions');
+    if (transactionCount.count === 0) {
+      for (const transaction of sampleTransactions) {
+        await this.db.runAsync(
+          `INSERT INTO transactions (
+            id, type, amount_original, currency_code, amount_converted, 
+            fx_rate_to_base, category_id, account_id, note, date, attachment_uris
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            transaction.id,
+            transaction.type,
+            transaction.amountOriginal,
+            transaction.currencyCode,
+            transaction.amountConverted,
+            transaction.fxRateToBase,
+            transaction.categoryId,
+            transaction.accountId,
+            transaction.note,
+            transaction.date,
+            JSON.stringify(transaction.attachmentUris || [])
+          ]
+        );
+      }
     }
 
     console.log('Initial data seeded successfully');
@@ -639,6 +632,47 @@ class DatabaseService {
       assetCategories: assetCategoryCount.count,
       assets: assetCount.count
     };
+  }
+
+  // Check and seed asset categories if missing
+  async ensureAssetCategoriesSeeded() {
+    await this.init();
+    
+    const assetCategoryCount = await this.db.getFirstAsync('SELECT COUNT(*) as count FROM asset_categories');
+    
+    if (assetCategoryCount.count === 0) {
+      console.log('No asset categories found, seeding...');
+      
+      // Insert asset categories
+      for (const category of sampleAssetCategories) {
+        await this.db.runAsync(
+          'INSERT INTO asset_categories (id, name, icon, color) VALUES (?, ?, ?, ?)',
+          [category.id, category.name, category.icon, category.color]
+        );
+      }
+      
+      console.log('Asset categories seeded successfully');
+    }
+  }
+
+  // Force seed asset categories (useful for updates)
+  async forceSeedAssetCategories() {
+    await this.init();
+    
+    console.log('Force seeding asset categories...');
+    
+    // Clear existing asset categories
+    await this.db.runAsync('DELETE FROM asset_categories');
+    
+    // Insert new asset categories
+    for (const category of sampleAssetCategories) {
+      await this.db.runAsync(
+        'INSERT INTO asset_categories (id, name, icon, color) VALUES (?, ?, ?, ?)',
+        [category.id, category.name, category.icon, category.color]
+      );
+    }
+    
+    console.log('Asset categories force seeded successfully');
   }
 
   // Close database connection

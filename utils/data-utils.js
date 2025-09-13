@@ -229,6 +229,16 @@ export const validateAsset = (asset) => {
   return errors;
 };
 
+// Ensure asset categories are seeded
+export const ensureAssetCategoriesSeeded = async () => {
+  return await databaseService.ensureAssetCategoriesSeeded();
+};
+
+// Force seed asset categories (useful for updates)
+export const forceSeedAssetCategories = async () => {
+  return await databaseService.forceSeedAssetCategories();
+};
+
 // Initialize database
 export const initializeDatabase = async () => {
   return await databaseService.init();

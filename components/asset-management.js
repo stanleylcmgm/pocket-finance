@@ -27,7 +27,8 @@ import {
   createAssetCategory,
   deleteAssetCategory,
   calculateTotalAssets,
-  validateAsset
+  validateAsset,
+  ensureAssetCategoriesSeeded
 } from '../utils/data-utils';
 
 const AssetManagement = () => {
@@ -76,6 +77,8 @@ const AssetManagement = () => {
   // Load asset categories from database
   const loadAssetCategories = useCallback(async () => {
     try {
+      // Ensure asset categories are seeded first
+      await ensureAssetCategoriesSeeded();
       const categories = await getAssetCategories();
       setAssetCategories(categories);
     } catch (error) {
