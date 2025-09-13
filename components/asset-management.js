@@ -502,23 +502,25 @@ const AssetManagement = () => {
         visible={categoriesModalVisible}
         onRequestClose={() => setCategoriesModalVisible(false)}
       >
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View style={assetManagementStyles.modalOverlay}>
-            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-              <View style={assetManagementStyles.modalContent}>
+        <View style={assetManagementStyles.modalOverlay}>
+          <View style={assetManagementStyles.modalContent}>
+            {/* Fixed Header */}
             <View style={assetManagementStyles.modalHeader}>
-                             <Text style={assetManagementStyles.modalTitle}>Manage Categories</Text>
+              <Text style={assetManagementStyles.modalTitle}>Manage Categories</Text>
               <TouchableOpacity onPress={() => setCategoriesModalVisible(false)}>
                 <Ionicons name="close" size={24} color="#6c757d" />
               </TouchableOpacity>
             </View>
 
-            {/* Existing categories grid */}
-            <View style={assetManagementStyles.categoryGridFixed}>
+            {/* Scrollable Categories Grid */}
+            <View style={{ height: 200, marginBottom: 12 }}>
               <ScrollView
-                nestedScrollEnabled
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={assetManagementStyles.categoryGrid}
+                style={{ height: 200 }}
+                contentContainerStyle={[assetManagementStyles.categoryGrid, { padding: 8, flexGrow: 1 }]}
+                showsVerticalScrollIndicator={true}
+                scrollEnabled={true}
+                nestedScrollEnabled={true}
+                keyboardShouldPersistTaps="handled"
               >
                 {assetCategories.map((c) => (
                   <View key={c.id} style={assetManagementStyles.categoryTile}>
@@ -605,9 +607,7 @@ const AssetManagement = () => {
                </TouchableOpacity>
              </View>
            </View>
-           </TouchableWithoutFeedback>
          </View>
-         </TouchableWithoutFeedback>
        </Modal>
      );
    };

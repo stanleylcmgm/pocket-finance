@@ -669,14 +669,9 @@ const ExpensesTracking = () => {
         visible={categoriesModalVisible}
         onRequestClose={() => setCategoriesModalVisible(false)}
       >
-        <TouchableOpacity
-          style={expensesTrackingStyles.modalOverlay}
-          activeOpacity={1}
-          onPress={() => {
-            Keyboard.dismiss();
-          }}
-        >
+        <View style={expensesTrackingStyles.modalOverlay}>
           <View style={expensesTrackingStyles.modalContent}>
+            {/* Fixed Header */}
             <View style={expensesTrackingStyles.modalHeader}>
               <Text style={expensesTrackingStyles.modalTitle}>Manage Categories</Text>
               <TouchableOpacity onPress={() => setCategoriesModalVisible(false)}>
@@ -684,11 +679,15 @@ const ExpensesTracking = () => {
               </TouchableOpacity>
             </View>
 
-            <View style={expensesTrackingStyles.categoryGridFixed}>
+            {/* Scrollable Categories Grid */}
+            <View style={{ height: 200, marginBottom: 12 }}>
               <ScrollView
-                nestedScrollEnabled
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={expensesTrackingStyles.categoryGrid}
+                style={{ height: 200 }}
+                contentContainerStyle={[expensesTrackingStyles.categoryGrid, { padding: 8, flexGrow: 1 }]}
+                showsVerticalScrollIndicator={true}
+                scrollEnabled={true}
+                nestedScrollEnabled={true}
+                keyboardShouldPersistTaps="handled"
               >
                 {expenseCategories.map((c) => (
                   <View key={c.id} style={expensesTrackingStyles.categoryTile}>
@@ -775,7 +774,7 @@ const ExpensesTracking = () => {
               </TouchableOpacity>
             </View>
           </View>
-        </TouchableOpacity>
+        </View>
       </Modal>
     );
   };

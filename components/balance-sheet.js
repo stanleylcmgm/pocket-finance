@@ -679,13 +679,6 @@ const BalanceSheet = () => {
     const colorOptions = ['#6c757d', '#007bff', '#28a745', '#dc3545', '#fd7e14', '#6f42c1', '#ffc107', '#20c997'];
     const activeIconOptions = iconOptions;
     const filtered = categories.filter((c) => c.type === newCategoryType);
-    
-    console.log('Categories modal debug:');
-    console.log('- Total categories:', categories.length);
-    console.log('- Categories:', categories);
-    console.log('- New category type:', newCategoryType);
-    console.log('- Filtered categories:', filtered.length);
-    console.log('- Filtered:', filtered);
 
     return (
       <Modal
@@ -741,7 +734,7 @@ const BalanceSheet = () => {
                 </View>
 
                 {/* Scrollable Categories List */}
-                <View style={{ height: 200, borderWidth: 1, borderColor: '#e0e0e0', borderRadius: 8, marginBottom: 12, backgroundColor: '#f8f9fa' }}>
+                <View style={{ height: 200, marginBottom: 12 }}>
                   <ScrollView
                     style={{ height: 200 }}
                     contentContainerStyle={{ padding: 8, flexGrow: 1 }}
