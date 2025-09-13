@@ -430,11 +430,11 @@ export const balanceSheetStyles = StyleSheet.create({
   },
   // New category list styles for one-per-row layout
   categoryListContainer: {
-    maxHeight: 210,
     marginBottom: 12,
   },
   categoryList: {
     gap: 8,
+    paddingBottom: 10,
   },
   categoryRow: {
     flexDirection: 'row',

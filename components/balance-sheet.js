@@ -679,6 +679,13 @@ const BalanceSheet = () => {
     const colorOptions = ['#6c757d', '#007bff', '#28a745', '#dc3545', '#fd7e14', '#6f42c1', '#ffc107', '#20c997'];
     const activeIconOptions = iconOptions;
     const filtered = categories.filter((c) => c.type === newCategoryType);
+    
+    console.log('Categories modal debug:');
+    console.log('- Total categories:', categories.length);
+    console.log('- Categories:', categories);
+    console.log('- New category type:', newCategoryType);
+    console.log('- Filtered categories:', filtered.length);
+    console.log('- Filtered:', filtered);
 
     return (
       <Modal
@@ -687,10 +694,9 @@ const BalanceSheet = () => {
         visible={categoriesModalVisible}
         onRequestClose={() => setCategoriesModalVisible(false)}
       >
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View style={balanceSheetStyles.modalOverlay}>
-            <TouchableWithoutFeedback onPress={() => {}}>
-              <View style={[balanceSheetStyles.modalContent, { maxHeight: '93%' }]}>
+        <View style={balanceSheetStyles.modalOverlay}>
+          <View style={[balanceSheetStyles.modalContent, { maxHeight: '93%' }]}>
+                {/* Fixed Header */}
                 <View style={balanceSheetStyles.modalHeader}>
                   <Text style={balanceSheetStyles.modalTitle}>Manage Categories</Text>
                   <TouchableOpacity onPress={() => setCategoriesModalVisible(false)}>
@@ -698,6 +704,7 @@ const BalanceSheet = () => {
                   </TouchableOpacity>
                 </View>
 
+                {/* Fixed Toggle Group */}
                 <View style={balanceSheetStyles.toggleGroup}>
                   <TouchableOpacity
                     style={[
@@ -733,15 +740,18 @@ const BalanceSheet = () => {
                   </TouchableOpacity>
                 </View>
 
-                {/* Existing categories list - one per row */}
-                <View style={balanceSheetStyles.categoryListContainer}>
+                {/* Scrollable Categories List */}
+                <View style={{ height: 200, borderWidth: 1, borderColor: '#e0e0e0', borderRadius: 8, marginBottom: 12, backgroundColor: '#f8f9fa' }}>
                   <ScrollView
-                    nestedScrollEnabled
-                    showsVerticalScrollIndicator={false}
-                    contentContainerStyle={balanceSheetStyles.categoryList}
+                    style={{ height: 200 }}
+                    contentContainerStyle={{ padding: 8, flexGrow: 1 }}
+                    showsVerticalScrollIndicator={true}
+                    scrollEnabled={true}
+                    nestedScrollEnabled={true}
+                    keyboardShouldPersistTaps="handled"
                   >
                     {filtered.map((c) => (
-                      <View key={c.id} style={balanceSheetStyles.categoryRow}>
+                      <View key={c.id} style={[balanceSheetStyles.categoryRow, { marginBottom: 8 }]}>
                         <View style={balanceSheetStyles.categoryRowLeft}>
                           <View style={[balanceSheetStyles.categoryAvatar, { backgroundColor: c.color }]}>
                             <Ionicons name={c.icon} size={18} color="#ffffff" />
@@ -754,11 +764,17 @@ const BalanceSheet = () => {
                       </View>
                     ))}
                     {filtered.length === 0 && (
-                      <Text style={{ color: '#6c757d' }}>No categories found.</Text>
+                      <View style={{ padding: 20, alignItems: 'center' }}>
+                        <Text style={{ color: '#6c757d', marginBottom: 8 }}>No categories found.</Text>
+                        <Text style={{ color: '#6c757d', fontSize: 12 }}>
+                          Total categories: {categories.length} | Type: {newCategoryType}
+                        </Text>
+                      </View>
                     )}
                   </ScrollView>
                 </View>
 
+                {/* Fixed Add New Section */}
                 <View style={balanceSheetStyles.divider} />
 
                 <Text style={balanceSheetStyles.sectionLabel}>Add New</Text>
@@ -824,10 +840,8 @@ const BalanceSheet = () => {
                     <Text style={balanceSheetStyles.saveButtonText}>Add Category</Text>
                   </TouchableOpacity>
                 </View>
-              </View>
-            </TouchableWithoutFeedback>
           </View>
-        </TouchableWithoutFeedback>
+        </View>
       </Modal>
     );
   };
