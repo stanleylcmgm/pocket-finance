@@ -14,7 +14,6 @@ export const useDatabaseInit = () => {
         setError(null);
         await initializeDatabase();
         setIsInitialized(true);
-        console.log('Database initialized successfully');
       } catch (err) {
         console.error('Failed to initialize database:', err);
         setError(err.message);
@@ -33,7 +32,6 @@ export const useDatabaseInit = () => {
 export const initDatabase = async () => {
   try {
     await initializeDatabase();
-    console.log('Database initialized successfully');
     return true;
   } catch (error) {
     console.error('Failed to initialize database:', error);

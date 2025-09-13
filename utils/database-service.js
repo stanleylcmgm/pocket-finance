@@ -94,7 +94,6 @@ class DatabaseService {
       await this.createTables();
       await this.seedInitialData();
       this.isInitialized = true;
-      console.log('Database initialized successfully');
       return this.db;
     } catch (error) {
       console.error('Error initializing database:', error);
@@ -184,7 +183,6 @@ class DatabaseService {
     const assetCategoryCount = await this.db.getFirstAsync('SELECT COUNT(*) as count FROM asset_categories');
     
     if (categoryCount.count > 0 && assetCategoryCount.count > 0) {
-      console.log('Database already has data, skipping seed');
       return;
     }
 
@@ -247,8 +245,6 @@ class DatabaseService {
         );
       }
     }
-
-    console.log('Initial data seeded successfully');
   }
 
   // Categories CRUD operations
@@ -644,8 +640,6 @@ class DatabaseService {
     const assetCategoryCount = await this.db.getFirstAsync('SELECT COUNT(*) as count FROM asset_categories');
     
     if (assetCategoryCount.count === 0) {
-      console.log('No asset categories found, seeding...');
-      
       // Insert asset categories
       for (const category of sampleAssetCategories) {
         await this.db.runAsync(
@@ -653,16 +647,12 @@ class DatabaseService {
           [category.id, category.name, category.icon, category.color]
         );
       }
-      
-      console.log('Asset categories seeded successfully');
     }
   }
 
   // Force seed asset categories (useful for updates)
   async forceSeedAssetCategories() {
     await this.init();
-    
-    console.log('Force seeding asset categories...');
     
     // Clear existing asset categories
     await this.db.runAsync('DELETE FROM asset_categories');
@@ -674,15 +664,11 @@ class DatabaseService {
         [category.id, category.name, category.icon, category.color]
       );
     }
-    
-    console.log('Asset categories force seeded successfully');
   }
 
   // Delete all records from all tables
   async deleteAllRecords() {
     try {
-      console.log('Deleting all records from all tables...');
-      
       // Delete from all tables in the correct order (respecting foreign key constraints)
       await this.db.runAsync('DELETE FROM transactions');
       await this.db.runAsync('DELETE FROM assets');
@@ -690,7 +676,6 @@ class DatabaseService {
       await this.db.runAsync('DELETE FROM categories');
       await this.db.runAsync('DELETE FROM accounts');
       
-      console.log('All records deleted successfully');
       return { success: true, message: 'All records deleted successfully' };
     } catch (error) {
       console.error('Error deleting all records:', error);

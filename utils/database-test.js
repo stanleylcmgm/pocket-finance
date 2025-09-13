@@ -7,30 +7,11 @@ import {
 } from './data-utils';
 
 export const verifyDatabaseUsage = async () => {
-  console.log('=== DATABASE VERIFICATION ===');
-  
   try {
     // Test 1: Get data from database
-    console.log('1. Fetching data from DATABASE...');
     const dbCategories = await getCategories();
     const dbAccounts = await getAccounts();
     const dbTransactions = await getTransactions();
-    
-    console.log('Database Categories:', dbCategories.length, 'items');
-    console.log('Database Accounts:', dbAccounts.length, 'items');
-    console.log('Database Transactions:', dbTransactions.length, 'items');
-    
-    // Test 2: Show sample data from database
-    console.log('\n2. Sample data from database:');
-    if (dbCategories.length > 0) {
-      console.log('First category:', dbCategories[0]);
-    }
-    if (dbAccounts.length > 0) {
-      console.log('First account:', dbAccounts[0]);
-    }
-    if (dbTransactions.length > 0) {
-      console.log('First transaction:', dbTransactions[0]);
-    }
     
     return {
       databaseWorking: true,
@@ -53,8 +34,6 @@ export const verifyDatabaseUsage = async () => {
 
 // Function to test adding a new transaction to database
 export const testDatabaseWrite = async () => {
-  console.log('\n=== DATABASE WRITE TEST ===');
-  
   try {
     const { createTransaction } = await import('./data-utils');
     
@@ -69,13 +48,10 @@ export const testDatabaseWrite = async () => {
       date: new Date().toISOString()
     };
     
-    console.log('Creating test transaction...');
     const newTransaction = await createTransaction(testTransaction);
-    console.log('New transaction created:', newTransaction);
     
     // Verify it was added
     const allTransactions = await getTransactions();
-    console.log('Total transactions now:', allTransactions.length);
     
     return {
       success: true,
@@ -94,25 +70,14 @@ export const testDatabaseWrite = async () => {
 
 // Function to delete all records from all tables
 export const deleteAllDatabaseRecords = async () => {
-  console.log('\n=== DELETE ALL RECORDS ===');
-  
   try {
-    console.log('Deleting all records from all tables...');
     const result = await deleteAllRecords();
-    console.log('Delete result:', result);
     
     if (result.success) {
-      console.log('All records deleted successfully');
-      
       // Verify deletion by checking record counts
       const categories = await getCategories();
       const accounts = await getAccounts();
       const transactions = await getTransactions();
-      
-      console.log('Verification - Remaining records:');
-      console.log('- Categories:', categories.length);
-      console.log('- Accounts:', accounts.length);
-      console.log('- Transactions:', transactions.length);
       
       return {
         success: true,

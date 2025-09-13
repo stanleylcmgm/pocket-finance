@@ -247,9 +247,7 @@ export const initializeDatabase = async () => {
 // Delete all records from all tables
 export const deleteAllRecords = async () => {
   try {
-    console.log('Calling databaseService.deleteAllRecords...');
     const result = await databaseService.deleteAllRecords();
-    console.log('Result from databaseService:', result);
     return result;
   } catch (error) {
     console.error('Error in deleteAllRecords:', error);

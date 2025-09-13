@@ -144,8 +144,6 @@ const ExpensesTracking = () => {
   };
 
   const handleDateSelect = (selectedDate) => {
-    console.log('Date selected:', selectedDate);
-    
     // Update the form data with the selected date
     if (tempFormData) {
       setFormData({

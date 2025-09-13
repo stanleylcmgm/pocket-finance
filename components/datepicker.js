@@ -76,7 +76,6 @@ const CustomDatePicker = ({
 
   const handleDateSelect = (year, month, day) => {
     const selectedDate = new Date(year, month, day);
-    console.log('Date selected in picker:', selectedDate);
     setSelectedYear(year);
     setSelectedMonth(month);
     setSelectedDay(day);
@@ -107,11 +106,8 @@ const CustomDatePicker = ({
   };
 
   const calendarDays = generateCalendarDays(selectedYear, selectedMonth);
-
-  console.log('DatePicker render - visible:', visible, 'inline:', inline, 'Platform:', Platform.OS);
   
   if (!visible && !inline) {
-    console.log('DatePicker not rendering - not visible and not inline');
     return null;
   }
 
@@ -208,7 +204,6 @@ const CustomDatePicker = ({
   }
 
   // Modal mode - using same config as working month picker
-  console.log('DatePicker rendering MODAL mode');
   return (
     <Modal
       animationType="slide"
