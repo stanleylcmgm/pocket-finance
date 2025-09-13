@@ -2,18 +2,21 @@ import * as SQLite from 'expo-sqlite';
 
 // Sample data for initial database seeding
 const sampleCategories = [
-  { id: 'cat-salary', name: 'Salary', type: 'income', icon: 'cash', color: '#28a745' },
-  { id: 'cat-freelance', name: 'Freelance', type: 'income', icon: 'laptop', color: '#17a2b8' },
+  { id: 'cat-salary', name: 'Salary', type: 'income', icon: 'briefcase', color: '#28a745' },
+  { id: 'cat-part-time', name: 'Part Time', type: 'income', icon: 'time', color: '#17a2b8' },
   { id: 'cat-investment', name: 'Investment', type: 'income', icon: 'trending-up', color: '#ffc107' },
-  { id: 'cat-other-income', name: 'Other', type: 'income', icon: 'add-circle', color: '#6c757d' },
-  { id: 'cat-food', name: 'Food', type: 'expense', icon: 'restaurant', color: '#dc3545' },
-  { id: 'cat-transport', name: 'Transport', type: 'expense', icon: 'car', color: '#fd7e14' },
+  
+  { id: 'cat-mpf', name: 'MPF', type: 'expense', icon: 'shield-checkmark', color: '#007bff' },
+  { id: 'cat-insurance', name: 'Insurance', type: 'expense', icon: 'umbrella', color: '#17a2b8' },
+  { id: 'cat-tax', name: 'Tax', type: 'expense', icon: 'document-text', color: '#dc3545' },
   { id: 'cat-housing', name: 'Housing', type: 'expense', icon: 'home', color: '#6f42c1' },
-  { id: 'cat-entertainment', name: 'Entertainment', type: 'expense', icon: 'game-controller', color: '#e83e8c' },
-  { id: 'cat-healthcare', name: 'Healthcare', type: 'expense', icon: 'medical', color: '#20c997' },
-  { id: 'cat-shopping', name: 'Shopping', type: 'expense', icon: 'bag', color: '#6c757d' },
-  { id: 'cat-bills', name: 'Bills', type: 'expense', icon: 'document-text', color: '#495057' },
-  { id: 'cat-other-expense', name: 'Other', type: 'expense', icon: 'remove-circle', color: '#6c757d' },
+  { id: 'cat-water', name: 'Water', type: 'expense', icon: 'water', color: '#007bff' },
+  { id: 'cat-electricity', name: 'Electricity', type: 'expense', icon: 'flash', color: '#ffc107' },
+  { id: 'cat-towngas', name: 'Towngas', type: 'expense', icon: 'flame', color: '#fd7e14' },
+  { id: 'cat-mobile-network', name: 'Mobile Network', type: 'expense', icon: 'phone-portrait', color: '#28a745' },
+  { id: 'cat-broadband', name: 'Broadband', type: 'expense', icon: 'wifi', color: '#6c757d' },
+  { id: 'cat-family', name: 'Family', type: 'expense', icon: 'people', color: '#e83e8c' },
+  { id: 'cat-personal-expenses', name: 'Personal Expenses', type: 'expense', icon: 'person', color: '#6c757d' },
 ];
 
 const sampleAccounts = [
