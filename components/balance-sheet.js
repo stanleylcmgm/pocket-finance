@@ -539,18 +539,37 @@ const BalanceSheet = () => {
       visible={modalVisible}
       onRequestClose={() => setModalVisible(false)}
     >
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      <TouchableOpacity
         style={balanceSheetStyles.modalOverlay}
+        activeOpacity={1}
+        onPress={() => {
+          Keyboard.dismiss();
+        }}
       >
-        <View style={balanceSheetStyles.modalContent}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={balanceSheetStyles.modalContent}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+        >
           <View style={balanceSheetStyles.modalHeader}>
             <Text style={balanceSheetStyles.modalTitle}>
               {editingTransaction ? 'Edit' : 'Add'} {modalType === 'income' ? 'Income' : 'Expense'}
             </Text>
-            <TouchableOpacity onPress={() => setModalVisible(false)}>
-              <Ionicons name="close" size={24} color="#6c757d" />
-            </TouchableOpacity>
+            <View style={balanceSheetStyles.modalHeaderButtons}>
+              <TouchableOpacity 
+                onPress={() => Keyboard.dismiss()}
+                style={balanceSheetStyles.keyboardDismissButton}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <Ionicons name="keyboard" size={20} color="#6c757d" />
+              </TouchableOpacity>
+              <TouchableOpacity 
+                onPress={() => setModalVisible(false)}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <Ionicons name="close" size={24} color="#6c757d" />
+              </TouchableOpacity>
+            </View>
           </View>
           
           {/* Description moved to top */}
@@ -571,6 +590,10 @@ const BalanceSheet = () => {
             multiline
             onFocus={() => setIsDescriptionFocused(true)}
             onBlur={() => setIsDescriptionFocused(false)}
+            returnKeyType="next"
+            onSubmitEditing={() => {
+              // Focus on amount field when user presses next
+            }}
           />
 
           <Text style={balanceSheetStyles.inputLabel}>Amount</Text>
@@ -588,8 +611,10 @@ const BalanceSheet = () => {
             keyboardType="numeric"
             onFocus={() => setIsAmountFocused(true)}
             onBlur={() => setIsAmountFocused(false)}
+            returnKeyType="done"
+            onSubmitEditing={() => Keyboard.dismiss()}
           />
-          
+
           <Text style={balanceSheetStyles.inputLabel}>Category *</Text>
           <View style={balanceSheetStyles.categoryContainer}>
             {categories
@@ -633,8 +658,8 @@ const BalanceSheet = () => {
               <Text style={balanceSheetStyles.saveButtonText}>Save</Text>
             </TouchableOpacity>
           </View>
-        </View>
-      </KeyboardAvoidingView>
+        </KeyboardAvoidingView>
+      </TouchableOpacity>
     </Modal>
   );
 

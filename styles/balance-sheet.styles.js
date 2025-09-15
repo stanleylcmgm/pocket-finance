@@ -376,6 +376,16 @@ export const balanceSheetStyles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 24,
   },
+  modalHeaderButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  keyboardDismissButton: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: '#f8f9fa',
+  },
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
