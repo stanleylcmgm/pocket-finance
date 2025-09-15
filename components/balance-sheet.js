@@ -616,31 +616,38 @@ const BalanceSheet = () => {
           />
 
           <Text style={balanceSheetStyles.inputLabel}>Category *</Text>
-          <View style={balanceSheetStyles.categoryContainer}>
-            {categories
-              .filter(cat => cat.type === modalType && (cat.subtype === 'formal' || cat.subtype === 'other'))
-              .map((category) => (
-                <TouchableOpacity
-                  key={category.id}
-                  style={[
-                    balanceSheetStyles.categoryButton,
-                    formData.categoryId === category.id && balanceSheetStyles.categoryButtonSelected
-                  ]}
-                  onPress={() => setFormData({ ...formData, categoryId: category.id })}
-                >
-                  <Ionicons 
-                    name={category.icon} 
-                    size={18} 
-                    color={formData.categoryId === category.id ? 'white' : category.color} 
-                  />
-                  <Text style={[
-                    balanceSheetStyles.categoryButtonText,
-                    formData.categoryId === category.id && balanceSheetStyles.categoryButtonTextSelected
-                  ]}>
-                    {category.name}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+          <View style={balanceSheetStyles.categoryScrollContainer}>
+            <ScrollView
+              style={balanceSheetStyles.categoryScrollView}
+              contentContainerStyle={balanceSheetStyles.categoryContainer}
+              showsVerticalScrollIndicator={true}
+              nestedScrollEnabled={true}
+            >
+              {categories
+                .filter(cat => cat.type === modalType && (cat.subtype === 'formal' || cat.subtype === 'other'))
+                .map((category) => (
+                  <TouchableOpacity
+                    key={category.id}
+                    style={[
+                      balanceSheetStyles.categoryButton,
+                      formData.categoryId === category.id && balanceSheetStyles.categoryButtonSelected
+                    ]}
+                    onPress={() => setFormData({ ...formData, categoryId: category.id })}
+                  >
+                    <Ionicons 
+                      name={category.icon} 
+                      size={18} 
+                      color={formData.categoryId === category.id ? 'white' : category.color} 
+                    />
+                    <Text style={[
+                      balanceSheetStyles.categoryButtonText,
+                      formData.categoryId === category.id && balanceSheetStyles.categoryButtonTextSelected
+                    ]}>
+                      {category.name}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+            </ScrollView>
           </View>
           
           {/* Account section removed per request */}          

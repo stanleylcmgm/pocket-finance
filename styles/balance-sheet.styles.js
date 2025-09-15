@@ -366,7 +366,7 @@ export const balanceSheetStyles = StyleSheet.create({
     padding: 24,
     width: '90%',
     maxWidth: 400,
-    maxHeight: '95%',
+    height: '68%',
     borderWidth: 1,
     borderColor: '#e9ecef',
   },
@@ -427,6 +427,17 @@ export const balanceSheetStyles = StyleSheet.create({
     gap: 10,
     marginBottom: 20,
     justifyContent: 'flex-start',
+  },
+  categoryScrollContainer: {
+    height: 160,
+    marginBottom: 20,
+    borderWidth: 0,
+    borderRadius: 12,
+    backgroundColor: 'white',
+  },
+  categoryScrollView: {
+    flex: 1,
+    padding: 8,
   },
   categoryGrid: {
     flexDirection: 'row',
