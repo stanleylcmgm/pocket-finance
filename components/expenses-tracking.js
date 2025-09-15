@@ -502,115 +502,136 @@ const ExpensesTracking = () => {
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={expensesTrackingStyles.modalContent}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
         >
           <View style={expensesTrackingStyles.modalHeader}>
             <Text style={expensesTrackingStyles.modalTitle}>
               {editingExpense ? 'Edit' : 'Add'} Expense
             </Text>
-            <TouchableOpacity onPress={() => setModalVisible(false)}>
-              <Ionicons name="close" size={24} color="#6c757d" />
-            </TouchableOpacity>
+            <View style={expensesTrackingStyles.modalHeaderButtons}>
+              <TouchableOpacity 
+                onPress={() => Keyboard.dismiss()}
+                style={expensesTrackingStyles.keyboardDismissButton}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <Ionicons name="keyboard" size={20} color="#6c757d" />
+              </TouchableOpacity>
+              <TouchableOpacity 
+                onPress={() => setModalVisible(false)}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <Ionicons name="close" size={24} color="#6c757d" />
+              </TouchableOpacity>
+            </View>
           </View>
-          
-          <Text style={expensesTrackingStyles.inputLabel}>Expense Name *</Text>
-          <TextInput
-            style={[
-              expensesTrackingStyles.input,
-              isNameFocused
-                ? expensesTrackingStyles.inputFocused
-                : expensesTrackingStyles.inputUnfocused,
-            ]}
-            placeholder="Enter Expense Name"
-            placeholderTextColor="#6c757d"
-            value={formData.name}
-            onChangeText={(text) => setFormData({ ...formData, name: text })}
-            onFocus={() => setIsNameFocused(true)}
-            onBlur={() => setIsNameFocused(false)}
-          />
+            <Text style={expensesTrackingStyles.inputLabel}>Expense Name *</Text>
+            <TextInput
+              style={[
+                expensesTrackingStyles.input,
+                isNameFocused
+                  ? expensesTrackingStyles.inputFocused
+                  : expensesTrackingStyles.inputUnfocused,
+              ]}
+              placeholder="Enter Expense Name"
+              placeholderTextColor="#6c757d"
+              value={formData.name}
+              onChangeText={(text) => setFormData({ ...formData, name: text })}
+              onFocus={() => setIsNameFocused(true)}
+              onBlur={() => setIsNameFocused(false)}
+              returnKeyType="next"
+              onSubmitEditing={() => {
+                // Focus on amount field when user presses next
+                // This will be handled by the amount field's ref
+              }}
+            />
 
-          <Text style={expensesTrackingStyles.inputLabel}>Amount *</Text>
-          <TextInput
-            style={[
-              expensesTrackingStyles.input,
-              isAmountFocused
-                ? expensesTrackingStyles.inputFocused
-                : expensesTrackingStyles.inputUnfocused,
-            ]}
-            placeholder="Enter Amount"
-            placeholderTextColor="#6c757d"
-            value={formData.amount}
-            onChangeText={handleAmountChange}
-            keyboardType="numeric"
-            onFocus={() => setIsAmountFocused(true)}
-            onBlur={() => setIsAmountFocused(false)}
-          />
+            <Text style={expensesTrackingStyles.inputLabel}>Amount *</Text>
+            <TextInput
+              style={[
+                expensesTrackingStyles.input,
+                isAmountFocused
+                  ? expensesTrackingStyles.inputFocused
+                  : expensesTrackingStyles.inputUnfocused,
+              ]}
+              placeholder="Enter Amount"
+              placeholderTextColor="#6c757d"
+              value={formData.amount}
+              onChangeText={handleAmountChange}
+              keyboardType="numeric"
+              onFocus={() => setIsAmountFocused(true)}
+              onBlur={() => setIsAmountFocused(false)}
+              returnKeyType="done"
+              onSubmitEditing={() => Keyboard.dismiss()}
+            />
 
-          <Text style={expensesTrackingStyles.inputLabel}>Date *</Text>
-          <TouchableOpacity
-            style={[
-              expensesTrackingStyles.input,
-              expensesTrackingStyles.dateInput,
-              expensesTrackingStyles.inputUnfocused,
-            ]}
-            onPress={openDatePicker}
-          >
-            <Text style={expensesTrackingStyles.dateInputText}>
-              {formatDateForDisplay(formData.date)}
-            </Text>
-            <Ionicons name="calendar" size={20} color="#6c757d" />
-          </TouchableOpacity>
-          
-          <Text style={expensesTrackingStyles.inputLabel}>Category *</Text>
-          <View style={expensesTrackingStyles.categoryScrollContainer}>
-            <ScrollView
-              style={expensesTrackingStyles.categoryScrollView}
-              contentContainerStyle={expensesTrackingStyles.categoryContainer}
-              showsVerticalScrollIndicator={true}
-              nestedScrollEnabled={true}
+            <Text style={expensesTrackingStyles.inputLabel}>Date *</Text>
+            <TouchableOpacity
+              style={[
+                expensesTrackingStyles.input,
+                expensesTrackingStyles.dateInput,
+                expensesTrackingStyles.inputUnfocused,
+              ]}
+              onPress={openDatePicker}
             >
-              {expenseCategories.map((category) => (
-                <TouchableOpacity
-                  key={category.id}
-                  style={[
-                    expensesTrackingStyles.categoryButton,
-                    formData.categoryId === category.id && expensesTrackingStyles.categoryButtonSelected
-                  ]}
-                  onPress={() => setFormData({ ...formData, categoryId: category.id })}
-                >
-                  <Ionicons 
-                    name={category.icon} 
-                    size={16} 
-                    color={formData.categoryId === category.id ? 'white' : category.color} 
-                  />
-                  <Text style={[
-                    expensesTrackingStyles.categoryButtonText,
-                    formData.categoryId === category.id && expensesTrackingStyles.categoryButtonTextSelected
-                  ]}>
-                    {category.name}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View>
+              <Text style={expensesTrackingStyles.dateInputText}>
+                {formatDateForDisplay(formData.date)}
+              </Text>
+              <Ionicons name="calendar" size={20} color="#6c757d" />
+            </TouchableOpacity>
+            
+            <Text style={expensesTrackingStyles.inputLabel}>Category *</Text>
+            <View style={expensesTrackingStyles.categoryScrollContainer}>
+              <ScrollView
+                style={expensesTrackingStyles.categoryScrollView}
+                contentContainerStyle={expensesTrackingStyles.categoryContainer}
+                showsVerticalScrollIndicator={true}
+                nestedScrollEnabled={true}
+              >
+                {expenseCategories.map((category) => (
+                  <TouchableOpacity
+                    key={category.id}
+                    style={[
+                      expensesTrackingStyles.categoryButton,
+                      formData.categoryId === category.id && expensesTrackingStyles.categoryButtonSelected
+                    ]}
+                    onPress={() => setFormData({ ...formData, categoryId: category.id })}
+                  >
+                    <Ionicons 
+                      name={category.icon} 
+                      size={16} 
+                      color={formData.categoryId === category.id ? 'white' : category.color} 
+                    />
+                    <Text style={[
+                      expensesTrackingStyles.categoryButtonText,
+                      formData.categoryId === category.id && expensesTrackingStyles.categoryButtonTextSelected
+                    ]}>
+                      {category.name}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
 
-          <Text style={expensesTrackingStyles.inputLabel}>Description (Optional)</Text>
-          <TextInput
-            style={[
-              expensesTrackingStyles.input,
-              expensesTrackingStyles.textArea,
-              isDescriptionFocused
-                ? expensesTrackingStyles.inputFocused
-                : expensesTrackingStyles.inputUnfocused,
-            ]}
-            placeholder="Enter Description"
-            placeholderTextColor="#6c757d"
-            value={formData.description}
-            onChangeText={(text) => setFormData({ ...formData, description: text })}
-            multiline
-            numberOfLines={3}
-            onFocus={() => setIsDescriptionFocused(true)}
-            onBlur={() => setIsDescriptionFocused(false)}
-          />
+            <Text style={expensesTrackingStyles.inputLabel}>Description (Optional)</Text>
+            <TextInput
+              style={[
+                expensesTrackingStyles.input,
+                expensesTrackingStyles.textArea,
+                isDescriptionFocused
+                  ? expensesTrackingStyles.inputFocused
+                  : expensesTrackingStyles.inputUnfocused,
+              ]}
+              placeholder="Enter Description"
+              placeholderTextColor="#6c757d"
+              value={formData.description}
+              onChangeText={(text) => setFormData({ ...formData, description: text })}
+              multiline
+              numberOfLines={3}
+              onFocus={() => setIsDescriptionFocused(true)}
+              onBlur={() => setIsDescriptionFocused(false)}
+              returnKeyType="done"
+              onSubmitEditing={() => Keyboard.dismiss()}
+            />
           
           <View style={expensesTrackingStyles.modalButtons}>
             <TouchableOpacity

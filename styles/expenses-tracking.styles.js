@@ -307,6 +307,7 @@ export const expensesTrackingStyles = StyleSheet.create({
     padding: 24,
     width: '90%',
     maxWidth: 400,
+    maxHeight: '90%',
     borderWidth: 1,
     borderColor: '#e9ecef',
   },
@@ -321,6 +322,16 @@ export const expensesTrackingStyles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#2c3e50',
     flex: 1,
+  },
+  modalHeaderButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  keyboardDismissButton: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: '#f8f9fa',
   },
   input: {
     borderWidth: 1,
