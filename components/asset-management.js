@@ -334,20 +334,37 @@ const AssetManagement = () => {
       visible={modalVisible}
       onRequestClose={() => setModalVisible(false)}
     >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <TouchableOpacity
+        style={assetManagementStyles.modalOverlay}
+        activeOpacity={1}
+        onPress={() => {
+          Keyboard.dismiss();
+        }}
+      >
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={assetManagementStyles.modalOverlay}
+          style={assetManagementStyles.modalContent}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
         >
-          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <View style={assetManagementStyles.modalContent}>
           <View style={assetManagementStyles.modalHeader}>
             <Text style={assetManagementStyles.modalTitle}>
               {editingAsset ? 'Edit' : 'Add'} Asset
             </Text>
-            <TouchableOpacity onPress={() => setModalVisible(false)}>
-              <Ionicons name="close" size={24} color="#6c757d" />
-            </TouchableOpacity>
+            <View style={assetManagementStyles.modalHeaderButtons}>
+              <TouchableOpacity 
+                onPress={() => Keyboard.dismiss()}
+                style={assetManagementStyles.keyboardDismissButton}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <Ionicons name="keyboard" size={20} color="#6c757d" />
+              </TouchableOpacity>
+              <TouchableOpacity 
+                onPress={() => setModalVisible(false)}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <Ionicons name="close" size={24} color="#6c757d" />
+              </TouchableOpacity>
+            </View>
           </View>
           
           <Text style={assetManagementStyles.inputLabel}>Asset Name *</Text>
@@ -364,6 +381,10 @@ const AssetManagement = () => {
             onChangeText={(text) => setFormData({ ...formData, name: text })}
             onFocus={() => setIsNameFocused(true)}
             onBlur={() => setIsNameFocused(false)}
+            returnKeyType="next"
+            onSubmitEditing={() => {
+              // Focus on amount field when user presses next
+            }}
           />
 
           <Text style={assetManagementStyles.inputLabel}>Amount *</Text>
@@ -381,6 +402,8 @@ const AssetManagement = () => {
             keyboardType="numeric"
             onFocus={() => setIsAmountFocused(true)}
             onBlur={() => setIsAmountFocused(false)}
+            returnKeyType="done"
+            onSubmitEditing={() => Keyboard.dismiss()}
           />
           
           <Text style={assetManagementStyles.inputLabel}>Category *</Text>
@@ -421,28 +444,28 @@ const AssetManagement = () => {
             onChangeText={(text) => setFormData({ ...formData, note: text })}
             multiline
             numberOfLines={3}
+            returnKeyType="done"
+            onSubmitEditing={() => Keyboard.dismiss()}
           />
           
-                     <View style={assetManagementStyles.modalButtons}>
-             <TouchableOpacity
-               style={[assetManagementStyles.modalButton, assetManagementStyles.cancelButton]}
-               onPress={() => setModalVisible(false)}
-             >
-               <Text style={assetManagementStyles.cancelButtonText}>Cancel</Text>
-             </TouchableOpacity>
-             <TouchableOpacity
-               style={[assetManagementStyles.modalButton, assetManagementStyles.saveButton]}
-               onPress={saveAsset}
-             >
-               <Text style={assetManagementStyles.saveButtonText}>Save</Text>
-             </TouchableOpacity>
-           </View>
-         </View>
-         </TouchableWithoutFeedback>
-       </KeyboardAvoidingView>
-       </TouchableWithoutFeedback>
-     </Modal>
-   );
+          <View style={assetManagementStyles.modalButtons}>
+            <TouchableOpacity
+              style={[assetManagementStyles.modalButton, assetManagementStyles.cancelButton]}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={assetManagementStyles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[assetManagementStyles.modalButton, assetManagementStyles.saveButton]}
+              onPress={saveAsset}
+            >
+              <Text style={assetManagementStyles.saveButtonText}>Save</Text>
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
+      </TouchableOpacity>
+    </Modal>
+  );
 
   const addCategory = async () => {
     const trimmedName = (newCategoryName || '').trim();
