@@ -66,6 +66,7 @@ const BalanceSheet = () => {
 
   // Categories management state
   const [categoriesModalVisible, setCategoriesModalVisible] = useState(false);
+  const [categoriesModalType, setCategoriesModalType] = useState('income'); // Track which type of categories modal is open
   const [categoriesVersion, setCategoriesVersion] = useState(0);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [newCategoryType, setNewCategoryType] = useState('expense');
@@ -677,7 +678,7 @@ const BalanceSheet = () => {
       return;
     }
     const exists = categories.some(
-      (c) => c.type === newCategoryType && c.name.toLowerCase() === trimmedName.toLowerCase()
+      (c) => c.type === categoriesModalType && c.name.toLowerCase() === trimmedName.toLowerCase()
     );
     if (exists) {
       Alert.alert('Category', 'A category with this name already exists for the selected type.');
@@ -686,10 +687,10 @@ const BalanceSheet = () => {
     const created = {
       id: `cat-${generateId()}`,
       name: trimmedName,
-      type: newCategoryType,
-      subtype: newCategoryType === 'income' ? 'formal' : 'formal', // Balance Sheet uses formal categories
-      icon: newCategoryIcon || (newCategoryType === 'income' ? 'cash' : 'pricetag'),
-      color: newCategoryColor || (newCategoryType === 'income' ? '#28a745' : '#dc3545'),
+      type: categoriesModalType,
+      subtype: categoriesModalType === 'income' ? 'formal' : 'formal', // Balance Sheet uses formal categories
+      icon: newCategoryIcon || (categoriesModalType === 'income' ? 'cash' : 'pricetag'),
+      color: newCategoryColor || (categoriesModalType === 'income' ? '#28a745' : '#dc3545'),
     };
     categories.push(created);
     setNewCategoryName('');
@@ -710,9 +711,9 @@ const BalanceSheet = () => {
     const iconOptions = ['restaurant', 'cart', 'car', 'home', 'heart', 'game-controller', 'medical', 'bag', 'document-text', 'pricetag', 'airplane', 'school'];
     const colorOptions = ['#6c757d', '#007bff', '#28a745', '#dc3545', '#fd7e14', '#6f42c1', '#ffc107', '#20c997'];
     const activeIconOptions = iconOptions;
-    // Filter categories by type AND subtype for Balance Sheet
+    // Filter categories by the modal type (income or expense)
     const filtered = categories.filter((c) => 
-      c.type === newCategoryType && 
+      c.type === categoriesModalType && 
       (c.subtype === 'formal' || c.subtype === 'other')
     );
 
@@ -724,10 +725,12 @@ const BalanceSheet = () => {
         onRequestClose={() => setCategoriesModalVisible(false)}
       >
         <View style={balanceSheetStyles.modalOverlay}>
-          <View style={[balanceSheetStyles.modalContent, { maxHeight: '93%' }]}>
+          <View style={[balanceSheetStyles.modalContent ]}>
             {/* Fixed Header */}
             <View style={balanceSheetStyles.modalHeader}>
-              <Text style={balanceSheetStyles.modalTitle}>Manage Categories</Text>
+              <Text style={balanceSheetStyles.modalTitle}>
+                Manage {categoriesModalType === 'income' ? 'Income' : 'Expense'} Categories
+              </Text>
               <TouchableOpacity 
                 onPress={() => setCategoriesModalVisible(false)}
                 style={{ padding: 12, margin: -12 }}
@@ -736,42 +739,6 @@ const BalanceSheet = () => {
                 <Ionicons name="close" size={28} color="#6c757d" />
               </TouchableOpacity>
             </View>
-
-                {/* Fixed Toggle Group */}
-                <View style={balanceSheetStyles.toggleGroup}>
-                  <TouchableOpacity
-                    style={[
-                      balanceSheetStyles.toggleButton,
-                      newCategoryType === 'income' && balanceSheetStyles.toggleButtonActive,
-                    ]}
-                    onPress={() => setNewCategoryType('income')}
-                  >
-                    <Text
-                      style={[
-                        balanceSheetStyles.toggleButtonText,
-                        newCategoryType === 'income' && balanceSheetStyles.toggleButtonTextActive,
-                      ]}
-                    >
-                      Income
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[
-                      balanceSheetStyles.toggleButton,
-                      newCategoryType === 'expense' && balanceSheetStyles.toggleButtonActive,
-                    ]}
-                    onPress={() => setNewCategoryType('expense')}
-                  >
-                    <Text
-                      style={[
-                        balanceSheetStyles.toggleButtonText,
-                        newCategoryType === 'expense' && balanceSheetStyles.toggleButtonTextActive,
-                      ]}
-                    >
-                      Expense
-                    </Text>
-                  </TouchableOpacity>
-                </View>
 
                 {/* Scrollable Categories List */}
                 <View style={{ height: 200, marginBottom: 12 }}>
@@ -915,22 +882,41 @@ const BalanceSheet = () => {
           style={[balanceSheetStyles.addButton, { backgroundColor: '#28a745' }]} 
           onPress={() => openModal('income')}
         >
-          <Ionicons name="add" size={20} color="white" />
-          <Text style={balanceSheetStyles.addButtonText}>Add Income</Text>
+          <Ionicons name="add" size={18} color="white" />
+          <Text style={balanceSheetStyles.addButtonText}>Income</Text>
         </TouchableOpacity>
         <TouchableOpacity 
           style={[balanceSheetStyles.addButton, { backgroundColor: '#dc3545' }]} 
           onPress={() => openModal('expense')}
         >
-          <Ionicons name="remove" size={20} color="white" />
-          <Text style={balanceSheetStyles.addButtonText}>Add Expenses</Text>
+          <Ionicons name="remove" size={18} color="white" />
+          <Text style={balanceSheetStyles.addButtonText}>Expense</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[balanceSheetStyles.addButton, { backgroundColor: '#007bff' }]}
-          onPress={() => setCategoriesModalVisible(true)}
+          onPress={() => {
+            setCategoriesModalType('income');
+            setNewCategoryType('income');
+            setNewCategoryIcon('cash');
+            setNewCategoryColor('#28a745');
+            setCategoriesModalVisible(true);
+          }}
         >
-          <Ionicons name="albums" size={20} color="white" />
-          <Text style={balanceSheetStyles.addButtonText}>Categories</Text>
+          <Ionicons name="trending-up" size={18} color="white" />
+          <Text style={balanceSheetStyles.addButtonText}>Income Cat</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[balanceSheetStyles.addButton, { backgroundColor: '#6c757d' }]}
+          onPress={() => {
+            setCategoriesModalType('expense');
+            setNewCategoryType('expense');
+            setNewCategoryIcon('pricetag');
+            setNewCategoryColor('#dc3545');
+            setCategoriesModalVisible(true);
+          }}
+        >
+          <Ionicons name="trending-down" size={18} color="white" />
+          <Text style={balanceSheetStyles.addButtonText}>Expense Cat</Text>
         </TouchableOpacity>
       </View>
 
