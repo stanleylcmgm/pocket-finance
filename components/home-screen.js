@@ -235,31 +235,6 @@ const HomeScreen = ({ navigation }) => {
         </ScrollView>
       </View>
 
-      {/* Bottom Navigation */}
-      <View style={homeScreenStyles.bottomNavigation}>
-        {bottomTabs.map((tab) => (
-          <TouchableOpacity
-            key={tab.id}
-            style={[
-              homeScreenStyles.tabItem,
-              activeTab === tab.id && homeScreenStyles.activeTabItem
-            ]}
-            onPress={() => handleTabPress(tab.id)}
-          >
-            <Ionicons
-              name={tab.icon}
-              size={20}
-              color={activeTab === tab.id ? colors.primary[500] : colors.secondary[500]}
-            />
-            <Text style={[
-              homeScreenStyles.tabText,
-              activeTab === tab.id && homeScreenStyles.activeTabText
-            ]}>
-              {tab.title}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
     </View>
   );
 };

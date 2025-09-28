@@ -10,8 +10,8 @@ export const homeScreenStyles = StyleSheet.create({
 
   // Header styles
   headerGradient: {
-    paddingTop: 25,
-    paddingBottom: 15,
+    paddingTop: 50,
+    paddingBottom: 20,
     backgroundColor: '#100C30',
   },
 
@@ -19,8 +19,8 @@ export const homeScreenStyles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingLeft: 20,
-    paddingRight: 20,
+    paddingLeft: 30,
+    paddingRight: 30,
   },
 
   titleContainer: {
@@ -80,7 +80,7 @@ export const homeScreenStyles = StyleSheet.create({
     borderRadius: 26,
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 16 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 4,
@@ -141,16 +141,22 @@ export const homeScreenStyles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 
   blockCard: {
-    width: '46%',
-    height: 160,
-    borderRadius: 20,
-    padding: 15,
+    width: '45%',
+    height: 170,
+    borderRadius: 25,
+    paddingTop: 15,
+    paddingBottom: 15,
+    paddingLeft: 15,
+    paddingRight: 15,
     justifyContent: 'space-between',
+    alignItems: 'flex-start',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 16 },
     shadowOpacity: 0.15,
     shadowRadius: 8,
     elevation: 6,
@@ -167,19 +173,28 @@ export const homeScreenStyles = StyleSheet.create({
   },
 
   blockTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: 'bold',
     color: '#333',
-    margin: 0,
+    marginTop: 0,
     marginBottom: 5,
-    lineHeight: 22,
+    marginLeft: 0,
+    marginRight: 0,
+    lineHeight: 20,
+    textAlign: 'left',
+    width: '100%',
   },
 
   blockSubtitle: {
     fontSize: 12,
     color: '#666',
     lineHeight: 16,
-    margin: 0,
+    marginTop: 0,
+    marginBottom: 0,
+    marginLeft: 0,
+    marginRight: 0,
+    textAlign: 'left',
+    width: '100%',
   },
 
   // Bottom spacing
