@@ -124,7 +124,7 @@ export const balanceSheetStyles = StyleSheet.create({
     gap: 6,
   },
   combinedLineText: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#2c3e50',
   },
   verticalDivider: {
@@ -133,13 +133,13 @@ export const balanceSheetStyles = StyleSheet.create({
     backgroundColor: '#e9ecef',
   },
   summaryLabel: {
-    fontSize: 12,
+    fontSize: 13,
     color: '#6c757d',
     marginBottom: 8,
     fontWeight: '500',
   },
   summaryAmount: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: 'bold',
     color: '#2c3e50',
   },

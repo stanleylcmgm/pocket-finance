@@ -107,7 +107,7 @@ class DatabaseService {
         amount_converted REAL NOT NULL,
         fx_rate_to_base REAL,
         category_id TEXT NOT NULL,
-        account_id TEXT NOT NULL,
+        account_id TEXT,
         note TEXT,
         date DATETIME NOT NULL,
         attachment_uris TEXT, -- JSON string array
@@ -161,6 +161,9 @@ class DatabaseService {
     
     // Migrate existing categories to have appropriate subtypes
     await this.migrateExistingCategories();
+    
+    // Migrate account_id column to allow NULL values
+    await this.migrateAccountIdToNullable();
   }
 
   // Migrate existing categories to have appropriate subtypes
@@ -214,6 +217,57 @@ class DatabaseService {
       }
     } catch (error) {
       console.error('Error migrating categories:', error);
+    }
+  }
+
+  // Migrate account_id column to allow NULL values
+  async migrateAccountIdToNullable() {
+    try {
+      // Check if the transactions table exists and has the old NOT NULL constraint
+      const tableInfo = await this.db.getAllAsync("PRAGMA table_info(transactions)");
+      const accountIdColumn = tableInfo.find(col => col.name === 'account_id');
+      
+      if (accountIdColumn && accountIdColumn.notnull === 1) {
+        // SQLite doesn't support ALTER COLUMN directly, so we need to recreate the table
+        console.log('Migrating account_id column to allow NULL values...');
+        
+        // Create a new table with the correct schema
+        await this.db.execAsync(`
+          CREATE TABLE transactions_new (
+            id TEXT PRIMARY KEY,
+            type TEXT NOT NULL CHECK (type IN ('income', 'expense')),
+            amount_original REAL NOT NULL,
+            currency_code TEXT NOT NULL DEFAULT 'USD',
+            amount_converted REAL NOT NULL,
+            fx_rate_to_base REAL,
+            category_id TEXT NOT NULL,
+            account_id TEXT,
+            note TEXT,
+            date DATETIME NOT NULL,
+            attachment_uris TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (category_id) REFERENCES categories (id),
+            FOREIGN KEY (account_id) REFERENCES accounts (id)
+          );
+        `);
+        
+        // Copy data from old table to new table
+        await this.db.execAsync(`
+          INSERT INTO transactions_new 
+          SELECT * FROM transactions;
+        `);
+        
+        // Drop the old table
+        await this.db.execAsync('DROP TABLE transactions;');
+        
+        // Rename the new table
+        await this.db.execAsync('ALTER TABLE transactions_new RENAME TO transactions;');
+        
+        console.log('Successfully migrated account_id column to allow NULL values');
+      }
+    } catch (error) {
+      console.error('Error migrating account_id column:', error);
     }
   }
 
@@ -484,9 +538,27 @@ class DatabaseService {
 
   async updateTransaction(id, updates) {
     await this.init();
+    
+    // Map camelCase properties to snake_case database columns
+    const columnMapping = {
+      'type': 'type',
+      'amountOriginal': 'amount_original',
+      'currencyCode': 'currency_code',
+      'amountConverted': 'amount_converted',
+      'fxRateToBase': 'fx_rate_to_base',
+      'categoryId': 'category_id',
+      'accountId': 'account_id',
+      'note': 'note',
+      'date': 'date',
+      'attachmentUris': 'attachment_uris'
+    };
+    
     const setClause = Object.keys(updates).map(key => {
-      if (key === 'attachmentUris') return 'attachment_uris = ?';
-      return `${key} = ?`;
+      const dbColumn = columnMapping[key];
+      if (!dbColumn) {
+        throw new Error(`Unknown property: ${key}`);
+      }
+      return `${dbColumn} = ?`;
     }).join(', ');
     
     const values = Object.entries(updates).map(([key, value]) => {

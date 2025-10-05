@@ -434,7 +434,7 @@ const BalanceSheet = () => {
             {formatCurrency(item.amountConverted)}
           </Text>
                       <TouchableOpacity
-              onPress={() => deleteTransaction(item.id)}
+              onPress={() => handleDeleteTransaction(item.id)}
               style={balanceSheetStyles.deleteButton}
             >
               <Ionicons name="trash" size={18} color="#dc3545" />
@@ -868,7 +868,7 @@ const BalanceSheet = () => {
       {/* Summary Cards */}
       <View style={balanceSheetStyles.summaryContainer}>
         {renderCombinedSummaryCard(monthlySummary.totalIncome, monthlySummary.totalExpenses)}
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1.6 }}>
         {renderSummaryCard('Balance', monthlySummary.balance, 
           monthlySummary.balance > 0 ? 'positive' : 
           monthlySummary.balance < 0 ? 'negative' : 'neutral'
