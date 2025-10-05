@@ -79,7 +79,7 @@ export default function App() {
             name="Home"
             component={HomeScreen}
             options={{
-              title: '⭐ Star',
+              title: '⭐ Pocket Finance',
               headerShown: false,
             }}
           />

@@ -10,7 +10,7 @@ export const homeScreenStyles = StyleSheet.create({
 
   // Header styles
   headerGradient: {
-    paddingTop: 50,
+    paddingTop: 60,
     paddingBottom: 20,
     backgroundColor: '#100C30',
   },
@@ -28,7 +28,7 @@ export const homeScreenStyles = StyleSheet.create({
   },
 
   title: {
-    fontSize: 32,
+    fontSize: 25,
     fontWeight: 'bold',
     color: '#ffffff',
     marginBottom: 5,

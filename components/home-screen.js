@@ -142,7 +142,7 @@ const HomeScreen = ({ navigation }) => {
       <View style={homeScreenStyles.headerGradient}>
         <View style={homeScreenStyles.header}>
           <View style={homeScreenStyles.titleContainer}>
-            <Text style={homeScreenStyles.title}>⭐ Star</Text>
+            <Text style={homeScreenStyles.title}>⭐ Pocket Finance</Text>
             <Text style={homeScreenStyles.subtitle}>Your Productivity Companion</Text>
           </View>
           <View style={homeScreenStyles.headerIcon}>
