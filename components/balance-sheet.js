@@ -633,7 +633,14 @@ const BalanceSheet = () => {
                       balanceSheetStyles.categoryButton,
                       formData.categoryId === category.id && balanceSheetStyles.categoryButtonSelected
                     ]}
-                    onPress={() => setFormData({ ...formData, categoryId: category.id })}
+                    onPress={() => {
+                      const newFormData = { ...formData, categoryId: category.id };
+                      // Auto-fill description with category name if description is empty
+                      if (!formData.note || formData.note.trim() === '') {
+                        newFormData.note = category.name;
+                      }
+                      setFormData(newFormData);
+                    }}
                   >
                     <Ionicons 
                       name={category.icon} 
