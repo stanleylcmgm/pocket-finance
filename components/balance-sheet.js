@@ -725,7 +725,7 @@ const BalanceSheet = () => {
         onRequestClose={() => setCategoriesModalVisible(false)}
       >
         <View style={balanceSheetStyles.modalOverlay}>
-          <View style={[balanceSheetStyles.modalContent ]}>
+          <View style={[balanceSheetStyles.modalContentCategories ]}>
             {/* Fixed Header */}
             <View style={balanceSheetStyles.modalHeader}>
               <Text style={balanceSheetStyles.modalTitle}>
