@@ -409,16 +409,89 @@ const ExpensesTracking = () => {
     );
   };
 
+  // Calculate top 3 categories
+  const getTopCategories = () => {
+    const categoryTotals = {};
+    monthlyExpenses.forEach(expense => {
+      const categoryId = expense.categoryId;
+      if (!categoryTotals[categoryId]) {
+        categoryTotals[categoryId] = 0;
+      }
+      categoryTotals[categoryId] += expense.amountConverted || 0;
+    });
+
+    return Object.entries(categoryTotals)
+      .map(([categoryId, total]) => ({
+        categoryId,
+        total,
+        category: expenseCategories.find(cat => cat.id === categoryId)
+      }))
+      .filter(item => item.category) // Only include categories that exist
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 2);
+  };
+
+  // Calculate average daily expense
+  const getAverageDailyExpense = () => {
+    if (monthlyExpenses.length === 0) return 0;
+    
+    const uniqueDays = new Set();
+    monthlyExpenses.forEach(expense => {
+      const date = new Date(expense.date).toDateString();
+      uniqueDays.add(date);
+    });
+    
+    return uniqueDays.size > 0 ? monthlyTotal / uniqueDays.size : 0;
+  };
+
   const renderSummaryCard = () => {
+    const topCategories = getTopCategories();
+    const averageDaily = getAverageDailyExpense();
+    const uniqueDays = new Set(monthlyExpenses.map(expense => new Date(expense.date).toDateString())).size;
+
     return (
       <View style={expensesTrackingStyles.summaryCard}>
-        <Text style={expensesTrackingStyles.summaryLabel}>Total Expenses</Text>
-        <Text style={expensesTrackingStyles.summaryAmount}>
-          {formatCurrency(monthlyTotal)}
-        </Text>
-        <Text style={expensesTrackingStyles.summarySubtext}>
-          {monthlyExpenses.length} expense{monthlyExpenses.length !== 1 ? 's' : ''} this month
-        </Text>
+        {/* Total Expenses and Average Daily */}
+        <View style={expensesTrackingStyles.summaryHeader}>
+          <View style={expensesTrackingStyles.summaryLeft}>
+            <Text style={expensesTrackingStyles.summaryLabel}>Total{'\n'}Expenses</Text>
+            <Text style={expensesTrackingStyles.summaryAmount}>
+              {formatCurrency(monthlyTotal)}
+            </Text>
+          </View>
+          <View style={expensesTrackingStyles.summaryRight}>
+            <Text style={expensesTrackingStyles.averageLabel}>Average{'\n'}Daily</Text>
+            <Text style={expensesTrackingStyles.averageAmount}>
+              {formatCurrency(averageDaily)}
+            </Text>
+          </View>
+        </View>
+
+        {/* Top 2 Categories */}
+        <View style={expensesTrackingStyles.topCategoriesSection}>
+          <Text style={expensesTrackingStyles.sectionTitle}>Top Categories</Text>
+          {topCategories.length > 0 ? (
+            topCategories.map((item, index) => (
+              <View key={item.categoryId} style={expensesTrackingStyles.categoryRow}>
+                <View style={expensesTrackingStyles.categoryInfo}>
+                  <Ionicons 
+                    name={item.category.icon} 
+                    size={14} 
+                    color={item.category.color} 
+                  />
+                  <Text style={expensesTrackingStyles.categoryName}>
+                    {item.category.name}
+                  </Text>
+                </View>
+                <Text style={expensesTrackingStyles.categoryAmount}>
+                  {formatCurrency(item.total)}
+                </Text>
+              </View>
+            ))
+          ) : (
+            <Text style={expensesTrackingStyles.categoryName}>No expenses with categories found</Text>
+          )}
+        </View>
       </View>
     );
   };
