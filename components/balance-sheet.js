@@ -929,8 +929,8 @@ const BalanceSheet = () => {
 
       {/* Transactions List */}
       <ScrollView style={balanceSheetStyles.scrollView} showsVerticalScrollIndicator={false}>
-        {renderSection('Income', monthlyTransactions.filter(tx => tx.type === 'income'), 'income')}
-        {renderSection('Expenses', monthlyTransactions.filter(tx => tx.type === 'expense'), 'expense')}
+        {renderSection('Income', monthlyTransactions.filter(tx => tx.type === 'income').sort((a, b) => b.amountConverted - a.amountConverted), 'income')}
+        {renderSection('Expenses', monthlyTransactions.filter(tx => tx.type === 'expense').sort((a, b) => b.amountConverted - a.amountConverted), 'expense')}
       </ScrollView>
 
       {/* Modals */}
