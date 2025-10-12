@@ -88,6 +88,25 @@ const ExpensesTracking = () => {
     }
   }, []);
 
+  // Group expenses by date
+  const groupExpensesByDate = useCallback((expenses) => {
+    const grouped = {};
+    expenses.forEach(expense => {
+      const date = new Date(expense.date);
+      const dateKey = date.toDateString();
+      if (!grouped[dateKey]) {
+        grouped[dateKey] = {
+          date: date,
+          expenses: []
+        };
+      }
+      grouped[dateKey].expenses.push(expense);
+    });
+    
+    // Convert to array and sort by date (newest first)
+    return Object.values(grouped).sort((a, b) => b.date - a.date);
+  }, []);
+
   // Load expenses for current month
   const loadMonthlyExpenses = useCallback(() => {
     const monthExpenses = filterTransactionsByMonth(expenses, monthKey);
@@ -350,6 +369,46 @@ const ExpensesTracking = () => {
   };
 
   // Render functions
+  const renderDateHeader = (date, expenses) => {
+    const today = new Date();
+    const isToday = date.toDateString() === today.toDateString();
+    
+    let dateText;
+    if (isToday) {
+      dateText = 'Today';
+    } else {
+      dateText = date.toLocaleDateString('en-US', { 
+        weekday: 'long', 
+        month: 'long', 
+        day: 'numeric',
+        year: date.getFullYear() !== today.getFullYear() ? 'numeric' : undefined
+      });
+    }
+    
+    // Calculate daily total
+    const dailyTotal = expenses.reduce((sum, expense) => sum + (expense.amountConverted || 0), 0);
+    
+    return (
+      <View style={expensesTrackingStyles.dateHeader}>
+        <Text style={expensesTrackingStyles.dateHeaderText}>{dateText}</Text>
+        <Text style={expensesTrackingStyles.dateHeaderTotal}>{formatCurrency(dailyTotal)}</Text>
+      </View>
+    );
+  };
+
+  const renderExpenseGroup = ({ item: dateGroup }) => {
+    return (
+      <View>
+        {renderDateHeader(dateGroup.date, dateGroup.expenses)}
+        {dateGroup.expenses.map((expense) => (
+          <View key={expense.id}>
+            {renderExpenseItem({ item: expense })}
+          </View>
+        ))}
+      </View>
+    );
+  };
+
   const renderSummaryCard = () => {
     return (
       <View style={expensesTrackingStyles.summaryCard}>
@@ -396,14 +455,8 @@ const ExpensesTracking = () => {
             <Text style={expensesTrackingStyles.itemTitle}>
               {item.note || 'Untitled Expense'}
             </Text>
-            {isToday && (
-              <View style={expensesTrackingStyles.todayBadge}>
-                <Text style={expensesTrackingStyles.todayBadgeText}>Today</Text>
-              </View>
-            )}
           </View>
           <View style={expensesTrackingStyles.itemDetails}>
-            <Text style={expensesTrackingStyles.itemCategory}>{category?.name}</Text>
             <Text style={expensesTrackingStyles.itemDate}>
               {expenseDate.toLocaleDateString('en-US', { 
                 month: 'short', 
@@ -897,9 +950,9 @@ const ExpensesTracking = () => {
           </View>
         ) : (
           <FlatList
-            data={monthlyExpenses}
-            renderItem={renderExpenseItem}
-            keyExtractor={item => item.id}
+            data={groupExpensesByDate(monthlyExpenses)}
+            renderItem={renderExpenseGroup}
+            keyExtractor={(item, index) => `date-group-${index}`}
             scrollEnabled={false}
             showsVerticalScrollIndicator={false}
           />

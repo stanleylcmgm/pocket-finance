@@ -673,4 +673,27 @@ export const expensesTrackingStyles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
   },
+
+  // Date Header
+  dateHeader: {
+    backgroundColor: '#f8f9fa',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e9ecef',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  dateHeaderText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#495057',
+    textTransform: 'capitalize',
+  },
+  dateHeaderTotal: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#007bff',
+  },
 });
