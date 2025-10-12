@@ -356,7 +356,7 @@ const AssetManagement = () => {
                 style={assetManagementStyles.keyboardDismissButton}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
-                <Ionicons name="keyboard" size={20} color="#6c757d" />
+                <Ionicons name="keyboard-outline" size={20} color="#6c757d" />
               </TouchableOpacity>
               <TouchableOpacity 
                 onPress={() => setModalVisible(false)}
