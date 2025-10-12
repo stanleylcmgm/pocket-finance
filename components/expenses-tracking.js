@@ -594,7 +594,14 @@ const ExpensesTracking = () => {
                       expensesTrackingStyles.categoryButton,
                       formData.categoryId === category.id && expensesTrackingStyles.categoryButtonSelected
                     ]}
-                    onPress={() => setFormData({ ...formData, categoryId: category.id })}
+                    onPress={() => {
+                      // Auto-fill expense name with category name if expense name is empty
+                      const updatedFormData = { ...formData, categoryId: category.id };
+                      if (!formData.name.trim()) {
+                        updatedFormData.name = category.name;
+                      }
+                      setFormData(updatedFormData);
+                    }}
                   >
                     <Ionicons 
                       name={category.icon} 

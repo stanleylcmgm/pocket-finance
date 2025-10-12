@@ -66,7 +66,7 @@ export const expensesTrackingStyles = StyleSheet.create({
     padding: 15,
   },
   summaryCard: {
-    backgroundColor: '#f8d7da',
+    backgroundColor: '#FFDBA3',
     padding: 20,
     borderRadius: 12,
     alignItems: 'center',
