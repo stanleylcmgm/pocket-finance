@@ -451,16 +451,16 @@ const ExpensesTracking = () => {
 
     return (
       <View style={expensesTrackingStyles.summaryCard}>
-        {/* Total Expenses and Average Daily */}
+        {/* Total and Daily Average */}
         <View style={expensesTrackingStyles.summaryHeader}>
           <View style={expensesTrackingStyles.summaryLeft}>
-            <Text style={expensesTrackingStyles.summaryLabel}>Total{'\n'}Expenses</Text>
+            <Text style={expensesTrackingStyles.summaryLabel}>Total</Text>
             <Text style={expensesTrackingStyles.summaryAmount}>
               {formatCurrency(monthlyTotal)}
             </Text>
           </View>
           <View style={expensesTrackingStyles.summaryRight}>
-            <Text style={expensesTrackingStyles.averageLabel}>Average{'\n'}Daily</Text>
+            <Text style={expensesTrackingStyles.averageLabel}>Daily{'\n'}Average</Text>
             <Text style={expensesTrackingStyles.averageAmount}>
               {formatCurrency(averageDaily)}
             </Text>
