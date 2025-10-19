@@ -33,27 +33,49 @@ export const assetManagementStyles = StyleSheet.create({
   },
   summaryCard: {
     backgroundColor: '#D2E2E8',
-    padding: 25,
-    borderRadius: 12,
-    alignItems: 'center',
+    padding: 16,
+    borderRadius: 16,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 14 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowRadius: 8,
+    elevation: 4,
     borderWidth: 1,
     borderColor: '#e9ecef',
+  },
+  summaryMainRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  summaryLeft: {
+    flex: 1,
   },
   summaryLabel: {
     fontSize: 14,
     color: '#6c757d',
-    marginBottom: 8,
-    fontWeight: '800',
+    marginBottom: 4,
+    fontWeight: '600',
   },
   summaryAmount: {
-    fontSize: 14,
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#2c3e50',
+  },
+  summaryRight: {
+    alignItems: 'flex-end',
+  },
+  trackingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  trackingValue: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#2c3e50',
+    marginLeft: 6,
   },
 
   // Category Breakdown

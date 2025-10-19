@@ -291,13 +291,79 @@ const AssetManagement = () => {
   const renderSummaryCard = () => {
     const topCategories = getTopCategories();
     
+    // Calculate tracking information from assets
+    const getTrackingInfo = () => {
+      if (assetsList.length === 0) return null;
+      
+      // Get the most recent tracking data from any asset
+      const assetWithTracking = assetsList.find(asset => 
+        asset.lastUpdatedDate && asset.currentUpdatedDate && asset.lastTotalAssetsValue
+      );
+      
+      if (!assetWithTracking) return null;
+      
+      const currentTotal = totalAssets;
+      const lastTotal = assetWithTracking.lastTotalAssetsValue;
+      const delta = currentTotal - lastTotal;
+      
+      const lastUpdateDate = new Date(assetWithTracking.lastUpdatedDate);
+      const currentUpdateDate = new Date(assetWithTracking.currentUpdatedDate);
+      const daysDifference = Math.floor((currentUpdateDate - lastUpdateDate) / (1000 * 60 * 60 * 24));
+      
+      return {
+        delta,
+        daysDifference,
+        lastTotal,
+        lastUpdateDate,
+        currentUpdateDate
+      };
+    };
+    
+    const trackingInfo = getTrackingInfo();
+    
     return (
       <View style={assetManagementStyles.summaryCard}>
-        <Text style={assetManagementStyles.summaryLabel}>Total Assets</Text>
-        <Text style={assetManagementStyles.summaryAmount}>
-          {formatCurrency(totalAssets)}
-        </Text>
+        {/* Main Content Row */}
+        <View style={assetManagementStyles.summaryMainRow}>
+          {/* Left Side - Total Assets */}
+          <View style={assetManagementStyles.summaryLeft}>
+            <Text style={assetManagementStyles.summaryLabel}>Total Assets</Text>
+            <Text style={assetManagementStyles.summaryAmount}>
+              {formatCurrency(totalAssets)}
+            </Text>
+          </View>
+          
+          {/* Right Side - Tracking Info */}
+          {trackingInfo && (
+            <View style={assetManagementStyles.summaryRight}>
+              <View style={assetManagementStyles.trackingRow}>
+                <Ionicons 
+                  name={trackingInfo.delta >= 0 ? "trending-up" : "trending-down"} 
+                  size={14} 
+                  color={trackingInfo.delta >= 0 ? '#28a745' : '#dc3545'} 
+                />
+                <Text style={[
+                  assetManagementStyles.trackingValue,
+                  { color: trackingInfo.delta >= 0 ? '#28a745' : '#dc3545' }
+                ]}>
+                  {trackingInfo.delta >= 0 ? '+' : ''}{formatCurrency(trackingInfo.delta)}
+                </Text>
+              </View>
+              <View style={assetManagementStyles.trackingRow}>
+                <Ionicons 
+                  name="calendar" 
+                  size={14} 
+                  color="#6c757d" 
+                />
+                <Text style={assetManagementStyles.trackingValue}>
+                  {trackingInfo.daysDifference} days
+                </Text>
+              </View>
+            </View>
+          )}
+        </View>
         
+        {/* Top Categories */}
         {topCategories.length > 0 && (
           <View style={assetManagementStyles.categoryBreakdown}>
             <Text style={assetManagementStyles.breakdownTitle}>Top Categories</Text>
