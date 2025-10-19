@@ -56,6 +56,52 @@ export const assetManagementStyles = StyleSheet.create({
     color: '#2c3e50',
   },
 
+  // Category Breakdown
+  categoryBreakdown: {
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#e9ecef',
+    width: '100%',
+  },
+  breakdownTitle: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#6c757d',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  categoryRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 4,
+  },
+  categoryInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  categoryIcon: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 8,
+  },
+  categoryName: {
+    fontSize: 13,
+    color: '#495057',
+    fontWeight: '500',
+    flex: 1,
+  },
+  categoryAmount: {
+    fontSize: 13,
+    color: '#28a745',
+    fontWeight: '600',
+  },
+
   // Add Buttons
   addButtonsContainer: {
     flexDirection: 'row',

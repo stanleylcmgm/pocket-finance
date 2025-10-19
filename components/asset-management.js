@@ -264,14 +264,58 @@ const AssetManagement = () => {
     setFormData({ ...formData, amount: formatted });
   };
 
+  // Calculate top 3 categories by total amount
+  const getTopCategories = () => {
+    const categoryTotals = {};
+    
+    // Calculate total for each category
+    assetsList.forEach(asset => {
+      if (categoryTotals[asset.categoryId]) {
+        categoryTotals[asset.categoryId].total += asset.amount;
+      } else {
+        const category = assetCategories.find(cat => cat.id === asset.categoryId);
+        categoryTotals[asset.categoryId] = {
+          ...category,
+          total: asset.amount
+        };
+      }
+    });
+    
+    // Sort by total amount and get top 3
+    return Object.values(categoryTotals)
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 3);
+  };
+
   // Render functions
   const renderSummaryCard = () => {
+    const topCategories = getTopCategories();
+    
     return (
       <View style={assetManagementStyles.summaryCard}>
         <Text style={assetManagementStyles.summaryLabel}>Total Assets</Text>
         <Text style={assetManagementStyles.summaryAmount}>
           {formatCurrency(totalAssets)}
         </Text>
+        
+        {topCategories.length > 0 && (
+          <View style={assetManagementStyles.categoryBreakdown}>
+            <Text style={assetManagementStyles.breakdownTitle}>Top Categories</Text>
+            {topCategories.map((category, index) => (
+              <View key={category.id} style={assetManagementStyles.categoryRow}>
+                <View style={assetManagementStyles.categoryInfo}>
+                  <View style={[assetManagementStyles.categoryIcon, { backgroundColor: category.color }]}>
+                    <Ionicons name={category.icon} size={12} color="#ffffff" />
+                  </View>
+                  <Text style={assetManagementStyles.categoryName}>{category.name}</Text>
+                </View>
+                <Text style={assetManagementStyles.categoryAmount}>
+                  {formatCurrency(category.total)}
+                </Text>
+              </View>
+            ))}
+          </View>
+        )}
       </View>
     );
   };
