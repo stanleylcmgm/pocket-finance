@@ -136,6 +136,9 @@ class DatabaseService {
         amount REAL NOT NULL,
         category_id TEXT NOT NULL,
         note TEXT,
+        last_updated_date DATETIME,
+        current_updated_date DATETIME,
+        last_total_assets_value REAL,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (category_id) REFERENCES asset_categories (id)
@@ -164,6 +167,9 @@ class DatabaseService {
     
     // Migrate account_id column to allow NULL values
     await this.migrateAccountIdToNullable();
+    
+    // Migrate assets table to add tracking fields
+    await this.migrateAssetsTrackingFields();
   }
 
   // Migrate existing categories to have appropriate subtypes
@@ -268,6 +274,36 @@ class DatabaseService {
       }
     } catch (error) {
       console.error('Error migrating account_id column:', error);
+    }
+  }
+
+  // Migrate assets table to add tracking fields
+  async migrateAssetsTrackingFields() {
+    try {
+      // Check if the assets table exists and has the new tracking fields
+      const tableInfo = await this.db.getAllAsync("PRAGMA table_info(assets)");
+      const hasLastUpdatedDate = tableInfo.some(col => col.name === 'last_updated_date');
+      const hasCurrentUpdatedDate = tableInfo.some(col => col.name === 'current_updated_date');
+      const hasLastTotalAssetsValue = tableInfo.some(col => col.name === 'last_total_assets_value');
+      
+      if (!hasLastUpdatedDate || !hasCurrentUpdatedDate || !hasLastTotalAssetsValue) {
+        console.log('Migrating assets table to add tracking fields...');
+        
+        // Add the new columns if they don't exist
+        if (!hasLastUpdatedDate) {
+          await this.db.execAsync('ALTER TABLE assets ADD COLUMN last_updated_date DATETIME;');
+        }
+        if (!hasCurrentUpdatedDate) {
+          await this.db.execAsync('ALTER TABLE assets ADD COLUMN current_updated_date DATETIME;');
+        }
+        if (!hasLastTotalAssetsValue) {
+          await this.db.execAsync('ALTER TABLE assets ADD COLUMN last_total_assets_value REAL;');
+        }
+        
+        console.log('Successfully migrated assets table to add tracking fields');
+      }
+    } catch (error) {
+      console.error('Error migrating assets tracking fields:', error);
     }
   }
 
@@ -647,6 +683,23 @@ class DatabaseService {
     await this.db.runAsync('DELETE FROM asset_categories WHERE id = ?', [id]);
   }
 
+  // Helper method to check if 30 days have passed since last update
+  shouldUpdateTrackingFields(lastUpdatedDate) {
+    if (!lastUpdatedDate) return true; // First time, should update
+    
+    const lastUpdate = new Date(lastUpdatedDate);
+    const currentDate = new Date();
+    const daysDifference = (currentDate - lastUpdate) / (1000 * 60 * 60 * 24);
+    
+    return daysDifference >= 30;
+  }
+
+  // Helper method to calculate total assets value
+  async calculateTotalAssetsValue() {
+    const assets = await this.db.getAllAsync('SELECT amount FROM assets');
+    return assets.reduce((total, asset) => total + (asset.amount || 0), 0);
+  }
+
   // Assets CRUD operations
   async getAssets() {
     await this.init();
@@ -663,6 +716,9 @@ class DatabaseService {
       amount: asset.amount,
       categoryId: asset.category_id,
       note: asset.note,
+      lastUpdatedDate: asset.last_updated_date,
+      currentUpdatedDate: asset.current_updated_date,
+      lastTotalAssetsValue: asset.last_total_assets_value,
       createdAt: asset.created_at,
       updatedAt: asset.updated_at,
       categoryName: asset.category_name,
@@ -688,6 +744,9 @@ class DatabaseService {
       amount: asset.amount,
       categoryId: asset.category_id,
       note: asset.note,
+      lastUpdatedDate: asset.last_updated_date,
+      currentUpdatedDate: asset.current_updated_date,
+      lastTotalAssetsValue: asset.last_total_assets_value,
       createdAt: asset.created_at,
       updatedAt: asset.updated_at,
       categoryName: asset.category_name,
@@ -699,15 +758,23 @@ class DatabaseService {
   async createAsset(asset) {
     await this.init();
     const id = `asset-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const currentDate = new Date().toISOString();
+    const totalAssetsValue = await this.calculateTotalAssetsValue();
+    
     await this.db.runAsync(
-      'INSERT INTO assets (id, name, amount, category_id, note) VALUES (?, ?, ?, ?, ?)',
-      [id, asset.name, asset.amount, asset.categoryId, asset.note]
+      'INSERT INTO assets (id, name, amount, category_id, note, last_updated_date, current_updated_date, last_total_assets_value) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      [id, asset.name, asset.amount, asset.categoryId, asset.note, currentDate, currentDate, totalAssetsValue]
     );
     return this.getAssetById(id);
   }
 
   async updateAsset(id, updates) {
     await this.init();
+    
+    // Get current asset to check tracking fields
+    const currentAsset = await this.db.getFirstAsync('SELECT * FROM assets WHERE id = ?', [id]);
+    if (!currentAsset) return null;
+    
     const setClause = Object.keys(updates).map(key => {
       if (key === 'categoryId') return 'category_id = ?';
       return `${key} = ?`;
@@ -718,16 +785,50 @@ class DatabaseService {
       return value;
     });
     
+    // Check if we should update tracking fields (30+ days since last update)
+    const shouldUpdateTracking = this.shouldUpdateTrackingFields(currentAsset.last_updated_date);
+    let trackingUpdates = '';
+    let trackingValues = [];
+    
+    if (shouldUpdateTracking) {
+      const currentDate = new Date().toISOString();
+      const totalAssetsValue = await this.calculateTotalAssetsValue();
+      
+      trackingUpdates = ', last_updated_date = ?, current_updated_date = ?, last_total_assets_value = ?';
+      trackingValues = [currentAsset.current_updated_date || currentDate, currentDate, totalAssetsValue];
+    }
+    
     await this.db.runAsync(
-      `UPDATE assets SET ${setClause}, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
-      [...values, id]
+      `UPDATE assets SET ${setClause}, updated_at = CURRENT_TIMESTAMP${trackingUpdates} WHERE id = ?`,
+      [...values, ...trackingValues, id]
     );
     return this.getAssetById(id);
   }
 
   async deleteAsset(id) {
     await this.init();
+    
+    // Get current asset to check if we should update tracking fields for remaining assets
+    const currentAsset = await this.db.getFirstAsync('SELECT * FROM assets WHERE id = ?', [id]);
+    if (!currentAsset) return;
+    
+    // Check if we should update tracking fields for remaining assets (30+ days since last update)
+    const shouldUpdateTracking = this.shouldUpdateTrackingFields(currentAsset.last_updated_date);
+    
+    // Delete the asset
     await this.db.runAsync('DELETE FROM assets WHERE id = ?', [id]);
+    
+    // If tracking should be updated, update remaining assets
+    if (shouldUpdateTracking) {
+      const currentDate = new Date().toISOString();
+      const totalAssetsValue = await this.calculateTotalAssetsValue();
+      
+      // Update tracking fields for all remaining assets
+      await this.db.runAsync(
+        'UPDATE assets SET last_updated_date = current_updated_date, current_updated_date = ?, last_total_assets_value = ?',
+        [currentDate, totalAssetsValue]
+      );
+    }
   }
 
   // Get database statistics

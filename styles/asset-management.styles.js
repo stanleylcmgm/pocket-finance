@@ -219,6 +219,25 @@ export const assetManagementStyles = StyleSheet.create({
     fontSize: 13,
     color: '#6c757d',
   },
+  
+  // Tracking Information Styles
+  trackingInfo: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 4,
+    paddingVertical: 2,
+  },
+  trackingLabel: {
+    fontSize: 11,
+    color: '#6c757d',
+    fontWeight: '500',
+  },
+  trackingValue: {
+    fontSize: 11,
+    color: '#495057',
+    fontWeight: '600',
+  },
   itemActions: {
     alignItems: 'flex-end',
     gap: 8,
