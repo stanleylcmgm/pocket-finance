@@ -33,7 +33,7 @@ export const assetManagementStyles = StyleSheet.create({
   },
   summaryCard: {
     backgroundColor: '#D2E2E8',
-    padding: 20,
+    padding: 30,
     borderRadius: 12,
     alignItems: 'center',
     shadowColor: '#000',
@@ -48,10 +48,10 @@ export const assetManagementStyles = StyleSheet.create({
     fontSize: 14,
     color: '#6c757d',
     marginBottom: 8,
-    fontWeight: '500',
+    fontWeight: '800',
   },
   summaryAmount: {
-    fontSize: 24,
+    fontSize: 14,
     fontWeight: 'bold',
     color: '#2c3e50',
   },
@@ -59,7 +59,8 @@ export const assetManagementStyles = StyleSheet.create({
   // Add Buttons
   addButtonsContainer: {
     flexDirection: 'row',
-    padding: 15,
+    paddingVertical: 8,
+    paddingHorizontal: 15,
     gap: 10,
   },
   addButton: {
@@ -182,7 +183,7 @@ export const assetManagementStyles = StyleSheet.create({
     color: '#28a745',
   },
   deleteButton: {
-    marginTop: 6,
+    marginTop: -5,
     padding: 6,
     borderRadius: 8,
     backgroundColor: 'transparent',
