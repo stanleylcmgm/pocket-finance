@@ -33,7 +33,7 @@ export const assetManagementStyles = StyleSheet.create({
   },
   summaryCard: {
     backgroundColor: '#D2E2E8',
-    padding: 30,
+    padding: 25,
     borderRadius: 12,
     alignItems: 'center',
     shadowColor: '#000',
