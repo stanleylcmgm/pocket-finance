@@ -201,6 +201,7 @@ export const assetManagementStyles = StyleSheet.create({
     padding: 24,
     width: '90%',
     maxWidth: 400,
+    height: 580,
     borderWidth: 1,
     borderColor: '#e9ecef',
   },

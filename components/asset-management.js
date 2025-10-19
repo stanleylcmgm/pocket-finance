@@ -415,7 +415,14 @@ const AssetManagement = () => {
                   assetManagementStyles.categoryButton,
                   formData.categoryId === category.id && assetManagementStyles.categoryButtonSelected
                 ]}
-                onPress={() => setFormData({ ...formData, categoryId: category.id })}
+                onPress={() => {
+                  const newFormData = { ...formData, categoryId: category.id };
+                  // Auto-fill asset name if it's empty
+                  if (!formData.name.trim()) {
+                    newFormData.name = category.name;
+                  }
+                  setFormData(newFormData);
+                }}
               >
                 <Ionicons 
                   name={category.icon} 
