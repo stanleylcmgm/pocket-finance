@@ -313,7 +313,7 @@ export const expensesTrackingStyles = StyleSheet.create({
     color: '#dc3545',
   },
   deleteButton: {
-    marginTop: 6,
+    marginTop: -5,
     padding: 6,
     borderRadius: 8,
     backgroundColor: 'transparent',

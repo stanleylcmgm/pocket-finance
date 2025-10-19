@@ -294,7 +294,7 @@ export const balanceSheetStyles = StyleSheet.create({
     fontWeight: 'bold',
   },
   deleteButton: {
-    marginTop: 6,
+    marginTop: -5,
     padding: 6,
     borderRadius: 8,
     backgroundColor: 'transparent',

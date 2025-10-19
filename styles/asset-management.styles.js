@@ -56,10 +56,12 @@ export const assetManagementStyles = StyleSheet.create({
     fontSize: 14,
     color: '#6c757d',
     marginBottom: 4,
-    fontWeight: '600',
+    fontWeight: '800',
   },
   summaryAmount: {
-    fontSize: 24,
+    paddingTop: 3,
+    paddingLeft: 2,
+    fontSize: 21,
     fontWeight: 'bold',
     color: '#2c3e50',
   },
@@ -127,7 +129,7 @@ export const assetManagementStyles = StyleSheet.create({
   // Add Buttons
   addButtonsContainer: {
     flexDirection: 'row',
-    paddingVertical: 8,
+    paddingVertical: 4,
     paddingHorizontal: 15,
     gap: 10,
   },
@@ -136,7 +138,7 @@ export const assetManagementStyles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 16,
+    padding: 15,
     borderRadius: 12,
     gap: 8,
     shadowColor: '#000',
@@ -148,7 +150,7 @@ export const assetManagementStyles = StyleSheet.create({
   addButtonText: {
     color: 'white',
     fontWeight: 'bold',
-    fontSize: 14,
+    fontSize: 15,
   },
 
   // Scroll View
@@ -251,12 +253,13 @@ export const assetManagementStyles = StyleSheet.create({
     paddingVertical: 2,
   },
   trackingLabel: {
-    fontSize: 11,
+    fontSize: 12,
     color: '#6c757d',
     fontWeight: '500',
   },
   trackingValue: {
-    fontSize: 11,
+    paddingLeft: 12,
+    fontSize: 12,
     color: '#495057',
     fontWeight: '600',
   },
