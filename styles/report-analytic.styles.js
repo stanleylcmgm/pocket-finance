@@ -38,7 +38,7 @@ export const reportAnalyticStyles = StyleSheet.create({
 
   scrollContent: {
     flexGrow: 1,
-    padding: 16,
+    padding: 12,
     paddingBottom: 20,
   },
 
@@ -58,9 +58,9 @@ export const reportAnalyticStyles = StyleSheet.create({
   // Card styles
   card: {
     backgroundColor: 'white',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 16,
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
@@ -74,83 +74,88 @@ export const reportAnalyticStyles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 12,
   },
 
   cardTitleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 8,
   },
 
   cardTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '700',
     color: '#2c3e50',
   },
 
   cardAmount: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#2c3e50',
   },
 
   cardContent: {
-    gap: 12,
+    gap: 8,
   },
 
   cardSubtitle: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '600',
     color: '#6c757d',
-    marginBottom: 8,
+    marginBottom: 6,
   },
 
   cardDescription: {
-    fontSize: 13,
+    fontSize: 11,
     color: '#6c757d',
-    lineHeight: 18,
+    lineHeight: 16,
   },
 
   // Asset categories
   categoriesList: {
-    gap: 8,
+    gap: 6,
   },
 
   categoryItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
     backgroundColor: '#f8f9fa',
-    borderRadius: 8,
+    borderRadius: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
 
   categoryInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 8,
     flex: 1,
   },
 
   categoryIcon: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
 
   categoryName: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '600',
     color: '#2c3e50',
     flex: 1,
   },
 
   categoryAmount: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: 'bold',
     color: '#28a745',
   },
@@ -158,57 +163,67 @@ export const reportAnalyticStyles = StyleSheet.create({
   // Metrics row
   metricsRow: {
     flexDirection: 'row',
-    gap: 16,
-    marginBottom: 16,
+    gap: 12,
+    marginBottom: 12,
   },
 
   metricItem: {
     flex: 1,
     alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
     backgroundColor: '#f8f9fa',
-    borderRadius: 12,
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
 
   metricLabel: {
-    fontSize: 12,
+    fontSize: 10,
     color: '#6c757d',
-    marginBottom: 4,
+    marginBottom: 2,
     fontWeight: '500',
   },
 
   metricValue: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
   },
 
   // Balance container
   balanceContainer: {
     alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
     backgroundColor: '#e3f2fd',
-    borderRadius: 12,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: '#bbdefb',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
   },
 
   balanceLabel: {
-    fontSize: 12,
+    fontSize: 10,
     color: '#1976d2',
-    marginBottom: 4,
+    marginBottom: 2,
     fontWeight: '600',
   },
 
   balanceValue: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
   },
 
   // No data text
   noDataText: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#6c757d',
     textAlign: 'center',
     fontStyle: 'italic',

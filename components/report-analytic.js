@@ -156,7 +156,7 @@ const ReportAnalytic = () => {
             <View style={reportAnalyticStyles.card}>
               <View style={reportAnalyticStyles.cardHeader}>
                 <View style={reportAnalyticStyles.cardTitleContainer}>
-                  <Ionicons name="wallet" size={24} color="#28a745" />
+                  <Ionicons name="wallet" size={20} color="#28a745" />
                   <Text style={reportAnalyticStyles.cardTitle}>Total Assets</Text>
                 </View>
                 <Text style={reportAnalyticStyles.cardAmount}>{formatCurrency(dashboardData.totalAssets)}</Text>
@@ -173,7 +173,7 @@ const ReportAnalytic = () => {
             <View style={reportAnalyticStyles.card}>
               <View style={reportAnalyticStyles.cardHeader}>
                 <View style={reportAnalyticStyles.cardTitleContainer}>
-                  <Ionicons name="trending-up" size={24} color="#007bff" />
+                  <Ionicons name="trending-up" size={20} color="#007bff" />
                   <Text style={reportAnalyticStyles.cardTitle}>This Month</Text>
                 </View>
               </View>
@@ -208,7 +208,7 @@ const ReportAnalytic = () => {
             <View style={reportAnalyticStyles.card}>
               <View style={reportAnalyticStyles.cardHeader}>
                 <View style={reportAnalyticStyles.cardTitleContainer}>
-                  <Ionicons name="calendar" size={24} color="#fd7e14" />
+                  <Ionicons name="calendar" size={20} color="#fd7e14" />
                   <Text style={reportAnalyticStyles.cardTitle}>Year-to-Date Average</Text>
                 </View>
                 <Text style={reportAnalyticStyles.cardAmount}>
