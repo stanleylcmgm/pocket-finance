@@ -368,7 +368,7 @@ const AssetManagement = () => {
           <View style={assetManagementStyles.categoryBreakdown}>
             <Text style={assetManagementStyles.breakdownTitle}>Top Categories</Text>
             {topCategories.map((category, index) => (
-              <View key={category.id} style={assetManagementStyles.categoryRow}>
+              <View key={`top-category-${category.id}-${index}`} style={assetManagementStyles.categoryRow}>
                 <View style={assetManagementStyles.categoryInfo}>
                   <View style={[assetManagementStyles.categoryIcon, { backgroundColor: category.color }]}>
                     <Ionicons name={category.icon} size={12} color="#ffffff" />
@@ -518,9 +518,9 @@ const AssetManagement = () => {
           
           <Text style={assetManagementStyles.inputLabel}>Category *</Text>
           <View style={assetManagementStyles.categoryContainer}>
-            {assetCategories.map((category) => (
+            {assetCategories.map((category, index) => (
               <TouchableOpacity
-                key={category.id}
+                key={`category-${category.id}-${index}`}
                 style={[
                   assetManagementStyles.categoryButton,
                   formData.categoryId === category.id && assetManagementStyles.categoryButtonSelected
@@ -666,8 +666,8 @@ const AssetManagement = () => {
                 nestedScrollEnabled={true}
                 keyboardShouldPersistTaps="handled"
               >
-                {assetCategories.map((c) => (
-                  <View key={c.id} style={assetManagementStyles.categoryTile}>
+                {assetCategories.map((c, index) => (
+                  <View key={`category-tile-${c.id}-${index}`} style={assetManagementStyles.categoryTile}>
                     <View style={assetManagementStyles.categoryTileLeft}>
                       <View style={[assetManagementStyles.categoryAvatar, { backgroundColor: c.color }]}>
                         <Ionicons name={c.icon} size={16} color="#ffffff" />
@@ -703,9 +703,9 @@ const AssetManagement = () => {
 
             <Text style={assetManagementStyles.inputLabel}>Icon</Text>
             <View style={assetManagementStyles.categoryContainer}>
-              {iconOptions.map((icon) => (
+              {iconOptions.map((icon, index) => (
                 <TouchableOpacity
-                  key={icon}
+                  key={`icon-${icon}-${index}`}
                   style={[
                     assetManagementStyles.iconOption,
                     newCategoryIcon === icon && assetManagementStyles.iconOptionSelected,
@@ -719,9 +719,9 @@ const AssetManagement = () => {
 
             <Text style={assetManagementStyles.inputLabel}>Color</Text>
             <View style={assetManagementStyles.colorRow}>
-              {colorOptions.map((hex) => (
+              {colorOptions.map((hex, index) => (
                 <TouchableOpacity
-                  key={hex}
+                  key={`color-${hex}-${index}`}
                   style={[
                     assetManagementStyles.colorSwatch,
                     { backgroundColor: hex },
