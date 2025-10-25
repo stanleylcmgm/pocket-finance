@@ -152,91 +152,74 @@ const ReportAnalytic = () => {
         <ScrollView style={reportAnalyticStyles.scrollView} showsVerticalScrollIndicator={false}>
           <View style={reportAnalyticStyles.scrollContent}>
             
-            {/* Combined Dashboard Card */}
+            {/* Total Assets Card */}
             <View style={reportAnalyticStyles.card}>
               <View style={reportAnalyticStyles.cardHeader}>
                 <View style={reportAnalyticStyles.cardTitleContainer}>
                   <Ionicons name="wallet" size={24} color="#28a745" />
-                  <Text style={reportAnalyticStyles.cardTitle}>Dashboard Overview</Text>
+                  <Text style={reportAnalyticStyles.cardTitle}>Total Assets</Text>
+                </View>
+                <Text style={reportAnalyticStyles.cardAmount}>{formatCurrency(dashboardData.totalAssets)}</Text>
+              </View>
+              <View style={reportAnalyticStyles.cardContent}>
+                <Text style={reportAnalyticStyles.cardSubtitle}>Top Asset Categories</Text>
+                <View style={reportAnalyticStyles.categoriesList}>
+                  {renderAssetCategories()}
+                </View>
+              </View>
+            </View>
+
+            {/* Income & Expenses Card */}
+            <View style={reportAnalyticStyles.card}>
+              <View style={reportAnalyticStyles.cardHeader}>
+                <View style={reportAnalyticStyles.cardTitleContainer}>
+                  <Ionicons name="trending-up" size={24} color="#007bff" />
+                  <Text style={reportAnalyticStyles.cardTitle}>This Month</Text>
                 </View>
               </View>
               <View style={reportAnalyticStyles.cardContent}>
-                <View style={reportAnalyticStyles.mixedLayoutContainer}>
-                  {/* Row 1 - Total Assets spanning 2 columns */}
-                  <View style={reportAnalyticStyles.assetsRow}>
-                    <View style={reportAnalyticStyles.assetsColumn}>
-                      <View style={reportAnalyticStyles.columnHeader}>
-                        <Ionicons name="wallet" size={16} color="#28a745" />
-                        <Text style={reportAnalyticStyles.columnTitle}>Total Assets</Text>
-                      </View>
-                      <View style={reportAnalyticStyles.assetContainer}>
-                        <Text style={reportAnalyticStyles.assetAmount}>
-                          {formatCurrency(dashboardData.totalAssets)}
-                        </Text>
-                        <Text style={reportAnalyticStyles.cardSubtitle}>Top Asset Categories</Text>
-                        <View style={reportAnalyticStyles.categoriesList}>
-                          {renderAssetCategories()}
-                        </View>
-                      </View>
-                    </View>
+                <View style={reportAnalyticStyles.metricsRow}>
+                  <View style={reportAnalyticStyles.metricItem}>
+                    <Text style={reportAnalyticStyles.metricLabel}>Income</Text>
+                    <Text style={[reportAnalyticStyles.metricValue, { color: '#28a745' }]}>
+                      {formatCurrency(dashboardData.currentMonthIncome)}
+                    </Text>
                   </View>
-
-                  {/* Row 2 - This Month and YTD Average as 2 columns */}
-                  <View style={reportAnalyticStyles.financialRow}>
-                    {/* This Month Financials */}
-                    <View style={reportAnalyticStyles.financialColumn}>
-                      <View style={reportAnalyticStyles.columnHeader}>
-                        <Ionicons name="trending-up" size={16} color="#007bff" />
-                        <Text style={reportAnalyticStyles.columnTitle}>Balance Sheet</Text>
-                      </View>
-                      <View style={reportAnalyticStyles.thisMonthContainer}>
-                        {/* Income Block */}
-                        <View style={reportAnalyticStyles.metricItemSmall}>
-                          <Text style={reportAnalyticStyles.metricLabelSmall}>Income</Text>
-                          <Text style={[reportAnalyticStyles.metricValueSmall, { color: '#28a745' }]}>
-                            {formatCurrency(dashboardData.currentMonthIncome)}
-                          </Text>
-                        </View>
-                        
-                        {/* Expenses Block */}
-                        <View style={reportAnalyticStyles.metricItemSmall}>
-                          <Text style={reportAnalyticStyles.metricLabelSmall}>Expenses</Text>
-                          <Text style={[reportAnalyticStyles.metricValueSmall, { color: '#dc3545' }]}>
-                            {formatCurrency(dashboardData.currentMonthExpenses)}
-                          </Text>
-                        </View>
-                        
-                        {/* Balance Block */}
-                        <View style={reportAnalyticStyles.balanceContainerSmall}>
-                          <Text style={reportAnalyticStyles.balanceLabelSmall}>Balance</Text>
-                          <Text style={[
-                            reportAnalyticStyles.balanceValueSmall,
-                            { color: dashboardData.currentMonthBalance >= 0 ? '#28a745' : '#dc3545' }
-                          ]}>
-                            {formatCurrency(dashboardData.currentMonthBalance)}
-                          </Text>
-                        </View>
-                      </View>
-                    </View>
-
-                    {/* YTD Average */}
-                    <View style={reportAnalyticStyles.financialColumn}>
-                      <View style={reportAnalyticStyles.columnHeader}>
-                        <Ionicons name="analytics" size={16} color="#fd7e14" />
-                        <Text style={reportAnalyticStyles.columnTitle}>YTD Monthly Average</Text>
-                      </View>
-                      <View style={reportAnalyticStyles.ytdContainer}>
-                        <Text style={reportAnalyticStyles.ytdAmount}>
-                          {formatCurrency(dashboardData.yearToDateAverageExpenses)}
-                        </Text>
-                        <Text style={reportAnalyticStyles.ytdLabel}>Monthly Average</Text>
-                        <Text style={reportAnalyticStyles.ytdDescription}>
-                          Expenses for {new Date().getFullYear()}
-                        </Text>
-                      </View>
-                    </View>
+                  <View style={reportAnalyticStyles.metricItem}>
+                    <Text style={reportAnalyticStyles.metricLabel}>Expenses</Text>
+                    <Text style={[reportAnalyticStyles.metricValue, { color: '#dc3545' }]}>
+                      {formatCurrency(dashboardData.currentMonthExpenses)}
+                    </Text>
                   </View>
                 </View>
+                <View style={reportAnalyticStyles.balanceContainer}>
+                  <Text style={reportAnalyticStyles.balanceLabel}>Balance</Text>
+                  <Text style={[
+                    reportAnalyticStyles.balanceValue,
+                    { color: dashboardData.currentMonthBalance >= 0 ? '#28a745' : '#dc3545' }
+                  ]}>
+                    {formatCurrency(dashboardData.currentMonthBalance)}
+                  </Text>
+                </View>
+              </View>
+            </View>
+
+            {/* Year-to-Date Average Expenses Card */}
+            <View style={reportAnalyticStyles.card}>
+              <View style={reportAnalyticStyles.cardHeader}>
+                <View style={reportAnalyticStyles.cardTitleContainer}>
+                  <Ionicons name="calendar" size={24} color="#fd7e14" />
+                  <Text style={reportAnalyticStyles.cardTitle}>Year-to-Date Average</Text>
+                </View>
+                <Text style={reportAnalyticStyles.cardAmount}>
+                  {formatCurrency(dashboardData.yearToDateAverageExpenses)}
+                </Text>
+              </View>
+              <View style={reportAnalyticStyles.cardContent}>
+                <Text style={reportAnalyticStyles.cardSubtitle}>Monthly Average Expenses</Text>
+                <Text style={reportAnalyticStyles.cardDescription}>
+                  Average monthly expenses for {new Date().getFullYear()}
+                </Text>
               </View>
             </View>
 
