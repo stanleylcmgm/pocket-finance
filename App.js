@@ -11,6 +11,7 @@ import HomeScreen from './components/home-screen';
 import BalanceSheet from './components/balance-sheet';
 import ExpensesTracking from './components/expenses-tracking';
 import AssetManagement from './components/asset-management';
+import ReportAnalytic from './components/report-analytic';
 
 const Stack = createStackNavigator();
 
@@ -102,6 +103,13 @@ export default function App() {
             component={AssetManagement}
             options={{
               title: 'Asset Management',
+            }}
+          />
+          <Stack.Screen
+            name="Reports"
+            component={ReportAnalytic}
+            options={{
+              title: 'Reports & Analytics',
             }}
           />
         </Stack.Navigator>

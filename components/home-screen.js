@@ -117,6 +117,8 @@ const HomeScreen = ({ navigation }) => {
       navigation.navigate('ExpensesTracking');
     } else if (screenName === 'AssetManagement') {
       navigation.navigate('AssetManagement');
+    } else if (screenName === 'Reports') {
+      navigation.navigate('Reports');
     } else {
       // For future screens
       alert(`${screenName} screen coming soon!`);
