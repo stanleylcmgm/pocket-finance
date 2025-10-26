@@ -90,8 +90,8 @@ const ReportAnalytic = () => {
       
       // Calculate YTD average by summing monthly expenses and dividing by months with data
       const monthlyExpensesForYTD = [];
-      // Include current month - manually create month keys to avoid date issues
-      for (let i = 0; i <= currentMonth.getMonth(); i++) {
+      // Exclude current month - only include months from January to previous month
+      for (let i = 0; i < currentMonth.getMonth(); i++) {
         // Manually create month key to avoid date constructor issues
         const monthKey = `${currentYear}-${String(i + 1).padStart(2, '0')}`;
         // Get expenses for this month from Expenses Tracking
