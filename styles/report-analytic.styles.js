@@ -101,9 +101,9 @@ export const reportAnalyticStyles = StyleSheet.create({
 
   cardSubtitle: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '700',
     color: '#6c757d',
-    marginBottom: 8,
+    marginBottom: 0,
   },
 
   cardDescription: {

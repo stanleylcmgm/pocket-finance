@@ -60,7 +60,7 @@ const ReportAnalytic = () => {
         }))
         .filter(item => item.category)
         .sort((a, b) => b.total - a.total)
-        .slice(0, 4);
+        .slice(0, 3);
 
       // Load current month transactions for balance sheet data
       const currentMonth = new Date();
