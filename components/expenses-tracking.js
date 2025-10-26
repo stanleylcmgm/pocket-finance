@@ -27,8 +27,13 @@ import {
   generateId
 } from '../utils/data-utils';
 
-// Mock data storage (replace with actual persistence later)
-let expenses = [];
+import {
+  getExpenses,
+  addExpense,
+  updateExpense,
+  deleteExpense as removeExpense,
+  getExpensesByMonth
+} from '../utils/expenses-data';
 
 const ExpensesTracking = () => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -109,7 +114,8 @@ const ExpensesTracking = () => {
 
   // Load expenses for current month
   const loadMonthlyExpenses = useCallback(() => {
-    const monthExpenses = filterTransactionsByMonth(expenses, monthKey);
+    const allExpenses = getExpenses();
+    const monthExpenses = filterTransactionsByMonth(allExpenses, monthKey);
     const sortedExpenses = sortTransactions(monthExpenses);
     
     setMonthlyExpenses(sortedExpenses);
@@ -166,6 +172,7 @@ const ExpensesTracking = () => {
   };
 
   const handleDateSelect = (selectedDate) => {
+    
     // Update the form data with the selected date
     if (tempFormData) {
       setFormData({
@@ -262,15 +269,13 @@ const ExpensesTracking = () => {
       attachmentUris: [],
     };
 
+
     if (editingExpense) {
       // Update existing expense
-      const index = expenses.findIndex(exp => exp.id === expense.id);
-      if (index !== -1) {
-        expenses[index] = expense;
-      }
+      updateExpense(expense.id, expense);
     } else {
       // Add new expense
-      expenses.push(expense);
+      addExpense(expense);
     }
 
     setModalVisible(false);
@@ -288,7 +293,7 @@ const ExpensesTracking = () => {
           text: 'Delete',
           style: 'destructive',
           onPress: () => {
-            expenses = expenses.filter(exp => exp.id !== id);
+            removeExpense(id);
             loadMonthlyExpenses();
           },
         },
@@ -304,7 +309,7 @@ const ExpensesTracking = () => {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
-    expenses.push(duplicated);
+    addExpense(duplicated);
     loadMonthlyExpenses();
   };
 
@@ -812,7 +817,8 @@ const ExpensesTracking = () => {
   };
 
   const requestDeleteCategory = (categoryId) => {
-    const inUse = expenses.some((exp) => exp.categoryId === categoryId);
+    const allExpenses = getExpenses();
+    const inUse = allExpenses.some((exp) => exp.categoryId === categoryId);
     if (inUse) {
       Alert.alert('Cannot Delete', 'This category is used by existing expenses.');
       return;

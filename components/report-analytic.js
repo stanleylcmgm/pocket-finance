@@ -7,6 +7,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 import { colors } from '../theme';
 import { reportAnalyticStyles } from '../styles/report-analytic.styles';
 import { 
@@ -20,6 +21,12 @@ import {
   filterTransactionsByMonth,
   getCategories
 } from '../utils/data-utils';
+
+import {
+  getExpenses,
+  getExpensesByYear,
+  getExpensesByDateRange
+} from '../utils/expenses-data';
 
 const ReportAnalytic = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -71,29 +78,31 @@ const ReportAnalytic = () => {
       const monthlyTransactions = filterTransactionsByMonth(allTransactions, monthKey);
       const monthlySummary = calculateMonthlySummary(monthlyTransactions);
 
-      // Calculate year-to-date average expenses and recent monthly expenses
+      // Calculate year-to-date average expenses and recent monthly expenses using Expenses Tracking data
       const currentYear = currentMonth.getFullYear();
       const yearStart = new Date(currentYear, 0, 1);
-      const yearTransactions = allTransactions.filter(tx => {
-        const txDate = new Date(tx.date);
-        return txDate >= yearStart && txDate <= currentMonth && tx.type === 'expense';
-      });
+      const yearEnd = new Date(currentYear, 11, 31, 23, 59, 59, 999);
+      
+      // Get expenses from Expenses Tracking (not Balance Sheet transactions)
+      const allExpenses = getExpenses();
+      const yearExpenses = getExpensesByDateRange(yearStart, yearEnd);
+      
       
       // Calculate YTD average by summing monthly expenses and dividing by months with data
       const monthlyExpensesForYTD = [];
+      // Include current month - manually create month keys to avoid date issues
       for (let i = 0; i <= currentMonth.getMonth(); i++) {
-        const targetDate = new Date(currentYear, i, 1);
-        const monthKey = toMonthKey(targetDate);
-        
-        // More robust filtering - check all transactions manually
-        const monthTransactions = allTransactions.filter(tx => {
-          const txDate = new Date(tx.date);
-          const txMonthKey = toMonthKey(txDate);
-          return txMonthKey === monthKey && tx.type === 'expense';
+        // Manually create month key to avoid date constructor issues
+        const monthKey = `${currentYear}-${String(i + 1).padStart(2, '0')}`;
+        // Get expenses for this month from Expenses Tracking
+        const monthExpenses = allExpenses.filter(expense => {
+          const expenseDate = new Date(expense.date);
+          const expenseMonthKey = toMonthKey(expenseDate);
+          return expenseMonthKey === monthKey;
         });
         
-        const monthExpenses = monthTransactions.reduce((sum, tx) => sum + (tx.amountConverted || 0), 0);
-        monthlyExpensesForYTD.push(monthExpenses);
+        const monthTotal = monthExpenses.reduce((sum, expense) => sum + (expense.amountConverted || 0), 0);
+        monthlyExpensesForYTD.push(monthTotal);
       }
       
       const totalYearExpenses = monthlyExpensesForYTD.reduce((sum, amount) => sum + amount, 0);
@@ -104,21 +113,37 @@ const ReportAnalytic = () => {
       const recentMonthlyExpenses = [];
       
       for (let i = 2; i >= 0; i--) {
-        const targetDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - i, 1);
-        const monthKey = toMonthKey(targetDate);
+        const targetMonth = currentMonth.getMonth() - i;
+        const targetYear = currentMonth.getFullYear();
         
-        // More robust filtering - check all transactions manually
-        const monthTransactions = allTransactions.filter(tx => {
-          const txDate = new Date(tx.date);
-          const txMonthKey = toMonthKey(txDate);
-          return txMonthKey === monthKey && tx.type === 'expense';
+        // Handle year rollover
+        let actualYear = targetYear;
+        let actualMonth = targetMonth;
+        if (targetMonth < 0) {
+          actualYear = targetYear - 1;
+          actualMonth = 12 + targetMonth;
+        }
+        
+        // Manually create month key
+        const monthKey = `${actualYear}-${String(actualMonth + 1).padStart(2, '0')}`;
+        
+        // Get expenses for this month from Expenses Tracking
+        const monthExpenses = allExpenses.filter(expense => {
+          const expenseDate = new Date(expense.date);
+          const expenseMonthKey = toMonthKey(expenseDate);
+          return expenseMonthKey === monthKey;
         });
         
-        const monthExpenses = monthTransactions.reduce((sum, tx) => sum + (tx.amountConverted || 0), 0);
+        const monthTotal = monthExpenses.reduce((sum, expense) => sum + (expense.amountConverted || 0), 0);
+        
+        // Create month name for display
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                           'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const monthName = monthNames[actualMonth];
         
         recentMonthlyExpenses.push({
-          month: targetDate.toLocaleDateString('en-US', { month: 'short' }),
-          amount: monthExpenses,
+          month: monthName,
+          amount: monthTotal,
           monthKey: monthKey
         });
       }
@@ -133,14 +158,29 @@ const ReportAnalytic = () => {
       // Calculate max monthly expenses from recent 12 months
       const monthlyExpenses12Months = [];
       for (let i = 11; i >= 0; i--) {
-        const targetDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - i, 1);
-        const monthKey = toMonthKey(targetDate);
-        const monthTransactions = filterTransactionsByMonth(allTransactions, monthKey);
-        const monthExpenses = monthTransactions
-          .filter(tx => tx.type === 'expense')
-          .reduce((sum, tx) => sum + (tx.amountConverted || 0), 0);
+        const targetMonth = currentMonth.getMonth() - i;
+        const targetYear = currentMonth.getFullYear();
         
-        monthlyExpenses12Months.push(monthExpenses);
+        // Handle year rollover
+        let actualYear = targetYear;
+        let actualMonth = targetMonth;
+        if (targetMonth < 0) {
+          actualYear = targetYear - 1;
+          actualMonth = 12 + targetMonth;
+        }
+        
+        // Manually create month key
+        const monthKey = `${actualYear}-${String(actualMonth + 1).padStart(2, '0')}`;
+        
+        // Get expenses for this month from Expenses Tracking
+        const monthExpenses = allExpenses.filter(expense => {
+          const expenseDate = new Date(expense.date);
+          const expenseMonthKey = toMonthKey(expenseDate);
+          return expenseMonthKey === monthKey;
+        });
+        
+        const monthTotal = monthExpenses.reduce((sum, expense) => sum + (expense.amountConverted || 0), 0);
+        monthlyExpenses12Months.push(monthTotal);
       }
       const maxMonthlyExpenses = Math.max(...monthlyExpenses12Months, yearToDateAverage);
 
@@ -165,6 +205,13 @@ const ReportAnalytic = () => {
   useEffect(() => {
     loadDashboardData();
   }, [loadDashboardData]);
+
+  // Reload data when screen comes into focus (when user navigates back from Expenses Tracking)
+  useFocusEffect(
+    useCallback(() => {
+      loadDashboardData();
+    }, [loadDashboardData])
+  );
 
   // Prepare bar chart data
   const prepareBarChartData = () => {
@@ -196,6 +243,10 @@ const ReportAnalytic = () => {
           const percentage = dashboardData.maxMonthlyExpenses > 0 ? (item.amount / dashboardData.maxMonthlyExpenses) * 100 : 0;
           const isAboveAverage = item.amount > dashboardData.yearToDateAverageExpenses;
           
+          // Define a nice color palette for the bars
+          const barColors = ['#3498db', '#a06b6b', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c'];
+          const barColor = barColors[index % barColors.length];
+          
           return (
             <View key={index} style={reportAnalyticStyles.monthlyChartItem}>
               <View style={reportAnalyticStyles.monthlyChartLabelContainer}>
@@ -210,7 +261,7 @@ const ReportAnalytic = () => {
                     reportAnalyticStyles.monthlyChartBar,
                     { 
                       width: `${percentage}%`,
-                      backgroundColor: isAboveAverage ? '#dc3545' : '#fd7e14'
+                      backgroundColor: barColor
                     }
                   ]} 
                 />
