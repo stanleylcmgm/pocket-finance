@@ -7,6 +7,47 @@ export const reportAnalyticStyles = StyleSheet.create({
     backgroundColor: '#f8f9fa',
   },
 
+  // Advice Card
+  adviceCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 14 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+
+  adviceHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    gap: 8,
+  },
+
+  adviceIcon: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#e3f2fd',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  adviceTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#2c3e50',
+  },
+
+  adviceMessage: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: '#6c757d',
+  },
+
   // Top Banner
   topBanner: {
     backgroundColor: '#100C20',

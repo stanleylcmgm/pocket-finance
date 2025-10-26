@@ -350,6 +350,20 @@ const ReportAnalytic = () => {
         <ScrollView style={reportAnalyticStyles.scrollView} showsVerticalScrollIndicator={false}>
           <View style={reportAnalyticStyles.scrollContent}>
             
+            {/* Financial Advice Card */}
+            <View style={reportAnalyticStyles.adviceCard}>
+              <View style={reportAnalyticStyles.adviceHeader}>
+                <View style={reportAnalyticStyles.adviceIcon}>
+                  <Ionicons name="bulb" size={14} color="#2196f3" />
+                </View>
+                <Text style={reportAnalyticStyles.adviceTitle}>Financial Insight</Text>
+              </View>
+              <Text style={reportAnalyticStyles.adviceMessage}>
+                Based on your recent spending patterns, consider setting aside 20% of your income for savings. 
+                Your expense tracking shows good discipline in monitoring daily costs. Keep up the great work!
+              </Text>
+            </View>
+            
             {/* Total Assets Card */}
             <View style={reportAnalyticStyles.card}>
               <View style={reportAnalyticStyles.cardHeader}>
