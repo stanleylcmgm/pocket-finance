@@ -213,4 +213,54 @@ export const reportAnalyticStyles = StyleSheet.create({
     textAlign: 'center',
     fontStyle: 'italic',
   },
+
+  // Chart container
+  chartContainer: {
+    marginVertical: 1,
+    backgroundColor: '#f8f9fa',
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 12,
+  },
+
+  // Custom bar chart styles
+  barChartContainer: {
+    gap: 8,
+  },
+
+  barChartItem: {
+    gap: 6,
+  },
+
+  barChartLabelContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+
+  barChartLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#2c3e50',
+    flex: 1,
+  },
+
+  barChartValue: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#28a745',
+  },
+
+  barChartBarContainer: {
+    height: 12,
+    backgroundColor: '#e9ecef',
+    borderRadius: 6,
+    overflow: 'hidden',
+  },
+
+  barChartBar: {
+    height: '100%',
+    borderRadius: 10,
+    minWidth: 2,
+  },
 });

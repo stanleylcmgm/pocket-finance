@@ -4,6 +4,7 @@ import {
   Text,
   ScrollView,
   ActivityIndicator,
+  Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../theme';
@@ -59,7 +60,7 @@ const ReportAnalytic = () => {
         }))
         .filter(item => item.category)
         .sort((a, b) => b.total - a.total)
-        .slice(0, 3);
+        .slice(0, 4);
 
       // Load current month transactions for balance sheet data
       const currentMonth = new Date();
@@ -100,28 +101,60 @@ const ReportAnalytic = () => {
     loadDashboardData();
   }, [loadDashboardData]);
 
-  // Render asset categories
-  const renderAssetCategories = () => {
+  // Prepare bar chart data
+  const prepareBarChartData = () => {
     if (dashboardData.topAssetCategories.length === 0) {
+      return [];
+    }
+
+    const maxValue = Math.max(...dashboardData.topAssetCategories.map(item => item.total));
+    
+    return dashboardData.topAssetCategories.map((item, index) => ({
+      name: item.category.name,
+      value: item.total,
+      color: item.category.color,
+      percentage: maxValue > 0 ? (item.total / maxValue) * 100 : 0,
+    }));
+  };
+
+  // Render custom bar chart
+  const renderCustomBarChart = () => {
+    const chartData = prepareBarChartData();
+    if (chartData.length === 0) {
       return (
-        <Text style={reportAnalyticStyles.noDataText}>No asset categories found</Text>
+        <Text style={reportAnalyticStyles.noDataText}>No data available for chart</Text>
       );
     }
 
-    return dashboardData.topAssetCategories.map((item, index) => (
-      <View key={item.categoryId} style={reportAnalyticStyles.categoryItem}>
-        <View style={reportAnalyticStyles.categoryInfo}>
-          <View style={[reportAnalyticStyles.categoryIcon, { backgroundColor: item.category.color }]}>
-            <Ionicons name={item.category.icon} size={16} color="white" />
+    return (
+      <View style={reportAnalyticStyles.barChartContainer}>
+        {chartData.map((item, index) => (
+          <View key={index} style={reportAnalyticStyles.barChartItem}>
+            <View style={reportAnalyticStyles.barChartLabelContainer}>
+              <Text style={reportAnalyticStyles.barChartLabel} numberOfLines={1}>
+                {item.name}
+              </Text>
+              <Text style={reportAnalyticStyles.barChartValue}>
+                {formatCurrency(item.value)}
+              </Text>
+            </View>
+            <View style={reportAnalyticStyles.barChartBarContainer}>
+              <View 
+                style={[
+                  reportAnalyticStyles.barChartBar,
+                  { 
+                    width: `${item.percentage}%`,
+                    backgroundColor: item.color 
+                  }
+                ]} 
+              />
+            </View>
           </View>
-          <Text style={reportAnalyticStyles.categoryName}>{item.category.name}</Text>
-        </View>
-        <Text style={reportAnalyticStyles.categoryAmount}>
-          {formatCurrency(item.total)}
-        </Text>
+        ))}
       </View>
-    ));
+    );
   };
+
 
   // Render loading state
   if (isLoading) {
@@ -162,9 +195,10 @@ const ReportAnalytic = () => {
                 <Text style={reportAnalyticStyles.cardAmount}>{formatCurrency(dashboardData.totalAssets)}</Text>
               </View>
               <View style={reportAnalyticStyles.cardContent}>
-                <Text style={reportAnalyticStyles.cardSubtitle}>Top Asset Categories</Text>
-                <View style={reportAnalyticStyles.categoriesList}>
-                  {renderAssetCategories()}
+                <Text style={reportAnalyticStyles.cardSubtitle}>Top Asset Categories</Text>                
+                {/* Custom Bar Chart */}
+                <View style={reportAnalyticStyles.chartContainer}>
+                  {renderCustomBarChart()}
                 </View>
               </View>
             </View>
