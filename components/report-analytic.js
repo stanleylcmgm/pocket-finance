@@ -421,7 +421,7 @@ const ReportAnalytic = () => {
                       <View style={reportAnalyticStyles.balanceHeader}>
                         <Ionicons 
                           name={dashboardData.currentMonthBalance >= 0 ? "checkmark-circle" : "alert-circle"} 
-                          size={20} 
+                          size={16} 
                           color={dashboardData.currentMonthBalance >= 0 ? '#28a745' : '#dc3545'} 
                         />
                         <Text style={[

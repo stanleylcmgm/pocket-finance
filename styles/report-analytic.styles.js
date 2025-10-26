@@ -9,7 +9,7 @@ export const reportAnalyticStyles = StyleSheet.create({
 
   // Top Banner
   topBanner: {
-    backgroundColor: 'white',
+    backgroundColor: '#100C20',
     paddingTop: 28,
     paddingBottom: 16,
     paddingHorizontal: 20,
@@ -62,7 +62,7 @@ export const reportAnalyticStyles = StyleSheet.create({
     padding: 20,
     marginBottom: 16,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 14 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 4,
@@ -187,14 +187,14 @@ export const reportAnalyticStyles = StyleSheet.create({
   enhancedMetricsRow: {
     flexDirection: 'row',
     gap: 12,
-    marginBottom: 6,
+    marginBottom: 7,
   },
 
   enhancedMetricItem: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 16,
+    paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 16,
     borderWidth: 1,
@@ -233,19 +233,19 @@ export const reportAnalyticStyles = StyleSheet.create({
 
   // Combined balance and savings container
   combinedBalanceSavingsContainer: {
-    paddingVertical: 20,
-    paddingHorizontal: 20,
-    borderRadius: 16,
-    borderWidth: 2,
-    marginBottom: 6,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    marginBottom: 4,
   },
 
   balanceSavingsHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: -3,
-    gap: 20,
+    marginBottom: -2,
+    gap: 16,
   },
 
   balanceSection: {
@@ -256,18 +256,18 @@ export const reportAnalyticStyles = StyleSheet.create({
   balanceHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 4,
-    gap: 6,
+    marginBottom: 2,
+    gap: 4,
   },
 
   balanceLabel: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '700',
   },
 
   balanceValue: {
-    marginTop: 4,
-    fontSize: 14,
+    marginTop: 2,
+    fontSize: 13,
     fontWeight: 'bold',
   },
 
@@ -277,27 +277,27 @@ export const reportAnalyticStyles = StyleSheet.create({
   },
 
   savingsRateLabel: {
-    fontSize: 12,
-    marginBottom: 8,
+    fontSize: 11,
+    marginBottom: 4,
     fontWeight: '600',
   },
 
   savingsRateBar: {
-    height: 6,
+    height: 4,
     backgroundColor: 'rgba(0,0,0,0.1)',
-    borderRadius: 3,
-    marginBottom: 6,
+    borderRadius: 2,
+    marginBottom: 3,
     overflow: 'hidden',
     width: '100%',
   },
 
   savingsRateFill: {
     height: '100%',
-    borderRadius: 3,
+    borderRadius: 2,
   },
 
   savingsRateValue: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: 'bold',
   },
 

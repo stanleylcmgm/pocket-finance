@@ -9,7 +9,7 @@ export const expensesTrackingStyles = StyleSheet.create({
 
   // Top Banner
   topBanner: {
-    backgroundColor: 'white',
+    backgroundColor: '#100C20',
     paddingTop: 28,
     paddingBottom: 16,
     paddingHorizontal: 20,
