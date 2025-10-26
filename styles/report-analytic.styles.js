@@ -95,6 +95,18 @@ export const reportAnalyticStyles = StyleSheet.create({
     color: '#2c3e50',
   },
 
+  cardTitleSmall: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#2c3e50',
+  },
+
+  cardAmountSmall: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#2c3e50',
+  },
+
   cardContent: {
     gap: 12,
   },
@@ -430,5 +442,56 @@ export const reportAnalyticStyles = StyleSheet.create({
     height: '100%',
     borderRadius: 10,
     minWidth: 2,
+  },
+
+  // Monthly expenses chart styles
+  monthlyChartContainer: {
+    gap: 8,
+  },
+
+  monthlyChartItem: {
+    gap: 6,
+  },
+
+  monthlyChartLabelContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+
+  monthlyChartLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#2c3e50',
+    flex: 1,
+  },
+
+  monthlyChartValue: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#fd7e14',
+  },
+
+  monthlyChartBarContainer: {
+    height: 12,
+    backgroundColor: '#e9ecef',
+    borderRadius: 6,
+    overflow: 'hidden',
+    position: 'relative',
+  },
+
+  monthlyChartBar: {
+    height: '100%',
+    borderRadius: 6,
+    minWidth: 2,
+  },
+
+  averageLine: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    width: 2,
+    backgroundColor: '#6c757d',
+    opacity: 0.7,
   },
 });

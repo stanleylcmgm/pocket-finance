@@ -30,6 +30,8 @@ const ReportAnalytic = () => {
     currentMonthExpenses: 0,
     currentMonthBalance: 0,
     yearToDateAverageExpenses: 0,
+    recentMonthlyExpenses: [],
+    maxMonthlyExpenses: 0,
   });
 
   // Load all dashboard data
@@ -69,7 +71,7 @@ const ReportAnalytic = () => {
       const monthlyTransactions = filterTransactionsByMonth(allTransactions, monthKey);
       const monthlySummary = calculateMonthlySummary(monthlyTransactions);
 
-      // Calculate year-to-date average expenses
+      // Calculate year-to-date average expenses and recent monthly expenses
       const currentYear = currentMonth.getFullYear();
       const yearStart = new Date(currentYear, 0, 1);
       const yearTransactions = allTransactions.filter(tx => {
@@ -77,9 +79,70 @@ const ReportAnalytic = () => {
         return txDate >= yearStart && txDate <= currentMonth && tx.type === 'expense';
       });
       
-      const monthsInYear = currentMonth.getMonth() + 1;
-      const totalYearExpenses = yearTransactions.reduce((sum, tx) => sum + (tx.amountConverted || 0), 0);
-      const yearToDateAverage = monthsInYear > 0 ? totalYearExpenses / monthsInYear : 0;
+      // Calculate YTD average by summing monthly expenses and dividing by months with data
+      const monthlyExpensesForYTD = [];
+      for (let i = 0; i <= currentMonth.getMonth(); i++) {
+        const targetDate = new Date(currentYear, i, 1);
+        const monthKey = toMonthKey(targetDate);
+        
+        // More robust filtering - check all transactions manually
+        const monthTransactions = allTransactions.filter(tx => {
+          const txDate = new Date(tx.date);
+          const txMonthKey = toMonthKey(txDate);
+          return txMonthKey === monthKey && tx.type === 'expense';
+        });
+        
+        const monthExpenses = monthTransactions.reduce((sum, tx) => sum + (tx.amountConverted || 0), 0);
+        monthlyExpensesForYTD.push(monthExpenses);
+      }
+      
+      const totalYearExpenses = monthlyExpensesForYTD.reduce((sum, amount) => sum + amount, 0);
+      const monthsWithData = monthlyExpensesForYTD.filter(amount => amount > 0).length;
+      const yearToDateAverage = monthsWithData > 0 ? totalYearExpenses / monthsWithData : 0;
+
+      // Calculate recent 3 monthly expenses
+      const recentMonthlyExpenses = [];
+      
+      for (let i = 2; i >= 0; i--) {
+        const targetDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - i, 1);
+        const monthKey = toMonthKey(targetDate);
+        
+        // More robust filtering - check all transactions manually
+        const monthTransactions = allTransactions.filter(tx => {
+          const txDate = new Date(tx.date);
+          const txMonthKey = toMonthKey(txDate);
+          return txMonthKey === monthKey && tx.type === 'expense';
+        });
+        
+        const monthExpenses = monthTransactions.reduce((sum, tx) => sum + (tx.amountConverted || 0), 0);
+        
+        recentMonthlyExpenses.push({
+          month: targetDate.toLocaleDateString('en-US', { month: 'short' }),
+          amount: monthExpenses,
+          monthKey: monthKey
+        });
+      }
+      
+      // Sort by month descending (most recent first)
+      recentMonthlyExpenses.sort((a, b) => {
+        const monthOrder = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                           'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        return monthOrder.indexOf(b.month) - monthOrder.indexOf(a.month);
+      });
+
+      // Calculate max monthly expenses from recent 12 months
+      const monthlyExpenses12Months = [];
+      for (let i = 11; i >= 0; i--) {
+        const targetDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - i, 1);
+        const monthKey = toMonthKey(targetDate);
+        const monthTransactions = filterTransactionsByMonth(allTransactions, monthKey);
+        const monthExpenses = monthTransactions
+          .filter(tx => tx.type === 'expense')
+          .reduce((sum, tx) => sum + (tx.amountConverted || 0), 0);
+        
+        monthlyExpenses12Months.push(monthExpenses);
+      }
+      const maxMonthlyExpenses = Math.max(...monthlyExpenses12Months, yearToDateAverage);
 
       setDashboardData({
         totalAssets,
@@ -88,6 +151,8 @@ const ReportAnalytic = () => {
         currentMonthExpenses: monthlySummary.totalExpenses,
         currentMonthBalance: monthlySummary.balance,
         yearToDateAverageExpenses: yearToDateAverage,
+        recentMonthlyExpenses,
+        maxMonthlyExpenses,
       });
 
     } catch (error) {
@@ -115,6 +180,55 @@ const ReportAnalytic = () => {
       color: item.category.color,
       percentage: maxValue > 0 ? (item.total / maxValue) * 100 : 0,
     }));
+  };
+
+  // Render monthly expenses bar chart
+  const renderMonthlyExpensesChart = () => {
+    if (dashboardData.recentMonthlyExpenses.length === 0) {
+      return (
+        <Text style={reportAnalyticStyles.noDataText}>No monthly expense data available</Text>
+      );
+    }
+
+    return (
+      <View style={reportAnalyticStyles.monthlyChartContainer}>
+        {dashboardData.recentMonthlyExpenses.map((item, index) => {
+          const percentage = dashboardData.maxMonthlyExpenses > 0 ? (item.amount / dashboardData.maxMonthlyExpenses) * 100 : 0;
+          const isAboveAverage = item.amount > dashboardData.yearToDateAverageExpenses;
+          
+          return (
+            <View key={index} style={reportAnalyticStyles.monthlyChartItem}>
+              <View style={reportAnalyticStyles.monthlyChartLabelContainer}>
+                <Text style={reportAnalyticStyles.monthlyChartLabel}>{item.month}</Text>
+                <Text style={reportAnalyticStyles.monthlyChartValue}>
+                  {formatCurrency(item.amount)}
+                </Text>
+              </View>
+              <View style={reportAnalyticStyles.monthlyChartBarContainer}>
+                <View 
+                  style={[
+                    reportAnalyticStyles.monthlyChartBar,
+                    { 
+                      width: `${percentage}%`,
+                      backgroundColor: isAboveAverage ? '#dc3545' : '#fd7e14'
+                    }
+                  ]} 
+                />
+                {/* YTD Average Line */}
+                <View 
+                  style={[
+                    reportAnalyticStyles.averageLine,
+                    { 
+                      left: `${(dashboardData.yearToDateAverageExpenses / dashboardData.maxMonthlyExpenses) * 100}%`
+                    }
+                  ]} 
+                />
+              </View>
+            </View>
+          );
+        })}
+      </View>
+    );
   };
 
   // Render custom bar chart
@@ -310,15 +424,19 @@ const ReportAnalytic = () => {
             <View style={reportAnalyticStyles.card}>
               <View style={reportAnalyticStyles.cardHeader}>
                 <View style={reportAnalyticStyles.cardTitleContainer}>
-                  <Ionicons name="calendar" size={24} color="#fd7e14" />
-                  <Text style={reportAnalyticStyles.cardTitle}>Year-to-Date Average</Text>
+                  <Ionicons name="calendar" size={20} color="#fd7e14" />
+                  <Text style={reportAnalyticStyles.cardTitleSmall}>Year-to-Date Average</Text>
                 </View>
-                <Text style={reportAnalyticStyles.cardAmount}>
+                <Text style={reportAnalyticStyles.cardAmountSmall}>
                   {formatCurrency(dashboardData.yearToDateAverageExpenses)}
                 </Text>
               </View>
               <View style={reportAnalyticStyles.cardContent}>
-                <Text style={reportAnalyticStyles.cardSubtitle}>Monthly Average Expenses</Text>
+                <Text style={reportAnalyticStyles.cardSubtitle}>Recent Monthly Expenses</Text>
+                {/* Monthly Expenses Bar Chart */}
+                <View style={reportAnalyticStyles.chartContainer}>
+                  {renderMonthlyExpensesChart()}
+                </View>
                 <Text style={reportAnalyticStyles.cardDescription}>
                   Average monthly expenses for {new Date().getFullYear()}
                 </Text>
