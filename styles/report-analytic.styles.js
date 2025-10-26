@@ -155,7 +155,180 @@ export const reportAnalyticStyles = StyleSheet.create({
     color: '#28a745',
   },
 
-  // Metrics row
+  // Month indicator
+  monthIndicator: {
+    backgroundColor: '#f8f9fa',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+  },
+
+  monthText: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#6c757d',
+  },
+
+  // Enhanced metrics row
+  enhancedMetricsRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 6,
+  },
+
+  enhancedMetricItem: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+  },
+
+  incomeMetric: {
+    backgroundColor: '#f0f9f0',
+    borderColor: '#c3e6c3',
+  },
+
+  expenseMetric: {
+    backgroundColor: '#fdf2f2',
+    borderColor: '#f5c6cb',
+  },
+
+  metricIconContainer: {
+    marginRight: 12,
+  },
+
+  metricContent: {
+    flex: 1,
+  },
+
+  enhancedMetricLabel: {
+    fontSize: 12,
+    color: '#6c757d',
+    marginBottom: 4,
+    fontWeight: '600',
+  },
+
+  enhancedMetricValue: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#2c3e50',
+  },
+
+  // Combined balance and savings container
+  combinedBalanceSavingsContainer: {
+    paddingVertical: 20,
+    paddingHorizontal: 20,
+    borderRadius: 16,
+    borderWidth: 2,
+    marginBottom: 6,
+  },
+
+  balanceSavingsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: -3,
+    gap: 20,
+  },
+
+  balanceSection: {
+    flex: 1,
+    alignItems: 'center',
+  },
+
+  balanceHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+    gap: 6,
+  },
+
+  balanceLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+
+  balanceValue: {
+    marginTop: 4,
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+
+  savingsSection: {
+    flex: 1,
+    alignItems: 'center',
+  },
+
+  savingsRateLabel: {
+    fontSize: 12,
+    marginBottom: 8,
+    fontWeight: '600',
+  },
+
+  savingsRateBar: {
+    height: 6,
+    backgroundColor: 'rgba(0,0,0,0.1)',
+    borderRadius: 3,
+    marginBottom: 6,
+    overflow: 'hidden',
+    width: '100%',
+  },
+
+  savingsRateFill: {
+    height: '100%',
+    borderRadius: 3,
+  },
+
+  savingsRateValue: {
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+
+  balanceStatus: {
+    fontSize: 11,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    textAlign: 'center',
+  },
+
+  // Legacy styles (keeping for backward compatibility)
+  enhancedBalanceContainer: {
+    paddingVertical: 20,
+    paddingHorizontal: 20,
+    borderRadius: 16,
+    borderWidth: 2,
+    marginBottom: 16,
+    alignItems: 'center',
+  },
+
+  enhancedBalanceLabel: {
+    fontSize: 14,
+    fontWeight: '700',
+  },
+
+  enhancedBalanceValue: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+
+  // Savings rate container
+  savingsRateContainer: {
+    backgroundColor: '#f8f9fa',
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+  },
+
+  // Legacy styles (keeping for backward compatibility)
   metricsRow: {
     flexDirection: 'row',
     gap: 16,
@@ -199,11 +372,6 @@ export const reportAnalyticStyles = StyleSheet.create({
     color: '#1976d2',
     marginBottom: 4,
     fontWeight: '600',
-  },
-
-  balanceValue: {
-    fontSize: 18,
-    fontWeight: 'bold',
   },
 
   // No data text

@@ -208,32 +208,100 @@ const ReportAnalytic = () => {
               <View style={reportAnalyticStyles.cardHeader}>
                 <View style={reportAnalyticStyles.cardTitleContainer}>
                   <Ionicons name="trending-up" size={24} color="#007bff" />
-                  <Text style={reportAnalyticStyles.cardTitle}>This Month</Text>
+                  <Text style={reportAnalyticStyles.cardTitle}>Monthly Balance</Text>
+                </View>
+                <View style={reportAnalyticStyles.monthIndicator}>
+                  <Text style={reportAnalyticStyles.monthText}>
+                    As of {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                  </Text>
                 </View>
               </View>
               <View style={reportAnalyticStyles.cardContent}>
-                <View style={reportAnalyticStyles.metricsRow}>
-                  <View style={reportAnalyticStyles.metricItem}>
-                    <Text style={reportAnalyticStyles.metricLabel}>Income</Text>
-                    <Text style={[reportAnalyticStyles.metricValue, { color: '#28a745' }]}>
-                      {formatCurrency(dashboardData.currentMonthIncome)}
-                    </Text>
+                {/* Enhanced Metrics Row */}
+                <View style={reportAnalyticStyles.enhancedMetricsRow}>
+                  <View style={[reportAnalyticStyles.enhancedMetricItem, reportAnalyticStyles.incomeMetric]}>
+                    <View style={reportAnalyticStyles.metricIconContainer}>
+                      <Ionicons name="arrow-up-circle" size={20} color="#28a745" />
+                    </View>
+                    <View style={reportAnalyticStyles.metricContent}>
+                      <Text style={reportAnalyticStyles.enhancedMetricLabel}>Income</Text>
+                      <Text style={reportAnalyticStyles.enhancedMetricValue}>
+                        {formatCurrency(dashboardData.currentMonthIncome)}
+                      </Text>
+                    </View>
                   </View>
-                  <View style={reportAnalyticStyles.metricItem}>
-                    <Text style={reportAnalyticStyles.metricLabel}>Expenses</Text>
-                    <Text style={[reportAnalyticStyles.metricValue, { color: '#dc3545' }]}>
-                      {formatCurrency(dashboardData.currentMonthExpenses)}
-                    </Text>
+                  <View style={[reportAnalyticStyles.enhancedMetricItem, reportAnalyticStyles.expenseMetric]}>
+                    <View style={reportAnalyticStyles.metricIconContainer}>
+                      <Ionicons name="arrow-down-circle" size={20} color="#dc3545" />
+                    </View>
+                    <View style={reportAnalyticStyles.metricContent}>
+                      <Text style={reportAnalyticStyles.enhancedMetricLabel}>Expenses</Text>
+                      <Text style={reportAnalyticStyles.enhancedMetricValue}>
+                        {formatCurrency(dashboardData.currentMonthExpenses)}
+                      </Text>
+                    </View>
                   </View>
                 </View>
-                <View style={reportAnalyticStyles.balanceContainer}>
-                  <Text style={reportAnalyticStyles.balanceLabel}>Balance</Text>
-                  <Text style={[
-                    reportAnalyticStyles.balanceValue,
-                    { color: dashboardData.currentMonthBalance >= 0 ? '#28a745' : '#dc3545' }
-                  ]}>
-                    {formatCurrency(dashboardData.currentMonthBalance)}
-                  </Text>
+
+                {/* Combined Balance & Savings Rate Section */}
+                <View style={[
+                  reportAnalyticStyles.combinedBalanceSavingsContainer,
+                  { 
+                    backgroundColor: dashboardData.currentMonthBalance >= 0 ? '#e8f5e8' : '#fdeaea',
+                    borderColor: dashboardData.currentMonthBalance >= 0 ? '#c3e6c3' : '#f5c6cb'
+                  }
+                ]}>
+                  <View style={reportAnalyticStyles.balanceSavingsHeader}>
+                    <View style={reportAnalyticStyles.balanceSection}>
+                      <View style={reportAnalyticStyles.balanceHeader}>
+                        <Ionicons 
+                          name={dashboardData.currentMonthBalance >= 0 ? "checkmark-circle" : "alert-circle"} 
+                          size={20} 
+                          color={dashboardData.currentMonthBalance >= 0 ? '#28a745' : '#dc3545'} 
+                        />
+                        <Text style={[
+                          reportAnalyticStyles.balanceLabel,
+                          { color: dashboardData.currentMonthBalance >= 0 ? '#28a745' : '#dc3545' }
+                        ]}>
+                          Net Balance
+                        </Text>
+                      </View>
+                      <Text style={[
+                        reportAnalyticStyles.balanceValue,
+                        { color: dashboardData.currentMonthBalance >= 0 ? '#28a745' : '#dc3545' }
+                      ]}>
+                        {formatCurrency(dashboardData.currentMonthBalance)}
+                      </Text>
+                    </View>
+                    
+                    {dashboardData.currentMonthIncome > 0 && (
+                      <View style={reportAnalyticStyles.savingsSection}>
+                        <Text style={[
+                          reportAnalyticStyles.savingsRateLabel,
+                          { color: dashboardData.currentMonthBalance >= 0 ? '#28a745' : '#dc3545' }
+                        ]}>
+                          Savings Rate
+                        </Text>
+                        <View style={reportAnalyticStyles.savingsRateBar}>
+                          <View 
+                            style={[
+                              reportAnalyticStyles.savingsRateFill,
+                              { 
+                                width: `${Math.min(100, Math.max(0, (dashboardData.currentMonthBalance / dashboardData.currentMonthIncome) * 100))}%`,
+                                backgroundColor: dashboardData.currentMonthBalance >= 0 ? '#28a745' : '#dc3545'
+                              }
+                            ]} 
+                          />
+                        </View>
+                        <Text style={[
+                          reportAnalyticStyles.savingsRateValue,
+                          { color: dashboardData.currentMonthBalance >= 0 ? '#28a745' : '#dc3545' }
+                        ]}>
+                          {((dashboardData.currentMonthBalance / dashboardData.currentMonthIncome) * 100).toFixed(1)}%
+                        </Text>
+                      </View>
+                    )}
+                  </View>
                 </View>
               </View>
             </View>
