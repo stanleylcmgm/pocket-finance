@@ -113,17 +113,17 @@ export const homeScreenStyles = StyleSheet.create({
   menuContainer: {
     paddingLeft: 20,
     paddingRight: 20,
-    paddingTop: 20,
+    paddingTop: 35,
   },
 
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 25,
   },
 
   menuTitle: {
-    fontSize: 20,
+    fontSize: 19,
     fontWeight: 'bold',
     color: '#2c3e50',
     marginRight: 12,
@@ -140,7 +140,7 @@ export const homeScreenStyles = StyleSheet.create({
   gridContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 14,
+    gap: 17,
     justifyContent: 'center',
     alignItems: 'center',
   },

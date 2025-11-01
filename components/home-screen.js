@@ -4,13 +4,11 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { colors } from '../theme';
 import { homeScreenStyles } from '../styles/home-screen.styles';
-import { verifyDatabaseUsage, testDatabaseWrite, deleteAllDatabaseRecords } from '../utils/database-test';
 import { 
   getAssets, 
   calculateTotalAssets,
@@ -28,61 +26,6 @@ const HomeScreen = ({ navigation }) => {
   const [totalAssets, setTotalAssets] = useState(0);
   const [monthlyExpensesTotal, setMonthlyExpensesTotal] = useState(0);
   const [balanceSheetBalance, setBalanceSheetBalance] = useState(0);
-
-  // Database verification functions
-  const handleVerifyDatabase = async () => {
-    const result = await verifyDatabaseUsage();
-    Alert.alert(
-      'Database Verification',
-      `Database Working: ${result.databaseWorking ? '✅ YES' : '❌ NO'}\n\n` +
-      `Database Data:\n` +
-      `- Categories: ${result.dbCategories}\n` +
-      `- Accounts: ${result.dbAccounts}\n` +
-      `- Transactions: ${result.dbTransactions}\n\n` +
-      `Sample Data:\n` +
-      `- First Category: ${result.sampleCategory?.name || 'None'}\n` +
-      `- First Account: ${result.sampleAccount?.name || 'None'}\n` +
-      `- First Transaction: ${result.sampleTransaction?.note || 'None'}`,
-      [{ text: 'OK' }]
-    );
-  };
-
-  const handleTestDatabaseWrite = async () => {
-    const result = await testDatabaseWrite();
-    Alert.alert(
-      'Database Write Test',
-      result.success 
-        ? `✅ SUCCESS!\n\nNew transaction created.\nTotal transactions: ${result.totalTransactions}`
-        : `❌ FAILED!\n\nError: ${result.error}`,
-      [{ text: 'OK' }]
-    );
-  };
-
-  const handleDeleteDatabase = async () => {
-    Alert.alert(
-      'Delete Database',
-      'Are you sure you want to delete ALL records from the database? This action cannot be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete All',
-          style: 'destructive',
-          onPress: async () => {
-            const result = await deleteAllDatabaseRecords();
-            Alert.alert(
-              'Delete Database',
-              result.success 
-                ? `✅ SUCCESS!\n\nAll records deleted successfully.\n\nRemaining records:\n- Categories: ${result.remainingRecords.categories}\n- Accounts: ${result.remainingRecords.accounts}\n- Transactions: ${result.remainingRecords.transactions}`
-                : `❌ FAILED!\n\nError: ${result.error}`,
-              [{ text: 'OK' }]
-            );
-            // Reload stats after deletion
-            loadStats();
-          }
-        }
-      ]
-    );
-  };
 
   // Load stats data
   const loadStats = useCallback(async () => {
@@ -273,30 +216,6 @@ const HomeScreen = ({ navigation }) => {
                 </View>
                 <Text style={homeScreenStyles.statNumber}>{formatCurrencyNoDecimals(balanceSheetBalance)}</Text>
                 <Text style={homeScreenStyles.statLabel}>Balance</Text>
-              </View>
-            </View>
-
-            {/* Database Test Section */}
-            <View style={homeScreenStyles.menuContainer}>
-              <View style={homeScreenStyles.sectionHeader}>
-                <Text style={homeScreenStyles.menuTitle}>Database Test</Text>
-                <View style={homeScreenStyles.sectionLine}></View>
-              </View>
-              <View style={homeScreenStyles.testButtonsContainer}>
-                <TouchableOpacity 
-                  style={[homeScreenStyles.testButton, { backgroundColor: colors.info[500] }]}
-                  onPress={handleVerifyDatabase}
-                >
-                  <Ionicons name="checkmark-circle" size={20} color="white" />
-                  <Text style={homeScreenStyles.testButtonText}>Verify Database</Text>
-                </TouchableOpacity>
-                <TouchableOpacity 
-                  style={[homeScreenStyles.testButton, { backgroundColor: colors.error[500] }]}
-                  onPress={handleDeleteDatabase}
-                >
-                  <Ionicons name="trash" size={20} color="white" />
-                  <Text style={homeScreenStyles.testButtonText}>Delete Database</Text>
-                </TouchableOpacity>
               </View>
             </View>
 
