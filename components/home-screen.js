@@ -20,8 +20,11 @@ import {
   formatCurrency
 } from '../utils/data-utils';
 import { getExpenses } from '../utils/expenses-data';
+import { useI18n } from '../i18n/i18n';
+import LanguageSelector from './language-selector';
 
 const HomeScreen = ({ navigation }) => {
+  const { t } = useI18n();
   const [activeTab, setActiveTab] = useState('home');
   const [totalAssets, setTotalAssets] = useState(0);
   const [monthlyExpensesTotal, setMonthlyExpensesTotal] = useState(0);
@@ -107,32 +110,32 @@ const HomeScreen = ({ navigation }) => {
   const menuItems = [
     {
       id: 'balance-sheet',
-      title: 'Balance Sheet',
-      subtitle: 'Track income & expenses',
+      title: t('home.balanceSheet'),
+      subtitle: t('home.balanceSheetSubtitle'),
       icon: 'wallet-outline',
       color: colors.features.balanceSheet,
       screen: 'BalanceSheet',
     },
     {
       id: 'expenses-tracking',
-      title: 'Expenses Tracking',
-      subtitle: 'Monitor spending patterns',
+      title: t('home.expensesTracking'),
+      subtitle: t('home.expensesTrackingSubtitle'),
       icon: 'trending-down-outline',
       color: colors.features.expensesTracking,
       screen: 'ExpensesTracking',
     },
     {
       id: 'asset-management',
-      title: 'Asset Management',
-      subtitle: 'Manage your investments',
+      title: t('home.assetManagement'),
+      subtitle: t('home.assetManagementSubtitle'),
       icon: 'business-outline',
       color: colors.features.assetManagement,
       screen: 'AssetManagement',
     },
     {
       id: 'reports',
-      title: 'Reports & Analytics',
-      subtitle: 'View insights',
+      title: t('home.reports'),
+      subtitle: t('home.reportsSubtitle'),
       icon: 'analytics-outline',
       color: colors.features.reports,
       screen: 'Reports',
@@ -140,11 +143,11 @@ const HomeScreen = ({ navigation }) => {
   ];
 
   const bottomTabs = [
-    { id: 'home', title: 'Home', icon: 'home-outline' },
-    { id: 'balance-sheet', title: 'Balance', icon: 'wallet-outline' },
-    { id: 'expenses-tracking', title: 'Expenses', icon: 'trending-down-outline' },
-    { id: 'asset-management', title: 'Assets', icon: 'business-outline' },
-    { id: 'reports', title: 'Reports', icon: 'analytics-outline' },
+    { id: 'home', title: t('home.home'), icon: 'home-outline' },
+    { id: 'balance-sheet', title: t('home.balance'), icon: 'wallet-outline' },
+    { id: 'expenses-tracking', title: t('home.expenses'), icon: 'trending-down-outline' },
+    { id: 'asset-management', title: t('home.assets'), icon: 'business-outline' },
+    { id: 'reports', title: t('home.reportsTitle'), icon: 'analytics-outline' },
   ];
 
   const navigateToScreen = (screenName) => {
@@ -156,9 +159,6 @@ const HomeScreen = ({ navigation }) => {
       navigation.navigate('AssetManagement');
     } else if (screenName === 'Reports') {
       navigation.navigate('Reports');
-    } else {
-      // For future screens
-      alert(`${screenName} screen coming soon!`);
     }
   };
 
@@ -181,8 +181,13 @@ const HomeScreen = ({ navigation }) => {
       <View style={homeScreenStyles.headerGradient}>
         <View style={homeScreenStyles.header}>
           <View style={homeScreenStyles.titleContainer}>
-            <Text style={homeScreenStyles.title}>⭐ Pocket Finance</Text>
-            <Text style={homeScreenStyles.subtitle}>Your Productivity Companion</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+              <View style={{ flex: 1 }}>
+                <Text style={homeScreenStyles.title}>{t('home.title')}</Text>
+                <Text style={homeScreenStyles.subtitle}>{t('home.subtitle')}</Text>
+              </View>
+              <LanguageSelector />
+            </View>
           </View>
           <View style={homeScreenStyles.headerIcon}>
             <Ionicons name="star" size={40} color="rgba(255,255,255,0.3)" />
@@ -201,28 +206,28 @@ const HomeScreen = ({ navigation }) => {
                   <Ionicons name="business" size={20} color={colors.success[500]} />
                 </View>
                 <Text style={homeScreenStyles.statNumber}>{formatCurrencyNoDecimals(totalAssets)}</Text>
-                <Text style={homeScreenStyles.statLabel}>Asset</Text>
+                <Text style={homeScreenStyles.statLabel}>{t('home.asset')}</Text>
               </View>
               <View style={homeScreenStyles.statCard}>
                 <View style={homeScreenStyles.statIconContainer}>
                   <Ionicons name="trending-down" size={20} color={colors.error[500]} />
                 </View>
                 <Text style={homeScreenStyles.statNumber}>{formatCurrencyNoDecimals(monthlyExpensesTotal)}</Text>
-                <Text style={homeScreenStyles.statLabel}>Spent</Text>
+                <Text style={homeScreenStyles.statLabel}>{t('home.spent')}</Text>
               </View>
               <View style={homeScreenStyles.statCard}>
                 <View style={homeScreenStyles.statIconContainer}>
                   <Ionicons name="wallet" size={20} color={colors.info[500]} />
                 </View>
                 <Text style={homeScreenStyles.statNumber}>{formatCurrencyNoDecimals(balanceSheetBalance)}</Text>
-                <Text style={homeScreenStyles.statLabel}>Balance</Text>
+                <Text style={homeScreenStyles.statLabel}>{t('home.balance')}</Text>
               </View>
             </View>
 
             {/* Financial Tools */}
             <View style={homeScreenStyles.menuContainer}>
               <View style={homeScreenStyles.sectionHeader}>
-                <Text style={homeScreenStyles.menuTitle}>Financial Tools</Text>
+                <Text style={homeScreenStyles.menuTitle}>{t('home.financialTools')}</Text>
                 <View style={homeScreenStyles.sectionLine}></View>
               </View>
               

@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { balanceSheetStyles } from '../styles/balance-sheet.styles';
+import { useI18n } from '../i18n/i18n';
 
 import { 
   formatCurrency, 
@@ -35,6 +36,7 @@ import {
 } from '../utils/data-utils';
 
 const BalanceSheet = () => {
+  const { t } = useI18n();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [monthKey, setMonthKey] = useState(toMonthKey(new Date()));
   const [monthlyTransactions, setMonthlyTransactions] = useState([]);
@@ -128,7 +130,7 @@ const BalanceSheet = () => {
       
     } catch (error) {
       console.error('Error loading data from database:', error);
-      Alert.alert('Error', 'Failed to load data from database');
+      Alert.alert(t('common.error'), t('balance.errorFailedToLoad'));
     } finally {
       setIsLoading(false);
     }
@@ -213,13 +215,13 @@ const BalanceSheet = () => {
 
   const saveTransaction = async () => {
     if (!formData.amount || !formData.categoryId) {
-      Alert.alert('Error', 'Please fill in amount and category');
+      Alert.alert(t('common.error'), t('balance.errorFillFields'));
       return;
     }
 
     const amount = parseAmountFromInput(formData.amount);
     if (amount <= 0) {
-      Alert.alert('Error', 'Amount must be greater than 0');
+      Alert.alert(t('common.error'), t('balance.errorAmountGreaterThanZero'));
       return;
     }
 
@@ -253,18 +255,18 @@ const BalanceSheet = () => {
       
     } catch (error) {
       console.error('Error saving transaction:', error);
-      Alert.alert('Error', 'Failed to save transaction');
+      Alert.alert(t('common.error'), t('balance.errorFailedToSave'));
     }
   };
 
   const handleDeleteTransaction = (id) => {
     Alert.alert(
-      'Delete Transaction',
-      'Are you sure you want to delete this transaction?',
+      t('balance.deleteTransaction'),
+      t('balance.deleteTransactionConfirm'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Delete',
+          text: t('common.delete'),
           style: 'destructive',
           onPress: async () => {
             try {
@@ -272,7 +274,7 @@ const BalanceSheet = () => {
               await loadDataFromDatabase();
             } catch (error) {
               console.error('Error deleting transaction:', error);
-              Alert.alert('Error', 'Failed to delete transaction');
+              Alert.alert(t('common.error'), t('balance.errorFailedToDelete'));
             }
           },
         },
@@ -293,7 +295,7 @@ const BalanceSheet = () => {
       await loadDataFromDatabase();
     } catch (error) {
       console.error('Error duplicating transaction:', error);
-      Alert.alert('Error', 'Failed to duplicate transaction');
+      Alert.alert(t('common.error'), t('balance.errorFailedToDuplicate'));
     }
   };
 
@@ -386,7 +388,7 @@ const BalanceSheet = () => {
 
     return (
       <View style={[balanceSheetStyles.summaryCard, getCardStyle()]}>
-        <Text style={balanceSheetStyles.summaryLabel}>{label}</Text>
+        <Text style={balanceSheetStyles.summaryLabel}>{label === 'Balance' ? t('balance.balance') : label}</Text>
         <Text style={[balanceSheetStyles.summaryAmount, { color: getTextColor() }]}>
           {formatCurrency(amount)}
         </Text>
@@ -399,11 +401,11 @@ const BalanceSheet = () => {
       <View style={[balanceSheetStyles.summaryCard, balanceSheetStyles.summaryCardCombined, { flex: 2 }]}>
         <View style={balanceSheetStyles.combinedTwoLines}>
           <Text style={balanceSheetStyles.combinedLineText}>
-            Total Income:
+            {t('balance.totalIncome')}
             <Text style={{ fontWeight: 'bold', color: '#155724' }}> {formatCurrency(incomeAmount)}</Text>
           </Text>
           <Text style={balanceSheetStyles.combinedLineText}>
-            Total Expenses:
+            {t('balance.totalExpenses')}
             <Text style={{ fontWeight: 'bold', color: '#721c24' }}> {formatCurrency(expenseAmount)}</Text>
           </Text>
         </View>
@@ -421,13 +423,13 @@ const BalanceSheet = () => {
         onPress={() => openModal(item.type, item)}
         onLongPress={() => {
           Alert.alert(
-            'Transaction Options',
-            'What would you like to do?',
+            t('balance.transactionOptions'),
+            t('expenses.whatWouldYouLikeToDo'),
             [
-              { text: 'Edit', onPress: () => openModal(item.type, item) },
-              { text: 'Duplicate', onPress: () => duplicateTransaction(item) },
-              { text: 'Delete', style: 'destructive', onPress: () => handleDeleteTransaction(item.id) },
-              { text: 'Cancel', style: 'cancel' },
+              { text: t('common.edit'), onPress: () => openModal(item.type, item) },
+              { text: t('expenses.duplicate'), onPress: () => duplicateTransaction(item) },
+              { text: t('common.delete'), style: 'destructive', onPress: () => handleDeleteTransaction(item.id) },
+              { text: t('common.cancel'), style: 'cancel' },
             ]
           );
         }}
@@ -440,7 +442,7 @@ const BalanceSheet = () => {
               color={category?.color || '#6c757d'} 
             />
             <Text style={balanceSheetStyles.itemTitle}>
-              {item.note || category?.name || 'Untitled'}
+              {item.note || category?.name || t('balance.untitled')}
             </Text>
           </View>
           <View style={balanceSheetStyles.itemDetails}>
@@ -483,14 +485,14 @@ const BalanceSheet = () => {
             color="#6c757d" 
           />
           <Text style={balanceSheetStyles.emptyText}>
-            No {type} entries yet
+            {type === 'income' ? t('balance.noIncomeEntries') : t('balance.noExpenseEntries')}
           </Text>
           <TouchableOpacity
             style={[balanceSheetStyles.emptyStateButton, { backgroundColor: type === 'income' ? '#28a745' : '#dc3545' }]}
             onPress={() => openModal(type)}
           >
             <Text style={balanceSheetStyles.emptyStateButtonText}>
-              Add Your First {type === 'income' ? 'Income' : 'Expense'}
+              {type === 'income' ? t('balance.addYourFirstIncome') : t('balance.addYourFirstExpense')}
             </Text>
           </TouchableOpacity>
         </View>
@@ -515,7 +517,7 @@ const BalanceSheet = () => {
     >
       <View style={balanceSheetStyles.modalOverlay}>
         <View style={balanceSheetStyles.monthPickerContent}>
-          <Text style={balanceSheetStyles.monthPickerTitle}>Select Month</Text>
+          <Text style={balanceSheetStyles.monthPickerTitle}>{t('expenses.selectMonth')}</Text>
           
           <View style={balanceSheetStyles.yearSelector}>
             <TouchableOpacity onPress={() => setSelectedYear(selectedYear - 1)}>
@@ -551,7 +553,7 @@ const BalanceSheet = () => {
             style={balanceSheetStyles.cancelButton}
             onPress={() => setMonthPickerVisible(false)}
           >
-            <Text style={balanceSheetStyles.cancelButtonText}>Cancel</Text>
+            <Text style={balanceSheetStyles.cancelButtonText}>{t('common.cancel')}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -579,7 +581,9 @@ const BalanceSheet = () => {
         >
           <View style={balanceSheetStyles.modalHeader}>
             <Text style={balanceSheetStyles.modalTitle}>
-              {editingTransaction ? 'Edit' : 'Add'} {modalType === 'income' ? 'Income' : 'Expense'}
+              {editingTransaction 
+                ? (modalType === 'income' ? t('balance.editIncomeTitle') : t('balance.editExpenseTitle'))
+                : (modalType === 'income' ? t('balance.addIncomeTitle') : t('balance.addExpenseTitle'))}
             </Text>
             <View style={balanceSheetStyles.modalHeaderButtons}>
               <TouchableOpacity 
@@ -600,7 +604,7 @@ const BalanceSheet = () => {
           
           {/* Description moved to top */}
           <Text style={balanceSheetStyles.inputLabel}>
-            {modalType === 'income' ? 'Income Description' : 'Expense Description'}
+            {modalType === 'income' ? t('balance.incomeDescription') : t('balance.expenseDescription')}
           </Text>
           <TextInput
             style={[
@@ -609,7 +613,7 @@ const BalanceSheet = () => {
                 ? balanceSheetStyles.inputFocused
                 : balanceSheetStyles.inputUnfocused,
             ]}
-            placeholder={modalType === 'income' ? "Enter Income" : "Enter Expense"}
+            placeholder={modalType === 'income' ? t('balance.enterIncome') : t('balance.enterExpense')}
             placeholderTextColor="#6c757d"
             value={formData.note}
             onChangeText={(text) => setFormData({ ...formData, note: text })}
@@ -622,7 +626,7 @@ const BalanceSheet = () => {
             }}
           />
 
-          <Text style={balanceSheetStyles.inputLabel}>Amount</Text>
+          <Text style={balanceSheetStyles.inputLabel}>{t('balance.amount')}</Text>
           <TextInput
             style={[
               balanceSheetStyles.input,
@@ -630,7 +634,7 @@ const BalanceSheet = () => {
                 ? balanceSheetStyles.inputFocused
                 : balanceSheetStyles.inputUnfocused,
             ]}
-            placeholder="Enter Amount"
+            placeholder={t('balance.enterAmount')}
             placeholderTextColor="#6c757d"
             value={formData.amount}
             onChangeText={handleAmountChange}
@@ -641,7 +645,7 @@ const BalanceSheet = () => {
             onSubmitEditing={() => Keyboard.dismiss()}
           />
 
-          <Text style={balanceSheetStyles.inputLabel}>Category *</Text>
+          <Text style={balanceSheetStyles.inputLabel}>{t('balance.category')}</Text>
           <View style={balanceSheetStyles.categoryScrollContainer}>
             <ScrollView
               style={balanceSheetStyles.categoryScrollView}
@@ -689,13 +693,13 @@ const BalanceSheet = () => {
               style={[balanceSheetStyles.modalButton, balanceSheetStyles.cancelButton]}
               onPress={() => setModalVisible(false)}
             >
-              <Text style={balanceSheetStyles.cancelButtonText}>Cancel</Text>
+              <Text style={balanceSheetStyles.cancelButtonText}>{t('common.cancel')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[balanceSheetStyles.modalButton, balanceSheetStyles.saveButton]}
               onPress={saveTransaction}
             >
-              <Text style={balanceSheetStyles.saveButtonText}>Save</Text>
+              <Text style={balanceSheetStyles.saveButtonText}>{t('common.save')}</Text>
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
@@ -706,14 +710,14 @@ const BalanceSheet = () => {
   const addCategory = () => {
     const trimmedName = (newCategoryName || '').trim();
     if (!trimmedName) {
-      Alert.alert('Category', 'Please enter a category name.');
+      Alert.alert(t('expenses.category'), t('balance.pleaseEnterCategoryName'));
       return;
     }
     const exists = categories.some(
       (c) => c.type === categoriesModalType && c.name.toLowerCase() === trimmedName.toLowerCase()
     );
     if (exists) {
-      Alert.alert('Category', 'A category with this name already exists for the selected type.');
+      Alert.alert(t('expenses.category'), t('balance.categoryAlreadyExists'));
       return;
     }
     const created = {
@@ -732,7 +736,7 @@ const BalanceSheet = () => {
   const requestDeleteCategory = (categoryId) => {
     const inUse = transactions.some((tx) => tx.categoryId === categoryId);
     if (inUse) {
-      Alert.alert('Cannot Delete', 'This category is used by existing transactions.');
+      Alert.alert(t('balance.cannotDelete'), t('balance.categoryInUse'));
       return;
     }
     categories = categories.filter((c) => c.id !== categoryId);
@@ -761,7 +765,7 @@ const BalanceSheet = () => {
             {/* Fixed Header */}
             <View style={balanceSheetStyles.modalHeader}>
               <Text style={balanceSheetStyles.modalTitle}>
-                Manage {categoriesModalType === 'income' ? 'Income' : 'Expense'} Categories
+                {categoriesModalType === 'income' ? t('balance.manageIncomeCategories') : t('balance.manageExpenseCategories')}
               </Text>
               <TouchableOpacity 
                 onPress={() => setCategoriesModalVisible(false)}
@@ -797,10 +801,7 @@ const BalanceSheet = () => {
                     ))}
                     {filtered.length === 0 && (
                       <View style={{ padding: 20, alignItems: 'center' }}>
-                        <Text style={{ color: '#6c757d', marginBottom: 8 }}>No categories found.</Text>
-                        <Text style={{ color: '#6c757d', fontSize: 12 }}>
-                          Total categories: {categories.length} | Type: {newCategoryType}
-                        </Text>
+                        <Text style={{ color: '#6c757d', marginBottom: 8 }}>{t('balance.noCategoriesFound')}</Text>
                       </View>
                     )}
                   </ScrollView>
@@ -809,21 +810,21 @@ const BalanceSheet = () => {
                 {/* Fixed Add New Section */}
                 <View style={balanceSheetStyles.divider} />
 
-                <Text style={balanceSheetStyles.sectionLabel}>Add New</Text>
+                <Text style={balanceSheetStyles.sectionLabel}>{t('balance.addNew')}</Text>
                 <View style={balanceSheetStyles.newPreviewRow}>
                   <View style={[balanceSheetStyles.categoryAvatar, { backgroundColor: newCategoryColor }]}>
                     <Ionicons name={newCategoryIcon} size={18} color="#ffffff" />
                   </View>
-                  <Text style={balanceSheetStyles.newPreviewText}>{newCategoryName || 'Preview'}</Text>
+                  <Text style={balanceSheetStyles.newPreviewText}>{newCategoryName || t('balance.preview')}</Text>
                 </View>
                 <TextInput
                   style={[balanceSheetStyles.input, balanceSheetStyles.inputUnfocused]}
-                  placeholder="Category Name"
+                  placeholder={t('balance.categoryName')}
                   value={newCategoryName}
                   onChangeText={setNewCategoryName}
                 />
 
-                <Text style={balanceSheetStyles.inputLabel}>Icon</Text>
+                <Text style={balanceSheetStyles.inputLabel}>{t('expenses.icon')}</Text>
                 <View style={balanceSheetStyles.categoryContainer}>
                   {activeIconOptions.map((icon) => (
                     <TouchableOpacity
@@ -839,7 +840,7 @@ const BalanceSheet = () => {
                   ))}
                 </View>
 
-                <Text style={balanceSheetStyles.inputLabel}>Color</Text>
+                <Text style={balanceSheetStyles.inputLabel}>{t('expenses.color')}</Text>
                 <View style={balanceSheetStyles.colorRow}>
                   {colorOptions.map((hex) => (
                     <TouchableOpacity
@@ -863,13 +864,13 @@ const BalanceSheet = () => {
                     style={[balanceSheetStyles.modalButton, balanceSheetStyles.cancelButton]}
                     onPress={() => setCategoriesModalVisible(false)}
                   >
-                    <Text style={balanceSheetStyles.cancelButtonText}>Close</Text>
+                    <Text style={balanceSheetStyles.cancelButtonText}>{t('expenses.close')}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[balanceSheetStyles.modalButton, balanceSheetStyles.saveButton]}
                     onPress={addCategory}
                   >
-                    <Text style={balanceSheetStyles.saveButtonText}>Add Category</Text>
+                    <Text style={balanceSheetStyles.saveButtonText}>{t('expenses.addCategory')}</Text>
                   </TouchableOpacity>
                 </View>
           </View>
@@ -882,7 +883,7 @@ const BalanceSheet = () => {
   if (isLoading) {
     return (
       <View style={[balanceSheetStyles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <Text style={{ fontSize: 18, color: '#666' }}>Loading data...</Text>
+        <Text style={{ fontSize: 18, color: '#666' }}>{t('balance.loadingData')}</Text>
       </View>
     );
   }
@@ -893,15 +894,15 @@ const BalanceSheet = () => {
 
       {/* Top Banner */}
       <View style={balanceSheetStyles.topBanner}>
-        <Text style={balanceSheetStyles.topBannerTitle}>Balance Sheet</Text>
-        <Text style={balanceSheetStyles.topBannerSubtitle}>Overview of your month</Text>
+        <Text style={balanceSheetStyles.topBannerTitle}>{t('balance.title')}</Text>
+        <Text style={balanceSheetStyles.topBannerSubtitle}>{t('balance.subtitle')}</Text>
       </View>
 
       {/* Summary Cards */}
       <View style={balanceSheetStyles.summaryContainer}>
         {renderCombinedSummaryCard(monthlySummary.totalIncome, monthlySummary.totalExpenses)}
         <View style={{ flex: 1.6 }}>
-        {renderSummaryCard('Balance', monthlySummary.balance, 
+        {renderSummaryCard(t('balance.balance'), monthlySummary.balance, 
           monthlySummary.balance > 0 ? 'positive' : 
           monthlySummary.balance < 0 ? 'negative' : 'neutral'
         )}
@@ -915,14 +916,14 @@ const BalanceSheet = () => {
           onPress={() => openModal('income')}
         >
           <Ionicons name="add" size={18} color="white" />
-          <Text style={balanceSheetStyles.addButtonText}>Income</Text>
+          <Text style={balanceSheetStyles.addButtonText}>{t('balance.addIncome')}</Text>
         </TouchableOpacity>
         <TouchableOpacity 
           style={[balanceSheetStyles.addButton, { backgroundColor: '#dc3545' }]} 
           onPress={() => openModal('expense')}
         >
           <Ionicons name="remove" size={18} color="white" />
-          <Text style={balanceSheetStyles.addButtonText}>Expense</Text>
+          <Text style={balanceSheetStyles.addButtonText}>{t('balance.addExpense')}</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[balanceSheetStyles.addButton, { backgroundColor: '#007bff' }]}
@@ -935,7 +936,7 @@ const BalanceSheet = () => {
           }}
         >
           <Ionicons name="trending-up" size={18} color="white" />
-          <Text style={balanceSheetStyles.addButtonText}>Income Cat</Text>
+          <Text style={balanceSheetStyles.addButtonText}>{t('balance.incomeCat')}</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[balanceSheetStyles.addButton, { backgroundColor: '#6c757d' }]}
@@ -948,14 +949,14 @@ const BalanceSheet = () => {
           }}
         >
           <Ionicons name="trending-down" size={18} color="white" />
-          <Text style={balanceSheetStyles.addButtonText}>Expense Cat</Text>
+          <Text style={balanceSheetStyles.addButtonText}>{t('balance.expenseCat')}</Text>
         </TouchableOpacity>
       </View>
 
       {/* Transactions List */}
       <ScrollView style={balanceSheetStyles.scrollView} showsVerticalScrollIndicator={false}>
-        {renderSection('Income', monthlyTransactions.filter(tx => tx.type === 'income').sort((a, b) => b.amountConverted - a.amountConverted), 'income')}
-        {renderSection('Expenses', monthlyTransactions.filter(tx => tx.type === 'expense').sort((a, b) => b.amountConverted - a.amountConverted), 'expense')}
+        {renderSection(t('balance.income'), monthlyTransactions.filter(tx => tx.type === 'income').sort((a, b) => b.amountConverted - a.amountConverted), 'income')}
+        {renderSection(t('balance.expenses'), monthlyTransactions.filter(tx => tx.type === 'expense').sort((a, b) => b.amountConverted - a.amountConverted), 'expense')}
       </ScrollView>
 
       {/* Modals */}

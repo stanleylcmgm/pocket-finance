@@ -5,6 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { View, Text, ActivityIndicator } from 'react-native';
 import { initDatabase } from './utils/database-init';
+import { I18nProvider, useI18n } from './i18n/i18n';
 
 // Import screens
 import HomeScreen from './components/home-screen';
@@ -15,7 +16,8 @@ import ReportAnalytic from './components/report-analytic';
 
 const Stack = createStackNavigator();
 
-export default function App() {
+function AppContent() {
+  const { t } = useI18n();
   const [isDbInitialized, setIsDbInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -41,7 +43,7 @@ export default function App() {
       <SafeAreaProvider>
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#2c3e50' }}>
           <ActivityIndicator size="large" color="#fff" />
-          <Text style={{ color: '#fff', marginTop: 16, fontSize: 16 }}>Initializing Database...</Text>
+          <Text style={{ color: '#fff', marginTop: 16, fontSize: 16 }}>{t('app.initializingDatabase')}</Text>
         </View>
         <StatusBar style="light" />
       </SafeAreaProvider>
@@ -53,7 +55,7 @@ export default function App() {
       <SafeAreaProvider>
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#2c3e50' }}>
           <Text style={{ color: '#fff', fontSize: 18, textAlign: 'center' }}>
-            Failed to initialize database.{'\n'}Please restart the app.
+            {t('app.databaseInitFailed')}
           </Text>
         </View>
         <StatusBar style="light" />
@@ -80,41 +82,49 @@ export default function App() {
             name="Home"
             component={HomeScreen}
             options={{
-              title: '⭐ Pocket Finance',
+              title: t('app.pocketFinance'),
               headerShown: false,
             }}
           />
           <Stack.Screen
             name="BalanceSheet"
             component={BalanceSheet}
-            options={{
-              title: 'Balance Sheet',
-            }}
+            options={({ route }) => ({
+              title: t('app.balanceSheet'),
+            })}
           />
           <Stack.Screen
             name="ExpensesTracking"
             component={ExpensesTracking}
-            options={{
-              title: 'Expenses Tracking',
-            }}
+            options={({ route }) => ({
+              title: t('app.expensesTracking'),
+            })}
           />
           <Stack.Screen
             name="AssetManagement"
             component={AssetManagement}
-            options={{
-              title: 'Asset Management',
-            }}
+            options={({ route }) => ({
+              title: t('app.assetManagement'),
+            })}
           />
           <Stack.Screen
             name="Reports"
             component={ReportAnalytic}
-            options={{
-              title: 'Reports & Analytics',
-            }}
+            options={({ route }) => ({
+              title: t('app.reportsAnalytics'),
+            })}
           />
         </Stack.Navigator>
         <StatusBar style="light" />
       </NavigationContainer>
     </SafeAreaProvider>
+  );
+}
+
+export default function App() {
+  return (
+    <I18nProvider>
+      <AppContent />
+    </I18nProvider>
   );
 }

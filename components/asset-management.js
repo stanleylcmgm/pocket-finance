@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { assetManagementStyles } from '../styles/asset-management.styles';
+import { useI18n } from '../i18n/i18n';
 
 import { 
   formatCurrency, 
@@ -32,6 +33,7 @@ import {
 } from '../utils/data-utils';
 
 const AssetManagement = () => {
+  const { t } = useI18n();
   const [assetsList, setAssetsList] = useState([]);
   const [totalAssets, setTotalAssets] = useState(0);
   const [assetCategories, setAssetCategories] = useState([]);

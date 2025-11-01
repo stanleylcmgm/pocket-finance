@@ -9,6 +9,7 @@ import {
   Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useI18n } from '../i18n/i18n';
 
 const CustomDatePicker = ({ 
   visible, 
@@ -17,6 +18,7 @@ const CustomDatePicker = ({
   initialDate = new Date(),
   inline = false
 }) => {
+  const { t } = useI18n();
   const [selectedYear, setSelectedYear] = useState(initialDate.getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(initialDate.getMonth());
   const [selectedDay, setSelectedDay] = useState(initialDate.getDate());
@@ -115,7 +117,7 @@ const CustomDatePicker = ({
     <View style={inline ? styles.inlineContainer : styles.modalContainer}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Select Date</Text>
+        <Text style={styles.title}>{t('datePicker.selectDate')}</Text>
         <TouchableOpacity onPress={onClose}>
           <Ionicons name="close" size={24} color="#666" />
         </TouchableOpacity>
@@ -186,13 +188,13 @@ const CustomDatePicker = ({
           style={[styles.actionButton, styles.cancelButton]}
           onPress={onClose}
         >
-          <Text style={styles.actionText}>Cancel</Text>
+          <Text style={styles.actionText}>{t('datePicker.cancel')}</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.actionButton, styles.todayActionButton]}
           onPress={handleTodayPress}
         >
-          <Text style={styles.actionText}>Today</Text>
+          <Text style={styles.actionText}>{t('datePicker.today')}</Text>
         </TouchableOpacity>
       </View>
     </View>

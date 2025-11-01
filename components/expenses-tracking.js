@@ -16,6 +16,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { expensesTrackingStyles } from '../styles/expenses-tracking.styles';
 import CustomDatePicker from './datepicker';
+import { useI18n } from '../i18n/i18n';
 
 import { 
   formatCurrency, 
@@ -36,6 +37,7 @@ import {
 } from '../utils/expenses-data';
 
 const ExpensesTracking = () => {
+  const { t } = useI18n();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [monthKey, setMonthKey] = useState(toMonthKey(new Date()));
   const [monthlyExpenses, setMonthlyExpenses] = useState([]);
@@ -87,7 +89,7 @@ const ExpensesTracking = () => {
       setExpenseCategories(expenseCategoriesData);
     } catch (error) {
       console.error('Error loading categories from database:', error);
-      Alert.alert('Error', 'Failed to load categories from database');
+      Alert.alert(t('common.error'), t('expenses.errorFailedToLoadCategories'));
     } finally {
       setIsLoading(false);
     }
@@ -127,7 +129,7 @@ const ExpensesTracking = () => {
       setMonthlyTotal(total);
     } catch (error) {
       console.error('Error loading expenses:', error);
-      Alert.alert('Error', 'Failed to load expenses from database');
+      Alert.alert(t('common.error'), t('expenses.errorFailedToLoad'));
     }
   }, [monthKey]);
 
@@ -257,13 +259,13 @@ const ExpensesTracking = () => {
 
   const saveExpense = async () => {
     if (!formData.name || !formData.categoryId || !formData.amount) {
-      Alert.alert('Error', 'Please fill in name, category, and amount');
+      Alert.alert(t('common.error'), t('expenses.errorFillFields'));
       return;
     }
 
     const amount = parseAmountFromInput(formData.amount);
     if (amount <= 0) {
-      Alert.alert('Error', 'Amount must be greater than 0');
+      Alert.alert(t('common.error'), t('expenses.errorAmountGreaterThanZero'));
       return;
     }
 
@@ -298,18 +300,18 @@ const ExpensesTracking = () => {
       await loadMonthlyExpenses();
     } catch (error) {
       console.error('Error saving expense:', error);
-      Alert.alert('Error', 'Failed to save expense to database');
+      Alert.alert(t('common.error'), t('expenses.errorFailedToSave'));
     }
   };
 
   const deleteExpense = (id) => {
     Alert.alert(
-      'Delete Expense',
-      'Are you sure you want to delete this expense?',
+      t('expenses.deleteExpense'),
+      t('expenses.deleteExpenseConfirm'),
       [
-        { text: 'Cancel', style: 'cancel' },
+              { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Delete',
+          text: t('expenses.delete'),
           style: 'destructive',
           onPress: async () => {
             try {
@@ -317,7 +319,7 @@ const ExpensesTracking = () => {
               await loadMonthlyExpenses();
             } catch (error) {
               console.error('Error deleting expense:', error);
-              Alert.alert('Error', 'Failed to delete expense from database');
+              Alert.alert(t('common.error'), t('expenses.errorFailedToDelete'));
             }
           },
         },
@@ -338,7 +340,7 @@ const ExpensesTracking = () => {
       await loadMonthlyExpenses();
     } catch (error) {
       console.error('Error duplicating expense:', error);
-      Alert.alert('Error', 'Failed to duplicate expense');
+      Alert.alert(t('common.error'), t('expenses.errorFailedToDuplicate'));
     }
   };
 
@@ -409,7 +411,7 @@ const ExpensesTracking = () => {
     
     let dateText;
     if (isToday) {
-      dateText = 'Today';
+      dateText = t('expenses.today');
     } else {
       dateText = date.toLocaleDateString('en-US', { 
         weekday: 'long', 
@@ -488,13 +490,13 @@ const ExpensesTracking = () => {
         {/* Total and Daily Average */}
         <View style={expensesTrackingStyles.summaryHeader}>
           <View style={expensesTrackingStyles.summaryLeft}>
-            <Text style={expensesTrackingStyles.summaryLabel}>Total</Text>
+            <Text style={expensesTrackingStyles.summaryLabel}>{t('expenses.total')}</Text>
             <Text style={expensesTrackingStyles.summaryAmount}>
               {formatCurrency(monthlyTotal)}
             </Text>
           </View>
           <View style={expensesTrackingStyles.summaryRight}>
-            <Text style={expensesTrackingStyles.averageLabel}>Daily{'\n'}Average</Text>
+            <Text style={expensesTrackingStyles.averageLabel}>{t('expenses.dailyAverage')}</Text>
             <Text style={expensesTrackingStyles.averageAmount}>
               {formatCurrency(averageDaily)}
             </Text>
@@ -503,7 +505,7 @@ const ExpensesTracking = () => {
 
         {/* Top 2 Categories */}
         <View style={expensesTrackingStyles.topCategoriesSection}>
-          <Text style={expensesTrackingStyles.sectionTitle}>Top Categories</Text>
+          <Text style={expensesTrackingStyles.sectionTitle}>{t('expenses.topCategories')}</Text>
           {topCategories.length > 0 ? (
             topCategories.map((item, index) => (
               <View key={item.categoryId} style={expensesTrackingStyles.categoryRow}>
@@ -523,7 +525,7 @@ const ExpensesTracking = () => {
               </View>
             ))
           ) : (
-            <Text style={expensesTrackingStyles.categoryName}>No expenses with categories found</Text>
+            <Text style={expensesTrackingStyles.categoryName}>{t('expenses.noExpensesWithCategories')}</Text>
           )}
         </View>
       </View>
@@ -541,13 +543,13 @@ const ExpensesTracking = () => {
         onPress={() => openModal(item)}
         onLongPress={() => {
           Alert.alert(
-            'Expense Options',
-            'What would you like to do?',
+            t('expenses.expenseOptions'),
+            t('expenses.whatWouldYouLikeToDo'),
             [
-              { text: 'Edit', onPress: () => openModal(item) },
-              { text: 'Duplicate', onPress: async () => await duplicateExpense(item) },
-              { text: 'Delete', style: 'destructive', onPress: () => deleteExpense(item.id) },
-              { text: 'Cancel', style: 'cancel' },
+              { text: t('expenses.edit'), onPress: () => openModal(item) },
+              { text: t('expenses.duplicate'), onPress: async () => await duplicateExpense(item) },
+              { text: t('expenses.delete'), style: 'destructive', onPress: () => deleteExpense(item.id) },
+              { text: t('common.cancel'), style: 'cancel' },
             ]
           );
         }}
@@ -560,7 +562,7 @@ const ExpensesTracking = () => {
               color={category?.color || '#6c757d'} 
             />
             <Text style={expensesTrackingStyles.itemTitle}>
-              {item.note || 'Untitled Expense'}
+              {item.note || t('expenses.untitledExpense')}
             </Text>
           </View>
           <View style={expensesTrackingStyles.itemDetails}>
@@ -602,7 +604,7 @@ const ExpensesTracking = () => {
     >
       <View style={expensesTrackingStyles.modalOverlay}>
         <View style={expensesTrackingStyles.monthPickerContent}>
-          <Text style={expensesTrackingStyles.monthPickerTitle}>Select Month</Text>
+          <Text style={expensesTrackingStyles.monthPickerTitle}>{t('expenses.selectMonth')}</Text>
           
           <View style={expensesTrackingStyles.yearSelector}>
             <TouchableOpacity onPress={() => setSelectedYear(selectedYear - 1)}>
@@ -638,7 +640,7 @@ const ExpensesTracking = () => {
             style={expensesTrackingStyles.cancelButton}
             onPress={() => setMonthPickerVisible(false)}
           >
-            <Text style={expensesTrackingStyles.cancelButtonText}>Cancel</Text>
+            <Text style={expensesTrackingStyles.cancelButtonText}>{t('common.cancel')}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -666,7 +668,7 @@ const ExpensesTracking = () => {
         >
           <View style={expensesTrackingStyles.modalHeader}>
             <Text style={expensesTrackingStyles.modalTitle}>
-              {editingExpense ? 'Edit' : 'Add'} Expense
+              {editingExpense ? t('expenses.editExpenseTitle') : t('expenses.addExpenseTitle')}
             </Text>
             <View style={expensesTrackingStyles.modalHeaderButtons}>
               <TouchableOpacity 
@@ -684,7 +686,7 @@ const ExpensesTracking = () => {
               </TouchableOpacity>
             </View>
           </View>
-            <Text style={expensesTrackingStyles.inputLabel}>Expense Name *</Text>
+            <Text style={expensesTrackingStyles.inputLabel}>{t('expenses.expenseName')}</Text>
             <TextInput
               style={[
                 expensesTrackingStyles.input,
@@ -692,7 +694,7 @@ const ExpensesTracking = () => {
                   ? expensesTrackingStyles.inputFocused
                   : expensesTrackingStyles.inputUnfocused,
               ]}
-              placeholder="Enter Expense Name"
+              placeholder={t('expenses.enterExpenseName')}
               placeholderTextColor="#6c757d"
               value={formData.name}
               onChangeText={(text) => setFormData({ ...formData, name: text })}
@@ -705,7 +707,7 @@ const ExpensesTracking = () => {
               }}
             />
 
-            <Text style={expensesTrackingStyles.inputLabel}>Amount *</Text>
+            <Text style={expensesTrackingStyles.inputLabel}>{t('expenses.amount')}</Text>
             <TextInput
               style={[
                 expensesTrackingStyles.input,
@@ -713,7 +715,7 @@ const ExpensesTracking = () => {
                   ? expensesTrackingStyles.inputFocused
                   : expensesTrackingStyles.inputUnfocused,
               ]}
-              placeholder="Enter Amount"
+              placeholder={t('expenses.enterAmount')}
               placeholderTextColor="#6c757d"
               value={formData.amount}
               onChangeText={handleAmountChange}
@@ -724,7 +726,7 @@ const ExpensesTracking = () => {
               onSubmitEditing={() => Keyboard.dismiss()}
             />
 
-            <Text style={expensesTrackingStyles.inputLabel}>Date *</Text>
+            <Text style={expensesTrackingStyles.inputLabel}>{t('expenses.date')}</Text>
             <TouchableOpacity
               style={[
                 expensesTrackingStyles.input,
@@ -739,7 +741,7 @@ const ExpensesTracking = () => {
               <Ionicons name="calendar" size={20} color="#6c757d" />
             </TouchableOpacity>
             
-            <Text style={expensesTrackingStyles.inputLabel}>Category *</Text>
+            <Text style={expensesTrackingStyles.inputLabel}>{t('expenses.category')}</Text>
             <View style={expensesTrackingStyles.categoryScrollContainer}>
               <ScrollView
                 style={expensesTrackingStyles.categoryScrollView}
@@ -779,7 +781,7 @@ const ExpensesTracking = () => {
               </ScrollView>
             </View>
 
-            <Text style={expensesTrackingStyles.inputLabel}>Description (Optional)</Text>
+            <Text style={expensesTrackingStyles.inputLabel}>{t('expenses.description')}</Text>
             <TextInput
               style={[
                 expensesTrackingStyles.input,
@@ -788,7 +790,7 @@ const ExpensesTracking = () => {
                   ? expensesTrackingStyles.inputFocused
                   : expensesTrackingStyles.inputUnfocused,
               ]}
-              placeholder="Enter Description"
+              placeholder={t('expenses.enterDescription')}
               placeholderTextColor="#6c757d"
               value={formData.description}
               onChangeText={(text) => setFormData({ ...formData, description: text })}
@@ -805,13 +807,13 @@ const ExpensesTracking = () => {
               style={[expensesTrackingStyles.modalButton, expensesTrackingStyles.cancelButton]}
               onPress={() => setModalVisible(false)}
             >
-              <Text style={expensesTrackingStyles.cancelButtonText}>Cancel</Text>
+              <Text style={expensesTrackingStyles.cancelButtonText}>{t('common.cancel')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[expensesTrackingStyles.modalButton, expensesTrackingStyles.saveButton]}
               onPress={saveExpense}
             >
-              <Text style={expensesTrackingStyles.saveButtonText}>Save</Text>
+              <Text style={expensesTrackingStyles.saveButtonText}>{t('expenses.save')}</Text>
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
@@ -822,14 +824,14 @@ const ExpensesTracking = () => {
   const addCategory = () => {
     const trimmedName = (newCategoryName || '').trim();
     if (!trimmedName) {
-      Alert.alert('Category', 'Please enter a category name.');
+      Alert.alert(t('expenses.category'), t('expenses.pleaseEnterCategoryName'));
       return;
     }
     const exists = expenseCategories.some(
       (c) => c.name.toLowerCase() === trimmedName.toLowerCase()
     );
     if (exists) {
-      Alert.alert('Category', 'A category with this name already exists.');
+      Alert.alert(t('expenses.category'), t('expenses.categoryAlreadyExists'));
       return;
     }
     const created = {
@@ -850,7 +852,7 @@ const ExpensesTracking = () => {
       const allExpenses = await getExpenses();
       const inUse = allExpenses.some((exp) => exp.categoryId === categoryId);
       if (inUse) {
-        Alert.alert('Cannot Delete', 'This category is used by existing expenses.');
+        Alert.alert(t('expenses.cannotDelete'), t('expenses.categoryInUse'));
         return;
       }
       // Note: Category deletion should be handled through database service
@@ -859,7 +861,7 @@ const ExpensesTracking = () => {
       setCategoriesVersion((v) => v + 1);
     } catch (error) {
       console.error('Error checking category usage:', error);
-      Alert.alert('Error', 'Failed to check if category is in use');
+      Alert.alert(t('common.error'), t('expenses.errorFailedToLoadCategories'));
     }
   };
 
@@ -879,7 +881,7 @@ const ExpensesTracking = () => {
           <View style={expensesTrackingStyles.modalContent}>
             {/* Fixed Header */}
             <View style={expensesTrackingStyles.modalHeader}>
-              <Text style={expensesTrackingStyles.modalTitle}>Manage Categories</Text>
+              <Text style={expensesTrackingStyles.modalTitle}>{t('expenses.manageCategories')}</Text>
               <TouchableOpacity 
                 onPress={() => setCategoriesModalVisible(false)}
                 style={{ padding: 12, margin: -12 }}
@@ -913,28 +915,28 @@ const ExpensesTracking = () => {
                   </View>
                 ))}
                 {expenseCategories.length === 0 && (
-                  <Text style={{ color: '#6c757d' }}>No categories found.</Text>
+                  <Text style={{ color: '#6c757d' }}>{t('expenses.noCategoriesFound')}</Text>
                 )}
               </ScrollView>
             </View>
 
             <View style={expensesTrackingStyles.divider} />
 
-            <Text style={expensesTrackingStyles.sectionLabel}>Add New Category</Text>
+            <Text style={expensesTrackingStyles.sectionLabel}>{t('expenses.addNewCategory')}</Text>
             <View style={expensesTrackingStyles.newPreviewRow}>
               <View style={[expensesTrackingStyles.categoryAvatar, { backgroundColor: newCategoryColor }]}>
                 <Ionicons name={newCategoryIcon} size={18} color="#ffffff" />
               </View>
-              <Text style={expensesTrackingStyles.newPreviewText}>{newCategoryName || 'Preview'}</Text>
+              <Text style={expensesTrackingStyles.newPreviewText}>{newCategoryName || t('expenses.preview')}</Text>
             </View>
             <TextInput
               style={[expensesTrackingStyles.input, expensesTrackingStyles.inputUnfocused]}
-              placeholder="Category Name"
+              placeholder={t('expenses.categoryName')}
               value={newCategoryName}
               onChangeText={setNewCategoryName}
             />
 
-            <Text style={expensesTrackingStyles.inputLabel}>Icon</Text>
+            <Text style={expensesTrackingStyles.inputLabel}>{t('expenses.icon')}</Text>
             <View style={expensesTrackingStyles.categoryContainer}>
               {iconOptions.map((icon) => (
                 <TouchableOpacity
@@ -950,7 +952,7 @@ const ExpensesTracking = () => {
               ))}
             </View>
 
-            <Text style={expensesTrackingStyles.inputLabel}>Color</Text>
+            <Text style={expensesTrackingStyles.inputLabel}>{t('expenses.color')}</Text>
             <View style={expensesTrackingStyles.colorRow}>
               {colorOptions.map((hex) => (
                 <TouchableOpacity
@@ -974,13 +976,13 @@ const ExpensesTracking = () => {
                 style={[expensesTrackingStyles.modalButton, expensesTrackingStyles.cancelButton]}
                 onPress={() => setCategoriesModalVisible(false)}
               >
-                <Text style={expensesTrackingStyles.cancelButtonText}>Close</Text>
+                <Text style={expensesTrackingStyles.cancelButtonText}>{t('expenses.close')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[expensesTrackingStyles.modalButton, expensesTrackingStyles.saveButton]}
                 onPress={addCategory}
               >
-                <Text style={expensesTrackingStyles.saveButtonText}>Add Category</Text>
+                <Text style={expensesTrackingStyles.saveButtonText}>{t('expenses.addCategory')}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -993,7 +995,7 @@ const ExpensesTracking = () => {
   if (isLoading) {
     return (
       <View style={[expensesTrackingStyles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <Text style={{ fontSize: 18, color: '#666' }}>Loading data...</Text>
+        <Text style={{ fontSize: 18, color: '#666' }}>{t('expenses.loadingData')}</Text>
       </View>
     );
   }
@@ -1002,8 +1004,8 @@ const ExpensesTracking = () => {
     <View style={expensesTrackingStyles.container}>
       {/* Top Banner */}
       <View style={expensesTrackingStyles.topBanner}>
-        <Text style={expensesTrackingStyles.topBannerTitle}>Expenses Tracking</Text>
-        <Text style={expensesTrackingStyles.topBannerSubtitle}>Track your daily expenses</Text>
+        <Text style={expensesTrackingStyles.topBannerTitle}>{t('expenses.title')}</Text>
+        <Text style={expensesTrackingStyles.topBannerSubtitle}>{t('expenses.subtitle')}</Text>
       </View>
 
       {/* Month Navigator */}
@@ -1035,14 +1037,14 @@ const ExpensesTracking = () => {
           onPress={() => openModal()}
         >
           <Ionicons name="add" size={20} color="white" />
-          <Text style={expensesTrackingStyles.addButtonText}>Add Expense</Text>
+          <Text style={expensesTrackingStyles.addButtonText}>{t('expenses.addExpense')}</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[expensesTrackingStyles.addButton, { backgroundColor: '#007bff' }]}
           onPress={() => setCategoriesModalVisible(true)}
         >
           <Ionicons name="albums" size={20} color="white" />
-          <Text style={expensesTrackingStyles.addButtonText}>Categories</Text>
+          <Text style={expensesTrackingStyles.addButtonText}>{t('expenses.categories')}</Text>
         </TouchableOpacity>
       </View>
 
@@ -1052,14 +1054,14 @@ const ExpensesTracking = () => {
           <View style={expensesTrackingStyles.emptyState}>
             <Ionicons name="receipt" size={48} color="#6c757d" />
             <Text style={expensesTrackingStyles.emptyText}>
-              No expenses recorded yet for this month
+              {t('expenses.noExpensesRecorded')}
             </Text>
             <TouchableOpacity
               style={[expensesTrackingStyles.emptyStateButton, { backgroundColor: '#dc3545' }]}
               onPress={() => openModal()}
             >
               <Text style={expensesTrackingStyles.emptyStateButtonText}>
-                Add Your First Expense
+                {t('expenses.addYourFirstExpense')}
               </Text>
             </TouchableOpacity>
           </View>

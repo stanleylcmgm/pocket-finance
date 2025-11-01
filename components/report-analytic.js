@@ -10,6 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { colors } from '../theme';
 import { reportAnalyticStyles } from '../styles/report-analytic.styles';
+import { useI18n } from '../i18n/i18n';
 import { 
   getAssets, 
   getAssetCategories, 
@@ -29,6 +30,7 @@ import {
 } from '../utils/expenses-data';
 
 const ReportAnalytic = () => {
+  const { t } = useI18n();
   const [isLoading, setIsLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState({
     totalAssets: 0,
@@ -255,7 +257,7 @@ const ReportAnalytic = () => {
   const renderMonthlyExpensesChart = () => {
     if (dashboardData.recentMonthlyExpenses.length === 0) {
       return (
-        <Text style={reportAnalyticStyles.noDataText}>No monthly expense data available</Text>
+        <Text style={reportAnalyticStyles.noDataText}>{t('reports.noMonthlyExpenseData')}</Text>
       );
     }
 
@@ -309,7 +311,7 @@ const ReportAnalytic = () => {
     const chartData = prepareBarChartData();
     if (chartData.length === 0) {
       return (
-        <Text style={reportAnalyticStyles.noDataText}>No data available for chart</Text>
+        <Text style={reportAnalyticStyles.noDataText}>{t('reports.noDataAvailable')}</Text>
       );
     }
 
@@ -348,12 +350,12 @@ const ReportAnalytic = () => {
     return (
       <View style={reportAnalyticStyles.container}>
         <View style={reportAnalyticStyles.topBanner}>
-          <Text style={reportAnalyticStyles.topBannerTitle}>Reports & Analytics</Text>
-          <Text style={reportAnalyticStyles.topBannerSubtitle}>View insights and trends</Text>
+          <Text style={reportAnalyticStyles.topBannerTitle}>{t('reports.title')}</Text>
+          <Text style={reportAnalyticStyles.topBannerSubtitle}>{t('reports.subtitle')}</Text>
         </View>
         <View style={reportAnalyticStyles.loadingContainer}>
           <ActivityIndicator size="large" color="#007bff" />
-          <Text style={reportAnalyticStyles.loadingText}>Loading dashboard data...</Text>
+          <Text style={reportAnalyticStyles.loadingText}>{t('reports.loadingDashboardData')}</Text>
         </View>
       </View>
     );
@@ -363,8 +365,8 @@ const ReportAnalytic = () => {
     <View style={reportAnalyticStyles.container}>
       {/* Top Banner */}
       <View style={reportAnalyticStyles.topBanner}>
-        <Text style={reportAnalyticStyles.topBannerTitle}>Reports & Analytics</Text>
-        <Text style={reportAnalyticStyles.topBannerSubtitle}>View insights and trends</Text>
+        <Text style={reportAnalyticStyles.topBannerTitle}>{t('reports.title')}</Text>
+        <Text style={reportAnalyticStyles.topBannerSubtitle}>{t('reports.subtitle')}</Text>
       </View>
 
       {/* Main Content Area */}
@@ -378,11 +380,10 @@ const ReportAnalytic = () => {
                 <View style={reportAnalyticStyles.adviceIcon}>
                   <Ionicons name="bulb" size={14} color="#2196f3" />
                 </View>
-                <Text style={reportAnalyticStyles.adviceTitle}>Financial Insight</Text>
+                <Text style={reportAnalyticStyles.adviceTitle}>{t('reports.financialInsight')}</Text>
               </View>
               <Text style={reportAnalyticStyles.adviceMessage}>
-                Based on your recent spending patterns, consider setting aside 20% of your income for savings. 
-                Your expense tracking shows good discipline in monitoring daily costs. Keep up the great work!
+                {t('reports.financialAdvice')}
               </Text>
             </View>
             
@@ -391,12 +392,12 @@ const ReportAnalytic = () => {
               <View style={reportAnalyticStyles.cardHeader}>
                 <View style={reportAnalyticStyles.cardTitleContainer}>
                   <Ionicons name="wallet" size={24} color="#28a745" />
-                  <Text style={reportAnalyticStyles.cardTitle}>Total Assets</Text>
+                  <Text style={reportAnalyticStyles.cardTitle}>{t('reports.totalAssets')}</Text>
                 </View>
                 <Text style={reportAnalyticStyles.cardAmount}>{formatCurrency(dashboardData.totalAssets)}</Text>
               </View>
               <View style={reportAnalyticStyles.cardContent}>
-                <Text style={reportAnalyticStyles.cardSubtitle}>Top Asset Categories</Text>                
+                <Text style={reportAnalyticStyles.cardSubtitle}>{t('reports.topAssetCategories')}</Text>                
                 {/* Custom Bar Chart */}
                 <View style={reportAnalyticStyles.chartContainer}>
                   {renderCustomBarChart()}
@@ -409,11 +410,11 @@ const ReportAnalytic = () => {
               <View style={reportAnalyticStyles.cardHeader}>
                 <View style={reportAnalyticStyles.cardTitleContainer}>
                   <Ionicons name="trending-up" size={24} color="#007bff" />
-                  <Text style={reportAnalyticStyles.cardTitle}>Monthly Balance</Text>
+                  <Text style={reportAnalyticStyles.cardTitle}>{t('reports.monthlyBalance')}</Text>
                 </View>
                 <View style={reportAnalyticStyles.monthIndicator}>
                   <Text style={reportAnalyticStyles.monthText}>
-                    As of {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                    {t('reports.asOf')} {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                   </Text>
                 </View>
               </View>
@@ -425,7 +426,7 @@ const ReportAnalytic = () => {
                       <Ionicons name="arrow-up-circle" size={20} color="#28a745" />
                     </View>
                     <View style={reportAnalyticStyles.metricContent}>
-                      <Text style={reportAnalyticStyles.enhancedMetricLabel}>Income</Text>
+                      <Text style={reportAnalyticStyles.enhancedMetricLabel}>{t('reports.income')}</Text>
                       <Text style={reportAnalyticStyles.enhancedMetricValue}>
                         {formatCurrency(dashboardData.currentMonthIncome)}
                       </Text>
@@ -436,7 +437,7 @@ const ReportAnalytic = () => {
                       <Ionicons name="arrow-down-circle" size={20} color="#dc3545" />
                     </View>
                     <View style={reportAnalyticStyles.metricContent}>
-                      <Text style={reportAnalyticStyles.enhancedMetricLabel}>Expenses</Text>
+                      <Text style={reportAnalyticStyles.enhancedMetricLabel}>{t('reports.expenses')}</Text>
                       <Text style={reportAnalyticStyles.enhancedMetricValue}>
                         {formatCurrency(dashboardData.currentMonthExpenses)}
                       </Text>
@@ -464,7 +465,7 @@ const ReportAnalytic = () => {
                           reportAnalyticStyles.balanceLabel,
                           { color: dashboardData.currentMonthBalance >= 0 ? '#28a745' : '#dc3545' }
                         ]}>
-                          Net Balance
+                          {t('reports.netBalance')}
                         </Text>
                       </View>
                       <Text style={[
@@ -481,7 +482,7 @@ const ReportAnalytic = () => {
                           reportAnalyticStyles.savingsRateLabel,
                           { color: dashboardData.currentMonthBalance >= 0 ? '#28a745' : '#dc3545' }
                         ]}>
-                          Savings Rate
+                          {t('reports.savingsRate')}
                         </Text>
                         <View style={reportAnalyticStyles.savingsRateBar}>
                           <View 
@@ -512,20 +513,20 @@ const ReportAnalytic = () => {
               <View style={reportAnalyticStyles.cardHeader}>
                 <View style={reportAnalyticStyles.cardTitleContainer}>
                   <Ionicons name="calendar" size={20} color="#fd7e14" />
-                  <Text style={reportAnalyticStyles.cardTitleSmall}>Year-to-Date Average</Text>
+                  <Text style={reportAnalyticStyles.cardTitleSmall}>{t('reports.yearToDateAverage')}</Text>
                 </View>
                 <Text style={reportAnalyticStyles.cardAmountSmall}>
                   {formatCurrency(dashboardData.yearToDateAverageExpenses)}
                 </Text>
               </View>
               <View style={reportAnalyticStyles.cardContent}>
-                <Text style={reportAnalyticStyles.cardSubtitle}>Recent Monthly Expenses</Text>
+                <Text style={reportAnalyticStyles.cardSubtitle}>{t('reports.recentMonthlyExpenses')}</Text>
                 {/* Monthly Expenses Bar Chart */}
                 <View style={reportAnalyticStyles.chartContainer}>
                   {renderMonthlyExpensesChart()}
                 </View>
                 <Text style={reportAnalyticStyles.cardDescription}>
-                  Average monthly expenses for {new Date().getFullYear()}
+                  {t('reports.averageMonthlyExpenses')} {new Date().getFullYear()}
                 </Text>
               </View>
             </View>
