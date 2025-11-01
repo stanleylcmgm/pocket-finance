@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -12,8 +12,10 @@ import {
   KeyboardAvoidingView,
   Platform,
   Keyboard,
+  Animated,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 import { expensesTrackingStyles } from '../styles/expenses-tracking.styles';
 import CustomDatePicker from './datepicker';
 import { useI18n } from '../i18n/i18n';
@@ -42,6 +44,18 @@ const ExpensesTracking = () => {
   const [monthKey, setMonthKey] = useState(toMonthKey(new Date()));
   const [monthlyExpenses, setMonthlyExpenses] = useState([]);
   const [monthlyTotal, setMonthlyTotal] = useState(0);
+
+  // Display values for animation
+  const [displayTotal, setDisplayTotal] = useState(0);
+  const [displayDailyAverage, setDisplayDailyAverage] = useState(0);
+  const [displayTopCategory1, setDisplayTopCategory1] = useState(0);
+  const [displayTopCategory2, setDisplayTopCategory2] = useState(0);
+
+  // Animated values for the summary card
+  const animatedTotal = useRef(new Animated.Value(0)).current;
+  const animatedDailyAverage = useRef(new Animated.Value(0)).current;
+  const animatedTopCategory1 = useRef(new Animated.Value(0)).current;
+  const animatedTopCategory2 = useRef(new Animated.Value(0)).current;
   
   // Database data state
   const [expenseCategories, setExpenseCategories] = useState([]);
@@ -141,6 +155,152 @@ const ExpensesTracking = () => {
     };
     loadData();
   }, [loadCategoriesFromDatabase, loadMonthlyExpenses]);
+
+  // Function to trigger animation
+  const triggerAnimation = useCallback(() => {
+    // Access current values from state
+    const currentExpenses = monthlyExpenses;
+    const currentTotal = monthlyTotal;
+    const currentCategories = expenseCategories;
+    
+    // Calculate top categories directly (same logic as getTopCategories)
+    const categoryTotals = {};
+    currentExpenses.forEach(expense => {
+      const categoryId = expense.categoryId;
+      if (!categoryTotals[categoryId]) {
+        categoryTotals[categoryId] = 0;
+      }
+      categoryTotals[categoryId] += expense.amountConverted || 0;
+    });
+
+    const topCategories = Object.entries(categoryTotals)
+      .map(([categoryId, total]) => ({
+        categoryId,
+        total,
+        category: currentCategories.find(cat => cat.id === categoryId)
+      }))
+      .filter(item => item.category)
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 2);
+
+    const uniqueDays = new Set(currentExpenses.map(expense => new Date(expense.date).toDateString())).size;
+    const averageDaily = uniqueDays > 0 ? currentTotal / uniqueDays : 0;
+    const category1Total = topCategories.length > 0 ? topCategories[0].total : 0;
+    const category2Total = topCategories.length > 1 ? topCategories[1].total : 0;
+
+    // Reset animated values to 0
+    animatedTotal.setValue(0);
+    animatedDailyAverage.setValue(0);
+    animatedTopCategory1.setValue(0);
+    animatedTopCategory2.setValue(0);
+    setDisplayTotal(0);
+    setDisplayDailyAverage(0);
+    setDisplayTopCategory1(0);
+    setDisplayTopCategory2(0);
+
+    // Set up listeners to update display values
+    const totalListener = animatedTotal.addListener(({ value }) => {
+      setDisplayTotal(value);
+    });
+    const averageListener = animatedDailyAverage.addListener(({ value }) => {
+      setDisplayDailyAverage(value);
+    });
+    const category1Listener = animatedTopCategory1.addListener(({ value }) => {
+      setDisplayTopCategory1(value);
+    });
+    const category2Listener = animatedTopCategory2.addListener(({ value }) => {
+      setDisplayTopCategory2(value);
+    });
+
+    // Start animations
+    const animationDuration = 1500;
+    const animations = [
+      Animated.timing(animatedTotal, {
+        toValue: currentTotal,
+        duration: animationDuration,
+        useNativeDriver: false,
+      }),
+      Animated.timing(animatedDailyAverage, {
+        toValue: averageDaily,
+        duration: animationDuration,
+        useNativeDriver: false,
+      }),
+      Animated.timing(animatedTopCategory1, {
+        toValue: category1Total,
+        duration: animationDuration,
+        useNativeDriver: false,
+      }),
+      Animated.timing(animatedTopCategory2, {
+        toValue: category2Total,
+        duration: animationDuration,
+        useNativeDriver: false,
+      }),
+    ];
+
+    Animated.parallel(animations).start((finished) => {
+      // Ensure final values are set
+      setDisplayTotal(currentTotal);
+      setDisplayDailyAverage(averageDaily);
+      setDisplayTopCategory1(category1Total);
+      setDisplayTopCategory2(category2Total);
+    });
+
+    // Return cleanup function
+    return () => {
+      animatedTotal.removeListener(totalListener);
+      animatedDailyAverage.removeListener(averageListener);
+      animatedTopCategory1.removeListener(category1Listener);
+      animatedTopCategory2.removeListener(category2Listener);
+    };
+  }, [monthlyTotal, monthlyExpenses.length, expenseCategories.length, animatedTotal, animatedDailyAverage, animatedTopCategory1, animatedTopCategory2]);
+
+  // Track previous values to prevent unnecessary re-animations
+  const prevValuesRef = useRef({ total: 0, length: 0 });
+
+  // Trigger animation when screen is focused
+  useFocusEffect(
+    useCallback(() => {
+      let cleanup = null;
+      const loadAndAnimate = async () => {
+        await loadMonthlyExpenses();
+        setTimeout(() => {
+          cleanup = triggerAnimation();
+        }, 150);
+      };
+      loadAndAnimate();
+      return () => {
+        if (cleanup) cleanup();
+      };
+    }, [loadMonthlyExpenses, triggerAnimation])
+  );
+
+  // Animate stats when values change
+  useEffect(() => {
+    // Only animate if values actually changed
+    const totalChanged = prevValuesRef.current.total !== monthlyTotal;
+    const lengthChanged = prevValuesRef.current.length !== monthlyExpenses.length;
+    
+    if ((totalChanged || lengthChanged) && (monthlyTotal !== 0 || monthlyExpenses.length > 0)) {
+      prevValuesRef.current.total = monthlyTotal;
+      prevValuesRef.current.length = monthlyExpenses.length;
+      
+      let cleanup = null;
+      const timer = setTimeout(() => {
+        cleanup = triggerAnimation();
+      }, 250);
+      
+      return () => {
+        clearTimeout(timer);
+        if (cleanup) cleanup();
+      };
+    } else if (monthlyTotal === 0 && monthlyExpenses.length === 0) {
+      // No data - set to 0
+      setDisplayTotal(0);
+      setDisplayDailyAverage(0);
+      setDisplayTopCategory1(0);
+      setDisplayTopCategory2(0);
+    }
+  }, [monthlyTotal, monthlyExpenses.length, triggerAnimation]);
 
   // Navigation functions
   const changeMonth = async (direction) => {
@@ -482,8 +642,6 @@ const ExpensesTracking = () => {
 
   const renderSummaryCard = () => {
     const topCategories = getTopCategories();
-    const averageDaily = getAverageDailyExpense();
-    const uniqueDays = new Set(monthlyExpenses.map(expense => new Date(expense.date).toDateString())).size;
 
     return (
       <View style={expensesTrackingStyles.summaryCard}>
@@ -492,13 +650,13 @@ const ExpensesTracking = () => {
           <View style={expensesTrackingStyles.summaryLeft}>
             <Text style={expensesTrackingStyles.summaryLabel}>{t('expenses.total')}</Text>
             <Text style={expensesTrackingStyles.summaryAmount}>
-              {formatCurrency(monthlyTotal)}
+              {formatCurrency(displayTotal)}
             </Text>
           </View>
           <View style={expensesTrackingStyles.summaryRight}>
             <Text style={expensesTrackingStyles.averageLabel}>{t('expenses.dailyAverage')}</Text>
             <Text style={expensesTrackingStyles.averageAmount}>
-              {formatCurrency(averageDaily)}
+              {formatCurrency(displayDailyAverage)}
             </Text>
           </View>
         </View>
@@ -507,23 +665,26 @@ const ExpensesTracking = () => {
         <View style={expensesTrackingStyles.topCategoriesSection}>
           <Text style={expensesTrackingStyles.sectionTitle}>{t('expenses.topCategories')}</Text>
           {topCategories.length > 0 ? (
-            topCategories.map((item, index) => (
-              <View key={item.categoryId} style={expensesTrackingStyles.categoryRow}>
-                <View style={expensesTrackingStyles.categoryInfo}>
-                  <Ionicons 
-                    name={item.category.icon} 
-                    size={14} 
-                    color={item.category.color} 
-                  />
-                  <Text style={expensesTrackingStyles.categoryName}>
-                    {item.category.name}
+            topCategories.map((item, index) => {
+              const displayAmount = index === 0 ? displayTopCategory1 : displayTopCategory2;
+              return (
+                <View key={item.categoryId} style={expensesTrackingStyles.categoryRow}>
+                  <View style={expensesTrackingStyles.categoryInfo}>
+                    <Ionicons 
+                      name={item.category.icon} 
+                      size={14} 
+                      color={item.category.color} 
+                    />
+                    <Text style={expensesTrackingStyles.categoryName}>
+                      {item.category.name}
+                    </Text>
+                  </View>
+                  <Text style={expensesTrackingStyles.categoryAmount}>
+                    {formatCurrency(displayAmount)}
                   </Text>
                 </View>
-                <Text style={expensesTrackingStyles.categoryAmount}>
-                  {formatCurrency(item.total)}
-                </Text>
-              </View>
-            ))
+              );
+            })
           ) : (
             <Text style={expensesTrackingStyles.categoryName}>{t('expenses.noExpensesWithCategories')}</Text>
           )}

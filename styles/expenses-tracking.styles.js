@@ -63,10 +63,10 @@ export const expensesTrackingStyles = StyleSheet.create({
 
   // Summary Cards
   summaryContainer: {
-    padding: 15,
+    padding: 8,
   },
   summaryCard: {
-    backgroundColor: '#FFDBA3',
+    backgroundColor: '#FFFCD3',
     padding: 20,
     borderRadius: 12,
     shadowColor: '#000',
