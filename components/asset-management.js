@@ -91,7 +91,7 @@ const AssetManagement = () => {
       setTotalAssets(total);
     } catch (error) {
       console.error('Error loading assets:', error);
-      Alert.alert('Error', 'Failed to load assets');
+      Alert.alert(t('common.error'), t('asset.errorFailedToLoad'));
     } finally {
       setIsLoading(false);
     }
@@ -106,7 +106,7 @@ const AssetManagement = () => {
       setAssetCategories(categories);
     } catch (error) {
       console.error('Error loading asset categories:', error);
-      Alert.alert('Error', 'Failed to load asset categories');
+      Alert.alert(t('common.error'), t('asset.errorFailedToLoadCategories'));
     }
   }, []);
 
@@ -344,13 +344,13 @@ const AssetManagement = () => {
 
   const saveAsset = async () => {
     if (!formData.name || !formData.amount || !formData.categoryId) {
-      Alert.alert('Error', 'Please fill in name, amount and category');
+      Alert.alert(t('common.error'), t('asset.errorFillFields'));
       return;
     }
 
     const amount = parseAmountFromInput(formData.amount);
     if (amount <= 0) {
-      Alert.alert('Error', 'Amount must be greater than 0');
+      Alert.alert(t('common.error'), t('asset.errorAmountGreaterThanZero'));
       return;
     }
 
@@ -364,7 +364,7 @@ const AssetManagement = () => {
     // Validate asset data
     const validationErrors = validateAsset(assetData);
     if (validationErrors.length > 0) {
-      Alert.alert('Validation Error', validationErrors.join('\n'));
+      Alert.alert(t('asset.validationError'), validationErrors.join('\n'));
       return;
     }
 
@@ -382,18 +382,18 @@ const AssetManagement = () => {
       await loadAssets();
     } catch (error) {
       console.error('Error saving asset:', error);
-      Alert.alert('Error', 'Failed to save asset');
+      Alert.alert(t('common.error'), t('asset.errorFailedToSave'));
     }
   };
 
   const deleteAsset = (id) => {
     Alert.alert(
-      'Delete Asset',
-      'Are you sure you want to delete this asset?',
+      t('asset.deleteAsset'),
+      t('asset.deleteAssetConfirm'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('asset.cancel'), style: 'cancel' },
         {
-          text: 'Delete',
+          text: t('asset.delete'),
           style: 'destructive',
           onPress: async () => {
             try {
@@ -401,7 +401,7 @@ const AssetManagement = () => {
               await loadAssets();
             } catch (error) {
               console.error('Error deleting asset:', error);
-              Alert.alert('Error', 'Failed to delete asset');
+              Alert.alert(t('common.error'), t('asset.errorFailedToDelete'));
             }
           },
         },
@@ -412,7 +412,7 @@ const AssetManagement = () => {
   const duplicateAsset = async (asset) => {
     try {
       const duplicatedData = {
-        name: `${asset.name} (Copy)`,
+        name: `${asset.name} ${t('asset.copy')}`,
         amount: asset.amount,
         categoryId: asset.categoryId,
         note: asset.note,
@@ -421,7 +421,7 @@ const AssetManagement = () => {
       await loadAssets();
     } catch (error) {
       console.error('Error duplicating asset:', error);
-      Alert.alert('Error', 'Failed to duplicate asset');
+      Alert.alert(t('common.error'), t('asset.errorFailedToDuplicate'));
     }
   };
 
@@ -554,7 +554,7 @@ const AssetManagement = () => {
         <View style={assetManagementStyles.summaryMainRow}>
           {/* Left Side - Total Assets */}
           <View style={assetManagementStyles.summaryLeft}>
-            <Text style={assetManagementStyles.summaryLabel}>Total Assets</Text>
+            <Text style={assetManagementStyles.summaryLabel}>{t('asset.totalAssets')}</Text>
             <Text style={assetManagementStyles.summaryAmount}>
               {formatCurrency(displayTotalAssets)}
             </Text>
@@ -583,7 +583,7 @@ const AssetManagement = () => {
                   color="#6c757d" 
                 />
                 <Text style={assetManagementStyles.trackingValue}>
-                  {trackingInfo.daysDifference} days
+                  {trackingInfo.daysDifference} {t('asset.days')}
                 </Text>
               </View>
             </View>
@@ -593,7 +593,7 @@ const AssetManagement = () => {
         {/* Top Categories */}
         {topCategories.length > 0 && (
           <View style={assetManagementStyles.categoryBreakdown}>
-            <Text style={assetManagementStyles.breakdownTitle}>Top Categories</Text>
+            <Text style={assetManagementStyles.breakdownTitle}>{t('asset.topCategories')}</Text>
             {topCategories.map((category, index) => {
               const displayAmount = index === 0 ? displayTopCategory1 : index === 1 ? displayTopCategory2 : displayTopCategory3;
               return (
@@ -625,13 +625,13 @@ const AssetManagement = () => {
         onPress={() => openModal(item)}
         onLongPress={() => {
           Alert.alert(
-            'Asset Options',
-            'What would you like to do?',
+            t('asset.assetOptions'),
+            t('asset.whatWouldYouLikeToDo'),
             [
-              { text: 'Edit', onPress: () => openModal(item) },
-              { text: 'Duplicate', onPress: () => duplicateAsset(item) },
-              { text: 'Delete', style: 'destructive', onPress: () => deleteAsset(item.id) },
-              { text: 'Cancel', style: 'cancel' },
+              { text: t('asset.edit'), onPress: () => openModal(item) },
+              { text: t('asset.duplicate'), onPress: () => duplicateAsset(item) },
+              { text: t('asset.delete'), style: 'destructive', onPress: () => deleteAsset(item.id) },
+              { text: t('asset.cancel'), style: 'cancel' },
             ]
           );
         }}
@@ -688,7 +688,7 @@ const AssetManagement = () => {
         >
           <View style={assetManagementStyles.modalHeader}>
             <Text style={assetManagementStyles.modalTitle}>
-              {editingAsset ? 'Edit' : 'Add'} Asset
+              {editingAsset ? t('asset.editAssetTitle') : t('asset.addAssetTitle')}
             </Text>
             <View style={assetManagementStyles.modalHeaderButtons}>
               <TouchableOpacity 
@@ -707,7 +707,7 @@ const AssetManagement = () => {
             </View>
           </View>
           
-          <Text style={assetManagementStyles.inputLabel}>Asset Name *</Text>
+          <Text style={assetManagementStyles.inputLabel}>{t('asset.assetName')}</Text>
           <TextInput
             style={[
               assetManagementStyles.input,
@@ -715,7 +715,7 @@ const AssetManagement = () => {
                 ? assetManagementStyles.inputFocused
                 : assetManagementStyles.inputUnfocused,
             ]}
-            placeholder="Enter Asset Name"
+            placeholder={t('asset.enterAssetName')}
             placeholderTextColor="#6c757d"
             value={formData.name}
             onChangeText={(text) => setFormData({ ...formData, name: text })}
@@ -727,7 +727,7 @@ const AssetManagement = () => {
             }}
           />
 
-          <Text style={assetManagementStyles.inputLabel}>Amount *</Text>
+          <Text style={assetManagementStyles.inputLabel}>{t('asset.amount')}</Text>
           <TextInput
             style={[
               assetManagementStyles.input,
@@ -735,7 +735,7 @@ const AssetManagement = () => {
                 ? assetManagementStyles.inputFocused
                 : assetManagementStyles.inputUnfocused,
             ]}
-            placeholder="Enter Amount"
+            placeholder={t('asset.enterAmount')}
             placeholderTextColor="#6c757d"
             value={formData.amount}
             onChangeText={handleAmountChange}
@@ -746,7 +746,7 @@ const AssetManagement = () => {
             onSubmitEditing={() => Keyboard.dismiss()}
           />
           
-          <Text style={assetManagementStyles.inputLabel}>Category *</Text>
+          <Text style={assetManagementStyles.inputLabel}>{t('asset.category')}</Text>
           <View style={assetManagementStyles.categoryContainer}>
             {assetCategories.map((category, index) => (
               <TouchableOpacity
@@ -779,13 +779,13 @@ const AssetManagement = () => {
             ))}
           </View>
 
-          <Text style={assetManagementStyles.inputLabel}>Description (Optional)</Text>
+          <Text style={assetManagementStyles.inputLabel}>{t('asset.description')}</Text>
           <TextInput
             style={[
               assetManagementStyles.input,
               assetManagementStyles.inputUnfocused,
             ]}
-            placeholder="Enter Description"
+            placeholder={t('asset.enterDescription')}
             placeholderTextColor="#6c757d"
             value={formData.note}
             onChangeText={(text) => setFormData({ ...formData, note: text })}
@@ -800,13 +800,13 @@ const AssetManagement = () => {
               style={[assetManagementStyles.modalButton, assetManagementStyles.cancelButton]}
               onPress={() => setModalVisible(false)}
             >
-              <Text style={assetManagementStyles.cancelButtonText}>Cancel</Text>
+              <Text style={assetManagementStyles.cancelButtonText}>{t('asset.cancel')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[assetManagementStyles.modalButton, assetManagementStyles.saveButton]}
               onPress={saveAsset}
             >
-              <Text style={assetManagementStyles.saveButtonText}>Save</Text>
+              <Text style={assetManagementStyles.saveButtonText}>{t('asset.save')}</Text>
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
@@ -817,14 +817,14 @@ const AssetManagement = () => {
   const addCategory = async () => {
     const trimmedName = (newCategoryName || '').trim();
     if (!trimmedName) {
-      Alert.alert('Category', 'Please enter a category name.');
+      Alert.alert(t('asset.category'), t('asset.pleaseEnterCategoryName'));
       return;
     }
     const exists = assetCategories.some(
       (c) => c.name.toLowerCase() === trimmedName.toLowerCase()
     );
     if (exists) {
-      Alert.alert('Category', 'A category with this name already exists.');
+      Alert.alert(t('asset.category'), t('asset.categoryAlreadyExists'));
       return;
     }
     
@@ -840,14 +840,14 @@ const AssetManagement = () => {
       await loadAssetCategories();
     } catch (error) {
       console.error('Error creating category:', error);
-      Alert.alert('Error', 'Failed to create category');
+      Alert.alert(t('common.error'), t('asset.errorFailedToCreateCategory'));
     }
   };
 
   const requestDeleteCategory = async (categoryId) => {
     const inUse = assetsList.some((asset) => asset.categoryId === categoryId);
     if (inUse) {
-      Alert.alert('Cannot Delete', 'This category is used by existing assets.');
+      Alert.alert(t('asset.cannotDelete'), t('asset.categoryInUse'));
       return;
     }
     
@@ -857,7 +857,7 @@ const AssetManagement = () => {
       await loadAssetCategories();
     } catch (error) {
       console.error('Error deleting category:', error);
-      Alert.alert('Error', 'Failed to delete category');
+      Alert.alert(t('common.error'), t('asset.errorFailedToDeleteCategory'));
     }
   };
 
@@ -876,7 +876,7 @@ const AssetManagement = () => {
           <View style={assetManagementStyles.modalContent}>
             {/* Fixed Header */}
             <View style={assetManagementStyles.modalHeader}>
-              <Text style={assetManagementStyles.modalTitle}>Manage Categories</Text>
+              <Text style={assetManagementStyles.modalTitle}>{t('asset.manageCategories')}</Text>
               <TouchableOpacity 
                 onPress={() => setCategoriesModalVisible(false)}
                 style={{ padding: 12, margin: -12 }}
@@ -910,28 +910,28 @@ const AssetManagement = () => {
                   </View>
                 ))}
                 {assetCategories.length === 0 && (
-                  <Text style={{ color: '#6c757d' }}>No categories found.</Text>
+                  <Text style={{ color: '#6c757d' }}>{t('asset.noCategoriesFound')}</Text>
                 )}
               </ScrollView>
             </View>
 
             <View style={assetManagementStyles.divider} />
 
-            <Text style={assetManagementStyles.sectionLabel}>Add New Category</Text>
+            <Text style={assetManagementStyles.sectionLabel}>{t('asset.addNewCategory')}</Text>
             <View style={assetManagementStyles.newPreviewRow}>
               <View style={[assetManagementStyles.categoryAvatar, { backgroundColor: newCategoryColor }]}>
                 <Ionicons name={newCategoryIcon} size={18} color="#ffffff" />
               </View>
-              <Text style={assetManagementStyles.newPreviewText}>{newCategoryName || 'Preview'}</Text>
+              <Text style={assetManagementStyles.newPreviewText}>{newCategoryName || t('asset.preview')}</Text>
             </View>
             <TextInput
               style={[assetManagementStyles.input, assetManagementStyles.inputUnfocused]}
-              placeholder="Category Name"
+              placeholder={t('asset.categoryName')}
               value={newCategoryName}
               onChangeText={setNewCategoryName}
             />
 
-            <Text style={assetManagementStyles.inputLabel}>Icon</Text>
+            <Text style={assetManagementStyles.inputLabel}>{t('asset.icon')}</Text>
             <View style={assetManagementStyles.categoryContainer}>
               {iconOptions.map((icon, index) => (
                 <TouchableOpacity
@@ -947,7 +947,7 @@ const AssetManagement = () => {
               ))}
             </View>
 
-            <Text style={assetManagementStyles.inputLabel}>Color</Text>
+            <Text style={assetManagementStyles.inputLabel}>{t('asset.color')}</Text>
             <View style={assetManagementStyles.colorRow}>
               {colorOptions.map((hex, index) => (
                 <TouchableOpacity
@@ -971,13 +971,13 @@ const AssetManagement = () => {
                 style={[assetManagementStyles.modalButton, assetManagementStyles.cancelButton]}
                 onPress={() => setCategoriesModalVisible(false)}
               >
-                <Text style={assetManagementStyles.cancelButtonText}>Close</Text>
+                <Text style={assetManagementStyles.cancelButtonText}>{t('asset.close')}</Text>
               </TouchableOpacity>
                              <TouchableOpacity
                  style={[assetManagementStyles.modalButton, assetManagementStyles.saveButton]}
                  onPress={addCategory}
                >
-                 <Text style={assetManagementStyles.saveButtonText}>Add Category</Text>
+                 <Text style={assetManagementStyles.saveButtonText}>{t('asset.addCategory')}</Text>
                </TouchableOpacity>
              </View>
            </View>
@@ -989,7 +989,7 @@ const AssetManagement = () => {
   if (isLoading) {
     return (
       <View style={[assetManagementStyles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <Text style={assetManagementStyles.topBannerTitle}>Loading...</Text>
+        <Text style={assetManagementStyles.topBannerTitle}>{t('asset.loading')}</Text>
       </View>
     );
   }
@@ -998,8 +998,8 @@ const AssetManagement = () => {
     <View style={assetManagementStyles.container}>
       {/* Top Banner */}
       <View style={assetManagementStyles.topBanner}>
-        <Text style={assetManagementStyles.topBannerTitle}>Asset Management</Text>
-        <Text style={assetManagementStyles.topBannerSubtitle}>Track your valuable assets</Text>
+        <Text style={assetManagementStyles.topBannerTitle}>{t('asset.title')}</Text>
+        <Text style={assetManagementStyles.topBannerSubtitle}>{t('asset.subtitle')}</Text>
       </View>
 
       {/* Summary Card */}
@@ -1014,14 +1014,14 @@ const AssetManagement = () => {
           onPress={() => openModal()}
         >
           <Ionicons name="add" size={20} color="white" />
-          <Text style={assetManagementStyles.addButtonText}>Add Asset</Text>
+          <Text style={assetManagementStyles.addButtonText}>{t('asset.addAsset')}</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[assetManagementStyles.addButton, { backgroundColor: '#007bff' }]}
           onPress={() => setCategoriesModalVisible(true)}
         >
           <Ionicons name="albums" size={20} color="white" />
-          <Text style={assetManagementStyles.addButtonText}>Categories</Text>
+          <Text style={assetManagementStyles.addButtonText}>{t('asset.categories')}</Text>
         </TouchableOpacity>
       </View>
 
@@ -1035,14 +1035,14 @@ const AssetManagement = () => {
               color="#6c757d" 
             />
             <Text style={assetManagementStyles.emptyText}>
-              No assets recorded yet
+              {t('asset.noAssetsRecorded')}
             </Text>
             <TouchableOpacity
               style={[assetManagementStyles.emptyStateButton, { backgroundColor: '#28a745' }]}
               onPress={() => openModal()}
             >
               <Text style={assetManagementStyles.emptyStateButtonText}>
-                Add Your First Asset
+                {t('asset.addYourFirstAsset')}
               </Text>
             </TouchableOpacity>
           </View>

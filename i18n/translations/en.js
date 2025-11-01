@@ -199,6 +199,10 @@ export const en = {
     preview: 'Preview',
     loading: 'Loading...',
     copy: '(Copy)',
+    days: 'days',
+    category: 'Category',
+    errorFailedToCreateCategory: 'Failed to create category',
+    errorFailedToDeleteCategory: 'Failed to delete category',
   },
 
   // Reports & Analytics
