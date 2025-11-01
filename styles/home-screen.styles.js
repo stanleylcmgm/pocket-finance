@@ -97,7 +97,7 @@ export const homeScreenStyles = StyleSheet.create({
   },
 
   statNumber: {
-    fontSize: 20,
+    fontSize: 12,
     fontWeight: 'bold',
     color: '#2c3e50',
     marginBottom: 4,

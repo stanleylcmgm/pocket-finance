@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -7,12 +7,27 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 import { colors } from '../theme';
 import { homeScreenStyles } from '../styles/home-screen.styles';
 import { verifyDatabaseUsage, testDatabaseWrite, deleteAllDatabaseRecords } from '../utils/database-test';
+import { 
+  getAssets, 
+  calculateTotalAssets,
+  getTransactions,
+  getCategories,
+  filterTransactionsByMonth,
+  calculateMonthlySummary,
+  toMonthKey,
+  formatCurrency
+} from '../utils/data-utils';
+import { getExpenses } from '../utils/expenses-data';
 
 const HomeScreen = ({ navigation }) => {
   const [activeTab, setActiveTab] = useState('home');
+  const [totalAssets, setTotalAssets] = useState(0);
+  const [monthlyExpensesTotal, setMonthlyExpensesTotal] = useState(0);
+  const [balanceSheetBalance, setBalanceSheetBalance] = useState(0);
 
   // Database verification functions
   const handleVerifyDatabase = async () => {
@@ -61,10 +76,89 @@ const HomeScreen = ({ navigation }) => {
                 : `❌ FAILED!\n\nError: ${result.error}`,
               [{ text: 'OK' }]
             );
+            // Reload stats after deletion
+            loadStats();
           }
         }
       ]
     );
+  };
+
+  // Load stats data
+  const loadStats = useCallback(async () => {
+    try {
+      const currentMonth = new Date();
+      const monthKey = toMonthKey(currentMonth);
+
+      // Load Asset Management total
+      const assets = await getAssets();
+      const assetsTotal = calculateTotalAssets(assets);
+      setTotalAssets(assetsTotal);
+
+      // Load Expenses Tracking monthly total
+      const allExpenses = await getExpenses();
+      const monthlyExpenses = allExpenses.filter(expense => {
+        const expenseDate = new Date(expense.date);
+        const expenseMonthKey = toMonthKey(expenseDate);
+        return expenseMonthKey === monthKey;
+      });
+      const expensesTotal = monthlyExpenses.reduce((sum, expense) => sum + (expense.amountConverted || 0), 0);
+      setMonthlyExpensesTotal(expensesTotal);
+
+      // Load Balance Sheet balance (current month, formal transactions only)
+      const [allTransactions, allCategories] = await Promise.all([
+        getTransactions(),
+        getCategories()
+      ]);
+
+      // Create a map of category IDs to their subtype for quick lookup
+      const categorySubtypeMap = {};
+      allCategories.forEach(cat => {
+        categorySubtypeMap[cat.id] = cat.subtype;
+      });
+
+      // Filter to only formal transactions (exclude daily expenses)
+      const formalTransactions = allTransactions.filter(tx => {
+        // All income transactions are included
+        if (tx.type === 'income') return true;
+        // For expense transactions, exclude those with daily categories
+        if (tx.type === 'expense') {
+          if (!tx.categoryId) return true; // Include expenses without category
+          const categorySubtype = categorySubtypeMap[tx.categoryId];
+          return categorySubtype !== 'daily';
+        }
+        return true;
+      });
+
+      // Filter to current month and calculate balance
+      const monthTransactions = filterTransactionsByMonth(formalTransactions, monthKey);
+      const summary = calculateMonthlySummary(monthTransactions);
+      setBalanceSheetBalance(summary.balance);
+
+    } catch (error) {
+      console.error('Error loading stats:', error);
+    }
+  }, []);
+
+  // Load stats when component mounts and when screen is focused
+  useEffect(() => {
+    loadStats();
+  }, [loadStats]);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadStats();
+    }, [loadStats])
+  );
+
+  // Format currency with no decimal places
+  const formatCurrencyNoDecimals = (amount) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(Math.round(amount));
   };
 
   const menuItems = [
@@ -161,23 +255,23 @@ const HomeScreen = ({ navigation }) => {
             <View style={homeScreenStyles.statsContainer}>
               <View style={homeScreenStyles.statCard}>
                 <View style={homeScreenStyles.statIconContainer}>
-                  <Ionicons name="trending-up" size={20} color={colors.success[500]} />
+                  <Ionicons name="business" size={20} color={colors.success[500]} />
                 </View>
-                <Text style={homeScreenStyles.statNumber}>$0</Text>
-                <Text style={homeScreenStyles.statLabel}>This Month</Text>
+                <Text style={homeScreenStyles.statNumber}>{formatCurrencyNoDecimals(totalAssets)}</Text>
+                <Text style={homeScreenStyles.statLabel}>Asset</Text>
               </View>
               <View style={homeScreenStyles.statCard}>
                 <View style={homeScreenStyles.statIconContainer}>
                   <Ionicons name="trending-down" size={20} color={colors.error[500]} />
                 </View>
-                <Text style={homeScreenStyles.statNumber}>$0</Text>
+                <Text style={homeScreenStyles.statNumber}>{formatCurrencyNoDecimals(monthlyExpensesTotal)}</Text>
                 <Text style={homeScreenStyles.statLabel}>Spent</Text>
               </View>
               <View style={homeScreenStyles.statCard}>
                 <View style={homeScreenStyles.statIconContainer}>
                   <Ionicons name="wallet" size={20} color={colors.info[500]} />
                 </View>
-                <Text style={homeScreenStyles.statNumber}>$0</Text>
+                <Text style={homeScreenStyles.statNumber}>{formatCurrencyNoDecimals(balanceSheetBalance)}</Text>
                 <Text style={homeScreenStyles.statLabel}>Balance</Text>
               </View>
             </View>
