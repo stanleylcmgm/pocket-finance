@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -12,8 +12,10 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
+  Animated,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 import { assetManagementStyles } from '../styles/asset-management.styles';
 import { useI18n } from '../i18n/i18n';
 
@@ -38,6 +40,25 @@ const AssetManagement = () => {
   const [totalAssets, setTotalAssets] = useState(0);
   const [assetCategories, setAssetCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Display values for animation
+  const [displayTotalAssets, setDisplayTotalAssets] = useState(0);
+  const [displayTrackingDelta, setDisplayTrackingDelta] = useState(0);
+  const [displayTopCategory1, setDisplayTopCategory1] = useState(0);
+  const [displayTopCategory2, setDisplayTopCategory2] = useState(0);
+  const [displayTopCategory3, setDisplayTopCategory3] = useState(0);
+
+  // Animated values for the summary card
+  const animatedTotalAssets = useRef(new Animated.Value(0)).current;
+  const animatedTrackingDelta = useRef(new Animated.Value(0)).current;
+  const animatedTopCategory1 = useRef(new Animated.Value(0)).current;
+  const animatedTopCategory2 = useRef(new Animated.Value(0)).current;
+  const animatedTopCategory3 = useRef(new Animated.Value(0)).current;
+
+  // Track previous values to prevent unnecessary re-animations
+  const prevValuesRef = useRef({ total: 0, length: 0 });
+  const isAnimatingRef = useRef(false);
+  const isMountedRef = useRef(false);
   
   // Modal states
   const [modalVisible, setModalVisible] = useState(false);
@@ -94,6 +115,207 @@ const AssetManagement = () => {
     loadAssets();
     loadAssetCategories();
   }, [loadAssets, loadAssetCategories]);
+
+  // Function to trigger animation
+  const triggerAnimation = useCallback(() => {
+    // Prevent multiple simultaneous animations
+    if (isAnimatingRef.current) {
+      return () => {};
+    }
+    
+    isAnimatingRef.current = true;
+    
+    // Access current values from state
+    const currentAssets = assetsList;
+    const currentTotal = totalAssets;
+    const currentCategories = assetCategories;
+    
+    // Don't animate if categories aren't loaded yet
+    if (currentCategories.length === 0 && currentAssets.length > 0) {
+      isAnimatingRef.current = false;
+      return () => {};
+    }
+    
+    // Calculate top categories and tracking info (same logic as getTopCategories)
+    const categoryTotals = {};
+    currentAssets.forEach(asset => {
+      if (!asset.categoryId) return; // Skip assets without category
+      const category = currentCategories.find(cat => cat.id === asset.categoryId);
+      if (category) {
+        if (categoryTotals[asset.categoryId]) {
+          categoryTotals[asset.categoryId].total += asset.amount;
+        } else {
+          categoryTotals[asset.categoryId] = {
+            ...category,
+            total: asset.amount
+          };
+        }
+      }
+    });
+    
+    const topCategories = Object.values(categoryTotals)
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 3);
+    
+    // Get tracking info
+    const assetWithTracking = currentAssets.find(asset => 
+      asset.lastUpdatedDate && asset.currentUpdatedDate && asset.lastTotalAssetsValue
+    );
+    const trackingDelta = assetWithTracking ? currentTotal - assetWithTracking.lastTotalAssetsValue : 0;
+    
+    // Calculate category totals - use the sorted order from topCategories
+    const category1Total = topCategories.length > 0 ? topCategories[0].total : 0;
+    const category2Total = topCategories.length > 1 ? topCategories[1].total : 0;
+    const category3Total = topCategories.length > 2 ? topCategories[2].total : 0;
+
+    // Reset animated values to 0
+    animatedTotalAssets.setValue(0);
+    animatedTrackingDelta.setValue(0);
+    animatedTopCategory1.setValue(0);
+    animatedTopCategory2.setValue(0);
+    animatedTopCategory3.setValue(0);
+    setDisplayTotalAssets(0);
+    setDisplayTrackingDelta(0);
+    setDisplayTopCategory1(0);
+    setDisplayTopCategory2(0);
+    setDisplayTopCategory3(0);
+
+    // Set up listeners to update display values
+    const totalListener = animatedTotalAssets.addListener(({ value }) => {
+      setDisplayTotalAssets(value);
+    });
+    const deltaListener = animatedTrackingDelta.addListener(({ value }) => {
+      setDisplayTrackingDelta(value);
+    });
+    const category1Listener = animatedTopCategory1.addListener(({ value }) => {
+      setDisplayTopCategory1(value);
+    });
+    const category2Listener = animatedTopCategory2.addListener(({ value }) => {
+      setDisplayTopCategory2(value);
+    });
+    const category3Listener = animatedTopCategory3.addListener(({ value }) => {
+      setDisplayTopCategory3(value);
+    });
+
+    // Start animations
+    const animationDuration = 1500;
+    
+    // Also set a timeout to ensure values are set even if animation doesn't complete
+    const fallbackTimer = setTimeout(() => {
+      setDisplayTopCategory1(category1Total);
+      setDisplayTopCategory2(category2Total);
+      setDisplayTopCategory3(category3Total);
+    }, animationDuration + 100);
+    
+    Animated.parallel([
+      Animated.timing(animatedTotalAssets, {
+        toValue: currentTotal,
+        duration: animationDuration,
+        useNativeDriver: false,
+      }),
+      Animated.timing(animatedTrackingDelta, {
+        toValue: trackingDelta,
+        duration: animationDuration,
+        useNativeDriver: false,
+      }),
+      Animated.timing(animatedTopCategory1, {
+        toValue: category1Total,
+        duration: animationDuration,
+        useNativeDriver: false,
+      }),
+      Animated.timing(animatedTopCategory2, {
+        toValue: category2Total,
+        duration: animationDuration,
+        useNativeDriver: false,
+      }),
+      Animated.timing(animatedTopCategory3, {
+        toValue: category3Total,
+        duration: animationDuration,
+        useNativeDriver: false,
+      }),
+    ]).start((finished) => {
+      clearTimeout(fallbackTimer);
+      isAnimatingRef.current = false;
+      if (finished) {
+        // Ensure final values are set after animation completes
+        setDisplayTotalAssets(currentTotal);
+        setDisplayTrackingDelta(trackingDelta);
+        setDisplayTopCategory1(category1Total);
+        setDisplayTopCategory2(category2Total);
+        setDisplayTopCategory3(category3Total);
+      }
+    });
+
+    // Return cleanup function
+    return () => {
+      clearTimeout(fallbackTimer);
+      isAnimatingRef.current = false;
+      animatedTotalAssets.removeListener(totalListener);
+      animatedTrackingDelta.removeListener(deltaListener);
+      animatedTopCategory1.removeListener(category1Listener);
+      animatedTopCategory2.removeListener(category2Listener);
+      animatedTopCategory3.removeListener(category3Listener);
+    };
+  }, [totalAssets, assetsList.length, assetCategories.length]);
+
+  // Trigger animation when screen is focused (navigating back to asset management)
+  useFocusEffect(
+    useCallback(() => {
+      let cleanup = null;
+      let timer = null;
+      isMountedRef.current = true;
+      const loadAndAnimate = async () => {
+        await loadAssets();
+        // Trigger animation after assets are loaded and screen is focused
+        if (isMountedRef.current) {
+          timer = setTimeout(() => {
+            cleanup = triggerAnimation();
+          }, 200);
+        }
+      };
+      loadAndAnimate();
+      return () => {
+        isMountedRef.current = false;
+        if (timer) clearTimeout(timer);
+        if (cleanup) cleanup();
+      };
+    }, [loadAssets, triggerAnimation])
+  );
+
+  // Animate stats when values change (for initial load, skip if useFocusEffect already handled it)
+  useEffect(() => {
+    // Skip if already mounted (useFocusEffect will handle it)
+    if (isMountedRef.current) {
+      return;
+    }
+    
+    // Only animate if values actually changed
+    const totalChanged = prevValuesRef.current.total !== totalAssets;
+    const lengthChanged = prevValuesRef.current.length !== assetsList.length;
+    
+    if ((totalChanged || lengthChanged) && (totalAssets !== 0 || assetsList.length > 0)) {
+      prevValuesRef.current.total = totalAssets;
+      prevValuesRef.current.length = assetsList.length;
+      
+      let cleanup = null;
+      // Delay to allow data to settle
+      const timer = setTimeout(() => {
+        cleanup = triggerAnimation();
+      }, 300);
+      
+      return () => {
+        clearTimeout(timer);
+        if (cleanup) cleanup();
+      };
+    } else if (totalAssets === 0 && assetsList.length === 0) {
+      // No data - set to 0 without animation
+      setDisplayTotalAssets(0);
+      setDisplayTrackingDelta(0);
+      setDisplayTopCategory1(0);
+      setDisplayTopCategory2(0);
+      setDisplayTopCategory3(0);
+    }
+  }, [totalAssets, assetsList.length, triggerAnimation]);
 
   // Asset management
   const openModal = (asset = null) => {
@@ -272,14 +494,17 @@ const AssetManagement = () => {
     
     // Calculate total for each category
     assetsList.forEach(asset => {
-      if (categoryTotals[asset.categoryId]) {
-        categoryTotals[asset.categoryId].total += asset.amount;
-      } else {
-        const category = assetCategories.find(cat => cat.id === asset.categoryId);
-        categoryTotals[asset.categoryId] = {
-          ...category,
-          total: asset.amount
-        };
+      if (!asset.categoryId) return; // Skip assets without category
+      const category = assetCategories.find(cat => cat.id === asset.categoryId);
+      if (category) {
+        if (categoryTotals[asset.categoryId]) {
+          categoryTotals[asset.categoryId].total += asset.amount;
+        } else {
+          categoryTotals[asset.categoryId] = {
+            ...category,
+            total: asset.amount
+          };
+        }
       }
     });
     
@@ -331,7 +556,7 @@ const AssetManagement = () => {
           <View style={assetManagementStyles.summaryLeft}>
             <Text style={assetManagementStyles.summaryLabel}>Total Assets</Text>
             <Text style={assetManagementStyles.summaryAmount}>
-              {formatCurrency(totalAssets)}
+              {formatCurrency(displayTotalAssets)}
             </Text>
           </View>
           
@@ -348,7 +573,7 @@ const AssetManagement = () => {
                   assetManagementStyles.trackingValue,
                   { color: trackingInfo.delta >= 0 ? '#28a745' : '#dc3545' }
                 ]}>
-                  {trackingInfo.delta >= 0 ? '+' : ''}{formatCurrency(trackingInfo.delta)}
+                  {displayTrackingDelta >= 0 ? '+' : ''}{formatCurrency(displayTrackingDelta)}
                 </Text>
               </View>
               <View style={assetManagementStyles.trackingRow}>
@@ -369,19 +594,22 @@ const AssetManagement = () => {
         {topCategories.length > 0 && (
           <View style={assetManagementStyles.categoryBreakdown}>
             <Text style={assetManagementStyles.breakdownTitle}>Top Categories</Text>
-            {topCategories.map((category, index) => (
-              <View key={`top-category-${category.id}-${index}`} style={assetManagementStyles.categoryRow}>
-                <View style={assetManagementStyles.categoryInfo}>
-                  <View style={[assetManagementStyles.categoryIcon, { backgroundColor: category.color }]}>
-                    <Ionicons name={category.icon} size={12} color="#ffffff" />
+            {topCategories.map((category, index) => {
+              const displayAmount = index === 0 ? displayTopCategory1 : index === 1 ? displayTopCategory2 : displayTopCategory3;
+              return (
+                <View key={`top-category-${category.id}-${index}`} style={assetManagementStyles.categoryRow}>
+                  <View style={assetManagementStyles.categoryInfo}>
+                    <View style={[assetManagementStyles.categoryIcon, { backgroundColor: category.color }]}>
+                      <Ionicons name={category.icon} size={12} color="#ffffff" />
+                    </View>
+                    <Text style={assetManagementStyles.categoryName}>{category.name}</Text>
                   </View>
-                  <Text style={assetManagementStyles.categoryName}>{category.name}</Text>
+                  <Text style={assetManagementStyles.categoryAmount}>
+                    {formatCurrency(displayAmount)}
+                  </Text>
                 </View>
-                <Text style={assetManagementStyles.categoryAmount}>
-                  {formatCurrency(category.total)}
-                </Text>
-              </View>
-            ))}
+              );
+            })}
           </View>
         )}
       </View>
