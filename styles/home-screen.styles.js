@@ -28,15 +28,15 @@ export const homeScreenStyles = StyleSheet.create({
   },
 
   title: {
-    fontSize: 25,
-    fontWeight: 'bold',
+    fontSize: 22,
+    fontWeight: '900',
     color: '#ffffff',
     marginBottom: 5,
     margin: 0,
   },
 
   subtitle: {
-    fontSize: 16,
+    fontSize: 14,
     color: 'rgba(255, 255, 255, 0.8)',
     margin: 0,
   },

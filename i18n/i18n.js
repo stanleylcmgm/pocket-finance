@@ -2,12 +2,12 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { en } from './translations/en';
 import { zh } from './translations/zh';
-import { es } from './translations/es';
+import { zhTW } from './translations/zh-TW';
 
 const translations = {
   en,
   zh,
-  es,
+  zhTW,
 };
 
 const I18nContext = createContext();

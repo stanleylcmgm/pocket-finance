@@ -10,7 +10,7 @@ const LanguageSelector = () => {
   const languages = {
     en: { name: 'English', flag: '🇺🇸' },
     zh: { name: '中文', flag: '🇨🇳' },
-    es: { name: 'Español', flag: '🇪🇸' },
+    zhTW: { name: '繁體中文', flag: '🇹🇼' },
   };
 
   const handleLanguageSelect = (langCode) => {

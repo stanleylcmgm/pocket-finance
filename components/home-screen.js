@@ -189,9 +189,6 @@ const HomeScreen = ({ navigation }) => {
               <LanguageSelector />
             </View>
           </View>
-          <View style={homeScreenStyles.headerIcon}>
-            <Ionicons name="star" size={40} color="rgba(255,255,255,0.3)" />
-          </View>
         </View>
       </View>
 
