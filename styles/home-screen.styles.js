@@ -140,7 +140,7 @@ export const homeScreenStyles = StyleSheet.create({
   gridContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 17,
+    gap: 20,
     justifyContent: 'center',
     alignItems: 'center',
   },
