@@ -13,8 +13,10 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
+  Animated,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 import { balanceSheetStyles } from '../styles/balance-sheet.styles';
 import { useI18n } from '../i18n/i18n';
 
@@ -45,6 +47,16 @@ const BalanceSheet = () => {
     totalExpenses: 0,
     balance: 0,
   });
+
+  // Display values for animation
+  const [displayIncome, setDisplayIncome] = useState(0);
+  const [displayExpenses, setDisplayExpenses] = useState(0);
+  const [displayBalance, setDisplayBalance] = useState(0);
+
+  // Animated values for the summary cards
+  const animatedIncome = useState(new Animated.Value(0))[0];
+  const animatedExpenses = useState(new Animated.Value(0))[0];
+  const animatedBalance = useState(new Animated.Value(0))[0];
   
   // Database data state
   const [categories, setCategories] = useState([]);
@@ -159,6 +171,89 @@ const BalanceSheet = () => {
   useEffect(() => {
     loadMonthlyTransactions();
   }, [loadMonthlyTransactions]);
+
+  // Function to trigger animation
+  const triggerAnimation = useCallback(() => {
+    // Reset animated values and display values to 0 before animating
+    animatedIncome.setValue(0);
+    animatedExpenses.setValue(0);
+    animatedBalance.setValue(0);
+    setDisplayIncome(0);
+    setDisplayExpenses(0);
+    setDisplayBalance(0);
+
+    // Set up listeners to update display values
+    const incomeListener = animatedIncome.addListener(({ value }) => {
+      setDisplayIncome(value);
+    });
+    const expensesListener = animatedExpenses.addListener(({ value }) => {
+      setDisplayExpenses(value);
+    });
+    const balanceListener = animatedBalance.addListener(({ value }) => {
+      setDisplayBalance(value);
+    });
+
+    // Start animations
+    const animationDuration = 1500;
+    Animated.parallel([
+      Animated.timing(animatedIncome, {
+        toValue: monthlySummary.totalIncome,
+        duration: animationDuration,
+        useNativeDriver: false,
+      }),
+      Animated.timing(animatedExpenses, {
+        toValue: monthlySummary.totalExpenses,
+        duration: animationDuration,
+        useNativeDriver: false,
+      }),
+      Animated.timing(animatedBalance, {
+        toValue: monthlySummary.balance,
+        duration: animationDuration,
+        useNativeDriver: false,
+      }),
+    ]).start();
+
+    // Return cleanup function
+    return () => {
+      animatedIncome.removeListener(incomeListener);
+      animatedExpenses.removeListener(expensesListener);
+      animatedBalance.removeListener(balanceListener);
+    };
+  }, [monthlySummary.totalIncome, monthlySummary.totalExpenses, monthlySummary.balance, animatedIncome, animatedExpenses, animatedBalance]);
+
+  // Trigger animation when screen is focused (navigating back to balance sheet)
+  useFocusEffect(
+    useCallback(() => {
+      let cleanup = null;
+      const loadAndAnimate = async () => {
+        await loadDataFromDatabase();
+        // Trigger animation after stats are loaded and screen is focused
+        setTimeout(() => {
+          cleanup = triggerAnimation();
+        }, 150);
+      };
+      loadAndAnimate();
+      return () => {
+        if (cleanup) cleanup();
+      };
+    }, [loadDataFromDatabase, triggerAnimation])
+  );
+
+  // Animate stats when values change (for initial load, before first focus)
+  useEffect(() => {
+    let cleanup = null;
+    // Only trigger on initial load if values are already available
+    if (monthlySummary.totalIncome !== 0 || monthlySummary.totalExpenses !== 0 || monthlySummary.balance !== 0) {
+      // Small delay to avoid race condition with useFocusEffect
+      const timer = setTimeout(() => {
+        cleanup = triggerAnimation();
+      }, 200);
+      return () => {
+        clearTimeout(timer);
+        if (cleanup) cleanup();
+      };
+    }
+  }, [monthlySummary.totalIncome, monthlySummary.totalExpenses, monthlySummary.balance, triggerAnimation]);
 
   // Navigation functions
   const changeMonth = (direction) => {
@@ -402,11 +497,11 @@ const BalanceSheet = () => {
         <View style={balanceSheetStyles.combinedTwoLines}>
           <Text style={balanceSheetStyles.combinedLineText}>
             {t('balance.totalIncome')}
-            <Text style={{ fontWeight: 'bold', color: '#155724' }}> {formatCurrency(incomeAmount)}</Text>
+            <Text style={{ fontWeight: 'bold', color: '#155724' }}> {formatCurrency(displayIncome)}</Text>
           </Text>
           <Text style={balanceSheetStyles.combinedLineText}>
             {t('balance.totalExpenses')}
-            <Text style={{ fontWeight: 'bold', color: '#721c24' }}> {formatCurrency(expenseAmount)}</Text>
+            <Text style={{ fontWeight: 'bold', color: '#721c24' }}> {formatCurrency(displayExpenses)}</Text>
           </Text>
         </View>
       </View>
@@ -902,7 +997,7 @@ const BalanceSheet = () => {
       <View style={balanceSheetStyles.summaryContainer}>
         {renderCombinedSummaryCard(monthlySummary.totalIncome, monthlySummary.totalExpenses)}
         <View style={{ flex: 1.6 }}>
-        {renderSummaryCard(t('balance.balance'), monthlySummary.balance, 
+        {renderSummaryCard(t('balance.balance'), displayBalance, 
           monthlySummary.balance > 0 ? 'positive' : 
           monthlySummary.balance < 0 ? 'negative' : 'neutral'
         )}

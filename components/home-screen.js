@@ -4,6 +4,7 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
+  Animated,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
@@ -29,6 +30,16 @@ const HomeScreen = ({ navigation }) => {
   const [totalAssets, setTotalAssets] = useState(0);
   const [monthlyExpensesTotal, setMonthlyExpensesTotal] = useState(0);
   const [balanceSheetBalance, setBalanceSheetBalance] = useState(0);
+
+  // Display values for animation
+  const [displayAssets, setDisplayAssets] = useState(0);
+  const [displayExpenses, setDisplayExpenses] = useState(0);
+  const [displayBalance, setDisplayBalance] = useState(0);
+
+  // Animated values for the stat cards
+  const animatedAssets = useState(new Animated.Value(0))[0];
+  const animatedExpenses = useState(new Animated.Value(0))[0];
+  const animatedBalance = useState(new Animated.Value(0))[0];
 
   // Load stats data
   const loadStats = useCallback(async () => {
@@ -86,16 +97,93 @@ const HomeScreen = ({ navigation }) => {
     }
   }, []);
 
-  // Load stats when component mounts and when screen is focused
+  // Function to trigger animation
+  const triggerAnimation = useCallback(() => {
+    // Reset animated values and display values to 0 before animating
+    animatedAssets.setValue(0);
+    animatedExpenses.setValue(0);
+    animatedBalance.setValue(0);
+    setDisplayAssets(0);
+    setDisplayExpenses(0);
+    setDisplayBalance(0);
+
+    // Set up listeners to update display values
+    const assetListener = animatedAssets.addListener(({ value }) => {
+      setDisplayAssets(value);
+    });
+    const expenseListener = animatedExpenses.addListener(({ value }) => {
+      setDisplayExpenses(value);
+    });
+    const balanceListener = animatedBalance.addListener(({ value }) => {
+      setDisplayBalance(value);
+    });
+
+    // Start animations
+    const animationDuration = 1500; 
+    Animated.parallel([
+      Animated.timing(animatedAssets, {
+        toValue: totalAssets,
+        duration: animationDuration,
+        useNativeDriver: false,
+      }),
+      Animated.timing(animatedExpenses, {
+        toValue: monthlyExpensesTotal,
+        duration: animationDuration,
+        useNativeDriver: false,
+      }),
+      Animated.timing(animatedBalance, {
+        toValue: balanceSheetBalance,
+        duration: animationDuration,
+        useNativeDriver: false,
+      }),
+    ]).start();
+
+    // Return cleanup function
+    return () => {
+      animatedAssets.removeListener(assetListener);
+      animatedExpenses.removeListener(expenseListener);
+      animatedBalance.removeListener(balanceListener);
+    };
+  }, [totalAssets, monthlyExpensesTotal, balanceSheetBalance, animatedAssets, animatedExpenses, animatedBalance]);
+
+  // Load stats when component mounts
   useEffect(() => {
     loadStats();
   }, [loadStats]);
 
+  // Trigger animation when screen is focused (navigating back to home)
   useFocusEffect(
     useCallback(() => {
-      loadStats();
-    }, [loadStats])
+      let cleanup = null;
+      const loadAndAnimate = async () => {
+        await loadStats();
+        // Trigger animation after stats are loaded and screen is focused
+        setTimeout(() => {
+          cleanup = triggerAnimation();
+        }, 150);
+      };
+      loadAndAnimate();
+      return () => {
+        if (cleanup) cleanup();
+      };
+    }, [loadStats, triggerAnimation])
   );
+
+  // Animate stats when values change (for initial load, before first focus)
+  useEffect(() => {
+    let cleanup = null;
+    // Only trigger on initial load if values are already available
+    if (totalAssets !== 0 || monthlyExpensesTotal !== 0 || balanceSheetBalance !== 0) {
+      // Small delay to avoid race condition with useFocusEffect
+      const timer = setTimeout(() => {
+        cleanup = triggerAnimation();
+      }, 200);
+      return () => {
+        clearTimeout(timer);
+        if (cleanup) cleanup();
+      };
+    }
+  }, [totalAssets, monthlyExpensesTotal, balanceSheetBalance, triggerAnimation]);
 
   // Format currency with no decimal places
   const formatCurrencyNoDecimals = (amount) => {
@@ -202,21 +290,21 @@ const HomeScreen = ({ navigation }) => {
                 <View style={homeScreenStyles.statIconContainer}>
                   <Ionicons name="business" size={20} color={colors.success[500]} />
                 </View>
-                <Text style={homeScreenStyles.statNumber}>{formatCurrencyNoDecimals(totalAssets)}</Text>
+                <Text style={homeScreenStyles.statNumber}>{formatCurrencyNoDecimals(displayAssets)}</Text>
                 <Text style={homeScreenStyles.statLabel}>{t('home.asset')}</Text>
               </View>
               <View style={homeScreenStyles.statCard}>
                 <View style={homeScreenStyles.statIconContainer}>
                   <Ionicons name="trending-down" size={20} color={colors.error[500]} />
                 </View>
-                <Text style={homeScreenStyles.statNumber}>{formatCurrencyNoDecimals(monthlyExpensesTotal)}</Text>
+                <Text style={homeScreenStyles.statNumber}>{formatCurrencyNoDecimals(displayExpenses)}</Text>
                 <Text style={homeScreenStyles.statLabel}>{t('home.spent')}</Text>
               </View>
               <View style={homeScreenStyles.statCard}>
                 <View style={homeScreenStyles.statIconContainer}>
                   <Ionicons name="wallet" size={20} color={colors.info[500]} />
                 </View>
-                <Text style={homeScreenStyles.statNumber}>{formatCurrencyNoDecimals(balanceSheetBalance)}</Text>
+                <Text style={homeScreenStyles.statNumber}>{formatCurrencyNoDecimals(displayBalance)}</Text>
                 <Text style={homeScreenStyles.statLabel}>{t('home.balance')}</Text>
               </View>
             </View>
