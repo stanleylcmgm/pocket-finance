@@ -71,11 +71,33 @@ const ReportAnalytic = () => {
         .sort((a, b) => b.total - a.total)
         .slice(0, 3);
 
-      // Load current month transactions for balance sheet data
+      // Load current month transactions for balance sheet data (only formal transactions)
       const currentMonth = new Date();
       const monthKey = toMonthKey(currentMonth);
-      const allTransactions = await getTransactions();
-      const monthlyTransactions = filterTransactionsByMonth(allTransactions, monthKey);
+      const [allTransactions, allCategories] = await Promise.all([
+        getTransactions(),
+        getCategories()
+      ]);
+      
+      // Filter to only formal transactions (exclude daily expenses)
+      const categorySubtypeMap = {};
+      allCategories.forEach(cat => {
+        categorySubtypeMap[cat.id] = cat.subtype;
+      });
+      
+      const formalTransactions = allTransactions.filter(tx => {
+        // All income transactions are included
+        if (tx.type === 'income') return true;
+        // For expense transactions, exclude those with daily categories
+        if (tx.type === 'expense') {
+          if (!tx.categoryId) return true;
+          const categorySubtype = categorySubtypeMap[tx.categoryId];
+          return categorySubtype !== 'daily';
+        }
+        return true;
+      });
+      
+      const monthlyTransactions = filterTransactionsByMonth(formalTransactions, monthKey);
       const monthlySummary = calculateMonthlySummary(monthlyTransactions);
 
       // Calculate year-to-date average expenses and recent monthly expenses using Expenses Tracking data
@@ -84,8 +106,8 @@ const ReportAnalytic = () => {
       const yearEnd = new Date(currentYear, 11, 31, 23, 59, 59, 999);
       
       // Get expenses from Expenses Tracking (not Balance Sheet transactions)
-      const allExpenses = getExpenses();
-      const yearExpenses = getExpensesByDateRange(yearStart, yearEnd);
+      const allExpenses = await getExpenses();
+      const yearExpenses = await getExpensesByDateRange(yearStart, yearEnd);
       
       
       // Calculate YTD average by summing monthly expenses and dividing by months with data

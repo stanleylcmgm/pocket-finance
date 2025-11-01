@@ -90,10 +90,35 @@ const BalanceSheet = () => {
       
       setCategories(categoriesData);
       setAccounts(accountsData);
-      setTransactions(transactionsData);
       
-      // Load monthly transactions
-      const monthTransactions = filterTransactionsByMonth(transactionsData, monthKey);
+      // Create a map of category IDs to their subtype for quick lookup
+      const categorySubtypeMap = {};
+      categoriesData.forEach(cat => {
+        categorySubtypeMap[cat.id] = cat.subtype;
+      });
+      
+      // Filter transactions: Balance Sheet should only show formal transactions
+      // Exclude daily expense transactions (subtype='daily')
+      // Include: All income transactions + Expense transactions with subtype != 'daily'
+      const formalTransactions = transactionsData.filter(tx => {
+        // All income transactions are included
+        if (tx.type === 'income') return true;
+        
+        // For expense transactions, exclude those with daily categories
+        if (tx.type === 'expense') {
+          if (!tx.categoryId) return true; // Include expenses without category
+          const categorySubtype = categorySubtypeMap[tx.categoryId];
+          // Exclude daily expenses, include formal/other/null
+          return categorySubtype !== 'daily';
+        }
+        
+        return true;
+      });
+      
+      setTransactions(formalTransactions);
+      
+      // Load monthly transactions (only formal ones)
+      const monthTransactions = filterTransactionsByMonth(formalTransactions, monthKey);
       const sortedTransactions = sortTransactions(monthTransactions);
       setMonthlyTransactions(sortedTransactions);
       

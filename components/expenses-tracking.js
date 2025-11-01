@@ -113,34 +113,46 @@ const ExpensesTracking = () => {
   }, []);
 
   // Load expenses for current month
-  const loadMonthlyExpenses = useCallback(() => {
-    const allExpenses = getExpenses();
-    const monthExpenses = filterTransactionsByMonth(allExpenses, monthKey);
-    const sortedExpenses = sortTransactions(monthExpenses);
-    
-    setMonthlyExpenses(sortedExpenses);
-    
-    // Calculate total
-    const total = sortedExpenses.reduce((sum, expense) => sum + (expense.amountConverted || 0), 0);
-    setMonthlyTotal(total);
+  const loadMonthlyExpenses = useCallback(async (overrideMonthKey = null) => {
+    try {
+      const targetMonthKey = overrideMonthKey || monthKey;
+      const allExpenses = await getExpenses();
+      const monthExpenses = filterTransactionsByMonth(allExpenses, targetMonthKey);
+      const sortedExpenses = sortTransactions(monthExpenses);
+      
+      setMonthlyExpenses(sortedExpenses);
+      
+      // Calculate total
+      const total = sortedExpenses.reduce((sum, expense) => sum + (expense.amountConverted || 0), 0);
+      setMonthlyTotal(total);
+    } catch (error) {
+      console.error('Error loading expenses:', error);
+      Alert.alert('Error', 'Failed to load expenses from database');
+    }
   }, [monthKey]);
 
   // Initialize and load data
   useEffect(() => {
-    loadCategoriesFromDatabase();
-    loadMonthlyExpenses();
+    const loadData = async () => {
+      await loadCategoriesFromDatabase();
+      await loadMonthlyExpenses();
+    };
+    loadData();
   }, [loadCategoriesFromDatabase, loadMonthlyExpenses]);
 
   // Navigation functions
-  const changeMonth = (direction) => {
+  const changeMonth = async (direction) => {
     const newDate = new Date(currentMonth);
     if (direction === 'next') {
       newDate.setMonth(newDate.getMonth() + 1);
     } else {
       newDate.setMonth(newDate.getMonth() - 1);
     }
+    const newMonthKey = toMonthKey(newDate);
     setCurrentMonth(newDate);
-    setMonthKey(toMonthKey(newDate));
+    setMonthKey(newMonthKey);
+    // Reload expenses for the new month immediately
+    await loadMonthlyExpenses(newMonthKey);
   };
 
   const openMonthPicker = () => {
@@ -149,11 +161,14 @@ const ExpensesTracking = () => {
     setMonthPickerVisible(true);
   };
 
-  const selectMonth = (year, month) => {
+  const selectMonth = async (year, month) => {
     const newDate = new Date(year, month, 1);
+    const newMonthKey = toMonthKey(newDate);
     setCurrentMonth(newDate);
-    setMonthKey(toMonthKey(newDate));
+    setMonthKey(newMonthKey);
     setMonthPickerVisible(false);
+    // Reload expenses for the new month immediately
+    await loadMonthlyExpenses(newMonthKey);
   };
 
   // Date Picker functions
@@ -240,7 +255,7 @@ const ExpensesTracking = () => {
     setModalVisible(true);
   };
 
-  const saveExpense = () => {
+  const saveExpense = async () => {
     if (!formData.name || !formData.categoryId || !formData.amount) {
       Alert.alert('Error', 'Please fill in name, category, and amount');
       return;
@@ -252,35 +267,39 @@ const ExpensesTracking = () => {
       return;
     }
 
-    const expense = {
-      id: editingExpense?.id || `exp-${Date.now()}`,
-      type: 'expense',
-      amountOriginal: amount,
-      currencyCode: 'USD',
-      amountConverted: amount,
-      fxRateToBase: null,
-      categoryId: formData.categoryId,
-      accountId: null,
-      note: formData.name,
-      description: formData.description || null,
-      date: formData.date.toISOString(),
-      createdAt: editingExpense?.createdAt || new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      attachmentUris: [],
-    };
+    try {
+      const expense = {
+        id: editingExpense?.id || `exp-${Date.now()}`,
+        type: 'expense',
+        amountOriginal: amount,
+        currencyCode: 'USD',
+        amountConverted: amount,
+        fxRateToBase: null,
+        categoryId: formData.categoryId,
+        accountId: null,
+        note: formData.name,
+        description: formData.description || null,
+        date: formData.date.toISOString(),
+        createdAt: editingExpense?.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        attachmentUris: [],
+      };
 
+      if (editingExpense) {
+        // Update existing expense
+        await updateExpense(expense.id, expense);
+      } else {
+        // Add new expense
+        await addExpense(expense);
+      }
 
-    if (editingExpense) {
-      // Update existing expense
-      updateExpense(expense.id, expense);
-    } else {
-      // Add new expense
-      addExpense(expense);
+      setModalVisible(false);
+      setEditingExpense(null);
+      await loadMonthlyExpenses();
+    } catch (error) {
+      console.error('Error saving expense:', error);
+      Alert.alert('Error', 'Failed to save expense to database');
     }
-
-    setModalVisible(false);
-    setEditingExpense(null);
-    loadMonthlyExpenses();
   };
 
   const deleteExpense = (id) => {
@@ -292,25 +311,35 @@ const ExpensesTracking = () => {
         {
           text: 'Delete',
           style: 'destructive',
-          onPress: () => {
-            removeExpense(id);
-            loadMonthlyExpenses();
+          onPress: async () => {
+            try {
+              await removeExpense(id);
+              await loadMonthlyExpenses();
+            } catch (error) {
+              console.error('Error deleting expense:', error);
+              Alert.alert('Error', 'Failed to delete expense from database');
+            }
           },
         },
       ]
     );
   };
 
-  const duplicateExpense = (expense) => {
-    const duplicated = {
-      ...expense,
-      id: `exp-${Date.now()}`,
-      date: new Date().toISOString(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    addExpense(duplicated);
-    loadMonthlyExpenses();
+  const duplicateExpense = async (expense) => {
+    try {
+      const duplicated = {
+        ...expense,
+        id: `exp-${Date.now()}`,
+        date: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      await addExpense(duplicated);
+      await loadMonthlyExpenses();
+    } catch (error) {
+      console.error('Error duplicating expense:', error);
+      Alert.alert('Error', 'Failed to duplicate expense');
+    }
   };
 
   // Amount input formatting
@@ -516,7 +545,7 @@ const ExpensesTracking = () => {
             'What would you like to do?',
             [
               { text: 'Edit', onPress: () => openModal(item) },
-              { text: 'Duplicate', onPress: () => duplicateExpense(item) },
+              { text: 'Duplicate', onPress: async () => await duplicateExpense(item) },
               { text: 'Delete', style: 'destructive', onPress: () => deleteExpense(item.id) },
               { text: 'Cancel', style: 'cancel' },
             ]
@@ -816,15 +845,22 @@ const ExpensesTracking = () => {
     setCategoriesVersion((v) => v + 1);
   };
 
-  const requestDeleteCategory = (categoryId) => {
-    const allExpenses = getExpenses();
-    const inUse = allExpenses.some((exp) => exp.categoryId === categoryId);
-    if (inUse) {
-      Alert.alert('Cannot Delete', 'This category is used by existing expenses.');
-      return;
+  const requestDeleteCategory = async (categoryId) => {
+    try {
+      const allExpenses = await getExpenses();
+      const inUse = allExpenses.some((exp) => exp.categoryId === categoryId);
+      if (inUse) {
+        Alert.alert('Cannot Delete', 'This category is used by existing expenses.');
+        return;
+      }
+      // Note: Category deletion should be handled through database service
+      // This is just a client-side check
+      setExpenseCategories(prev => prev.filter((c) => c.id !== categoryId));
+      setCategoriesVersion((v) => v + 1);
+    } catch (error) {
+      console.error('Error checking category usage:', error);
+      Alert.alert('Error', 'Failed to check if category is in use');
     }
-    expenseCategories = expenseCategories.filter((c) => c.id !== categoryId);
-    setCategoriesVersion((v) => v + 1);
   };
 
   const renderCategoriesModal = () => {
