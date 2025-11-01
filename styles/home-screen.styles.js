@@ -98,15 +98,15 @@ export const homeScreenStyles = StyleSheet.create({
 
   statNumber: {
     fontSize: 12,
-    fontWeight: 'bold',
-    color: '#2c3e50',
+    fontWeight: '900',
+    color: '#59C3C3',
     marginBottom: 4,
   },
 
   statLabel: {
     fontSize: 12,
     color: '#6c757d',
-    fontWeight: '500',
+    fontWeight: '800',
   },
 
   // Menu section
