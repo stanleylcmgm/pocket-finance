@@ -1,4 +1,4 @@
-# ⭐ Star - Your Productivity Companion
+# ⭐ Pocket Finance - Your Productivity Companion
 
 A comprehensive mobile productivity app for personal planning and financial tracking, built with React Native and Expo.
 
