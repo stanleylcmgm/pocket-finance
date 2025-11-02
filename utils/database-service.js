@@ -44,6 +44,9 @@ const sampleAssetCategories = [
   { id: 'cat-mpf', name: 'MPF', icon: 'shield-checkmark', color: '#28a745' },
 ];
 
+// Sample transactions (empty by default - users add their own transactions)
+const sampleTransactions = [];
+
 class DatabaseService {
   constructor() {
     this.db = null;
