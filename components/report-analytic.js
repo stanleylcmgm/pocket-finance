@@ -12,6 +12,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { colors } from '../theme';
 import { reportAnalyticStyles } from '../styles/report-analytic.styles';
 import { useI18n } from '../i18n/i18n';
+import AdBanner from './ad-banner';
 import { 
   getAssets, 
   getAssetCategories, 
@@ -974,6 +975,9 @@ const ReportAnalytic = () => {
           </View>
         </ScrollView>
       </View>
+
+      {/* Ad Banner at Bottom */}
+      <AdBanner position="bottom" />
     </View>
   );
 };

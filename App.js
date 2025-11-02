@@ -9,6 +9,9 @@ import * as SplashScreen from 'expo-splash-screen';
 import { initDatabase } from './utils/database-init';
 import { I18nProvider, useI18n } from './i18n/i18n';
 
+// Conditionally import AdMob (only works in custom development builds, not Expo Go)
+import { mobileAds, adMobAvailable } from './utils/admob-wrapper';
+
 // Keep the native splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
 
@@ -39,6 +42,12 @@ function AppContent() {
       const minDisplayTime = 2000; // Minimum 2 seconds
       
       try {
+        // Initialize AdMob (only if available - requires custom dev build)
+        if (mobileAds) {
+          await mobileAds().initialize();
+          console.log('AdMob initialized');
+        }
+        
         // Immediately hide the native splash screen
         await SplashScreen.hideAsync();
         
