@@ -285,7 +285,13 @@ const HomeScreen = ({ navigation }) => {
         <ScrollView style={homeScreenStyles.scrollView}>
           <View style={homeScreenStyles.scrollContent}>
             {/* Quick Stats */}
-            <View style={homeScreenStyles.statsContainer}>
+            <View style={[homeScreenStyles.menuContainer, { paddingTop: 20 }]}>
+              <View style={[homeScreenStyles.sectionHeader, { marginBottom: 15 }]}>
+                <Text style={homeScreenStyles.menuTitle}>{t('home.financialOverview')}</Text>
+                <View style={homeScreenStyles.sectionLine}></View>
+              </View>
+            </View>
+            <View style={[homeScreenStyles.statsContainer, { paddingTop: 0 }]}>
               <View style={homeScreenStyles.statCard}>
                 <View style={homeScreenStyles.statIconContainer}>
                   <Ionicons name="business" size={20} color={colors.success[500]} />

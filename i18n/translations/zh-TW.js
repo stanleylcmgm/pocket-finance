@@ -17,6 +17,7 @@ export const zhTW = {
     asset: '資產',
     spent: '支出',
     balance: '餘額',
+    financialOverview: '財務概覽',
     financialTools: '財務工具',
     balanceSheet: '資產負債表',
     balanceSheetSubtitle: '追蹤收入與支出',

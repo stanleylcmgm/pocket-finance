@@ -17,6 +17,7 @@ export const zh = {
     asset: '资产',
     spent: '支出',
     balance: '余额',
+    financialOverview: '财务概览',
     financialTools: '财务工具',
     balanceSheet: '资产负债表',
     balanceSheetSubtitle: '追踪收入与支出',

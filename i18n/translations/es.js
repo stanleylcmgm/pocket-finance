@@ -17,6 +17,7 @@ export const es = {
     asset: 'Activo',
     spent: 'Gastado',
     balance: 'Balance',
+    financialOverview: 'Resumen Financiero',
     financialTools: 'Herramientas Financieras',
     balanceSheet: 'Balance General',
     balanceSheetSubtitle: 'Rastree ingresos y gastos',

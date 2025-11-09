@@ -17,6 +17,7 @@ export const en = {
     asset: 'Asset',
     spent: 'Spent',
     balance: 'Balance',
+    financialOverview: 'Financial Overview',
     financialTools: 'Financial Tools',
     balanceSheet: 'Balance Sheet',
     balanceSheetSubtitle: 'Track income & expenses',
