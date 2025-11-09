@@ -19,6 +19,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { balanceSheetStyles } from '../styles/balance-sheet.styles';
 import { useI18n } from '../i18n/i18n';
+import AdBanner from './ad-banner';
 
 import { 
   formatCurrency, 
@@ -1053,6 +1054,9 @@ const BalanceSheet = () => {
         {renderSection(t('balance.income'), monthlyTransactions.filter(tx => tx.type === 'income').sort((a, b) => b.amountConverted - a.amountConverted), 'income')}
         {renderSection(t('balance.expenses'), monthlyTransactions.filter(tx => tx.type === 'expense').sort((a, b) => b.amountConverted - a.amountConverted), 'expense')}
       </ScrollView>
+
+      {/* Ad Banner at Bottom */}
+      <AdBanner position="bottom" />
 
       {/* Modals */}
       {renderEntryModal()}

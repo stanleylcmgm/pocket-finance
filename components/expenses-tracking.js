@@ -19,6 +19,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { expensesTrackingStyles } from '../styles/expenses-tracking.styles';
 import CustomDatePicker from './datepicker';
 import { useI18n } from '../i18n/i18n';
+import AdBanner from './ad-banner';
 
 import { 
   formatCurrency, 
@@ -1236,6 +1237,9 @@ const ExpensesTracking = () => {
           />
         )}
       </ScrollView>
+
+      {/* Ad Banner at Bottom */}
+      <AdBanner position="bottom" />
 
       {/* Modals */}
       {renderEntryModal()}

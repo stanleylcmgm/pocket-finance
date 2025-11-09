@@ -24,6 +24,7 @@ import { getExpenses } from '../utils/expenses-data';
 import { useI18n } from '../i18n/i18n';
 import LanguageSelector from './language-selector';
 import RemoveAdsButton from './remove-ads-button';
+import AdBanner from './ad-banner';
 
 const HomeScreen = ({ navigation }) => {
   const { t } = useI18n();
@@ -348,6 +349,9 @@ const HomeScreen = ({ navigation }) => {
             <View style={homeScreenStyles.bottomSpacing}></View>
           </View>
         </ScrollView>
+        
+        {/* Ad Banner at Bottom */}
+        <AdBanner position="bottom" />
       </View>
 
     </View>

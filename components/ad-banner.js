@@ -1,84 +1,119 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import React, { useEffect, useState } from 'react';
+import { View, StyleSheet, Text } from 'react-native';
+import { getAdUnitId } from '../utils/admob-config';
+import { BannerAd, BannerAdSize, adMobAvailable } from '../utils/admob-wrapper';
 import { useRemoveAds } from '../utils/use-remove-ads';
-import { useI18n } from '../i18n/i18n';
 
 /**
  * Advertisement Banner Component
- * This component will only render if the user has NOT purchased the remove ads feature
+ * This component displays Google AdMob banner ads and will only render if:
+ * 1. The user has NOT purchased the remove ads feature
+ * 2. AdMob is available (not in Expo Go)
  * 
  * Usage:
- * <AdBanner />
+ * <AdBanner position="bottom" />
  * 
  * The banner will automatically hide if the user has purchased the remove ads feature
  */
-const AdBanner = ({ style, onPress }) => {
+const AdBanner = ({ 
+  size, 
+  position = 'bottom',
+  style,
+}) => {
   const { isAdsRemoved, isLoading } = useRemoveAds();
-  const { t } = useI18n();
+  const [adUnitId, setAdUnitId] = useState(null);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    // Get ad unit ID (AdMob is initialized in App.js)
+    // Only if AdMob components are available
+    if (adMobAvailable && BannerAd && BannerAdSize) {
+      const unitId = getAdUnitId('banner');
+      setAdUnitId(unitId);
+    }
+  }, []);
 
   // Don't show banner if ads are removed or still loading
   if (isLoading || isAdsRemoved) {
     return null;
   }
 
-  return (
-    <TouchableOpacity
-      style={[styles.banner, style]}
-      onPress={onPress}
-      activeOpacity={0.8}
-    >
-      <View style={styles.bannerContent}>
-        <View style={styles.bannerLeft}>
-          <Ionicons name="megaphone" size={20} color="#fff" />
-          <View style={styles.bannerTextContainer}>
-            <Text style={styles.bannerTitle}>{t('ads.bannerTitle')}</Text>
-            <Text style={styles.bannerSubtitle}>{t('ads.bannerSubtitle')}</Text>
-          </View>
+  // Don't render if AdMob is not available (e.g., in Expo Go)
+  // Show a placeholder in development so you can see where ads will appear
+  if (!adMobAvailable || !BannerAd || !BannerAdSize || !adUnitId) {
+    // Show development placeholder when running in Expo Go
+    if (__DEV__) {
+      return (
+        <View style={[styles.container, styles.placeholderContainer]}>
+          <Text style={styles.placeholderText}>📱 Ad Banner (not available in Expo Go)</Text>
+          <Text style={styles.placeholderSubtext}>Build a custom dev build to see ads</Text>
         </View>
-        <Ionicons name="chevron-forward" size={20} color="#fff" />
-      </View>
-    </TouchableOpacity>
+      );
+    }
+    return null;
+  }
+
+  const containerStyle = [
+    styles.container,
+    position === 'top' && styles.topPosition,
+    position === 'bottom' && styles.bottomPosition,
+    style,
+  ];
+
+  // Use provided size or default to BANNER (only if BannerAdSize is available)
+  const adSize = size || (BannerAdSize ? BannerAdSize.BANNER : undefined);
+
+  return (
+    <View style={containerStyle}>
+      <BannerAd
+        unitId={adUnitId}
+        size={adSize}
+        requestOptions={{
+          requestNonPersonalizedAdsOnly: true,
+        }}
+        onAdLoaded={() => {
+          setIsLoaded(true);
+          console.log('Banner ad loaded');
+        }}
+        onAdFailedToLoad={(error) => {
+          console.error('Banner ad failed to load:', error);
+          setIsLoaded(false);
+        }}
+      />
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  banner: {
-    backgroundColor: '#667eea',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    marginHorizontal: 16,
-    marginVertical: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  bannerContent: {
-    flexDirection: 'row',
+  container: {
+    width: '100%',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    backgroundColor: 'transparent',
   },
-  bannerLeft: {
-    flexDirection: 'row',
+  topPosition: {
+    marginTop: 0,
+  },
+  bottomPosition: {
+    marginBottom: 0,
+  },
+  placeholderContainer: {
+    backgroundColor: '#f0f0f0',
+    padding: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#ddd',
     alignItems: 'center',
-    flex: 1,
+    justifyContent: 'center',
+    minHeight: 60,
   },
-  bannerTextContainer: {
-    marginLeft: 12,
-    flex: 1,
-  },
-  bannerTitle: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: 'bold',
-    marginBottom: 2,
-  },
-  bannerSubtitle: {
-    color: 'rgba(255, 255, 255, 0.9)',
+  placeholderText: {
     fontSize: 12,
+    color: '#666',
+    fontWeight: '500',
+  },
+  placeholderSubtext: {
+    fontSize: 10,
+    color: '#999',
+    marginTop: 4,
   },
 });
 

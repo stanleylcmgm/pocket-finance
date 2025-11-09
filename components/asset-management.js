@@ -18,6 +18,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { assetManagementStyles } from '../styles/asset-management.styles';
 import { useI18n } from '../i18n/i18n';
+import AdBanner from './ad-banner';
 
 import { 
   formatCurrency, 
@@ -1056,6 +1057,9 @@ const AssetManagement = () => {
           />
         )}
       </ScrollView>
+
+      {/* Ad Banner at Bottom */}
+      <AdBanner position="bottom" />
 
       {/* Modals */}
       {renderEntryModal()}
