@@ -198,7 +198,7 @@ const AssetManagement = () => {
     });
 
     // Start animations
-    const animationDuration = 1500;
+    const animationDuration = 500;
     
     // Also set a timeout to ensure values are set even if animation doesn't complete
     const fallbackTimer = setTimeout(() => {

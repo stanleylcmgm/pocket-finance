@@ -213,7 +213,7 @@ const ExpensesTracking = () => {
     });
 
     // Start animations
-    const animationDuration = 1500;
+    const animationDuration = 500;
     const animations = [
       Animated.timing(animatedTotal, {
         toValue: currentTotal,

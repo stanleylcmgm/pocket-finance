@@ -397,7 +397,7 @@ const ReportAnalytic = () => {
     });
 
     // Start animations
-    const animationDuration = 1500;
+    const animationDuration = 500;
     const fallbackTimer = setTimeout(() => {
       setDisplayTotalAssets(totalAssets);
       setDisplayIncome(income);

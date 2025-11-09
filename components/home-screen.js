@@ -119,7 +119,7 @@ const HomeScreen = ({ navigation }) => {
     });
 
     // Start animations
-    const animationDuration = 1500; 
+    const animationDuration = 500; 
     Animated.parallel([
       Animated.timing(animatedAssets, {
         toValue: totalAssets,

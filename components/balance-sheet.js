@@ -194,7 +194,7 @@ const BalanceSheet = () => {
     });
 
     // Start animations
-    const animationDuration = 1500;
+    const animationDuration = 500;
     Animated.parallel([
       Animated.timing(animatedIncome, {
         toValue: monthlySummary.totalIncome,
