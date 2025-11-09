@@ -219,6 +219,8 @@ export const zhTW = {
     yearToDateAverage: '年初至今平均',
     recentMonthlyExpenses: '最近月度支出',
     averageMonthlyExpenses: '年度平均月度支出',
+    expensesByCategory: '按類別支出',
+    total: '總計',
     noMonthlyExpenseData: '無月度支出資料',
     noDataAvailable: '圖表無可用資料',
   },
@@ -241,6 +243,7 @@ export const zhTW = {
     close: '關閉',
     add: '新增',
     today: '今天',
+    reset: '重置',
   },
 };
 

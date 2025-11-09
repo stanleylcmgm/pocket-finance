@@ -223,6 +223,8 @@ export const en = {
     yearToDateAverage: 'Year-to-Date Average',
     recentMonthlyExpenses: 'Recent Monthly Expenses',
     averageMonthlyExpenses: 'Average monthly expenses for',
+    expensesByCategory: 'Expenses by Category',
+    total: 'Total',
     noMonthlyExpenseData: 'No monthly expense data available',
     noDataAvailable: 'No data available for chart',
   },
@@ -245,6 +247,7 @@ export const en = {
     close: 'Close',
     add: 'Add',
     today: 'Today',
+    reset: 'Reset',
   },
 };
 

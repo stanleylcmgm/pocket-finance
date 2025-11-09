@@ -219,6 +219,8 @@ export const es = {
     yearToDateAverage: 'Promedio del Año a la Fecha',
     recentMonthlyExpenses: 'Gastos Mensuales Recientes',
     averageMonthlyExpenses: 'Gastos mensuales promedio para',
+    expensesByCategory: 'Gastos por Categoría',
+    total: 'Total',
     noMonthlyExpenseData: 'No hay datos de gastos mensuales disponibles',
     noDataAvailable: 'No hay datos disponibles para el gráfico',
   },
@@ -241,6 +243,7 @@ export const es = {
     close: 'Cerrar',
     add: 'Agregar',
     today: 'Hoy',
+    reset: 'Restablecer',
   },
 };
 

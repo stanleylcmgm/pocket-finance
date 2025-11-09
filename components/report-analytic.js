@@ -41,6 +41,7 @@ const ReportAnalytic = () => {
   const [ytdMonthPickerVisible, setYtdMonthPickerVisible] = useState(false);
   const [ytdSelectedYear, setYtdSelectedYear] = useState(new Date().getFullYear());
   const [ytdSelectedMonthIndex, setYtdSelectedMonthIndex] = useState(new Date().getMonth());
+  const [isMonthSelected, setIsMonthSelected] = useState(false); // Track if user selected a specific month
   const [dashboardData, setDashboardData] = useState({
     totalAssets: 0,
     topAssetCategories: [],
@@ -50,6 +51,7 @@ const ReportAnalytic = () => {
     yearToDateAverageExpenses: 0,
     recentMonthlyExpenses: [],
     maxMonthlyExpenses: 0,
+    selectedMonthCategoryExpenses: [], // Category totals for selected month
   });
 
   // Display values for animation
@@ -270,6 +272,55 @@ const ReportAnalytic = () => {
         ? Math.max(...monthlyTotalsArray, yearToDateAverage) 
         : yearToDateAverage;
 
+      // Calculate category expenses for selected month if a month is selected
+      let selectedMonthCategoryExpenses = [];
+      if (isMonthSelected) {
+        const selectedMonthKey = `${ytdSelectedMonth.getFullYear()}-${String(ytdSelectedMonth.getMonth() + 1).padStart(2, '0')}`;
+        
+        // Get all expense categories
+        const expenseCategories = allCategories.filter(cat => 
+          cat.type === 'expense' && cat.subtype === 'daily'
+        );
+        
+        // Filter expenses for the selected month
+        const selectedMonthExpenses = allExpenses.filter(expense => {
+          const expenseDate = new Date(expense.date);
+          const expenseYear = expenseDate.getFullYear();
+          const expenseMonth = expenseDate.getMonth() + 1;
+          const expenseMonthKey = `${expenseYear}-${String(expenseMonth).padStart(2, '0')}`;
+          return expenseMonthKey === selectedMonthKey;
+        });
+        
+        // Group by category and calculate totals
+        const categoryTotals = {};
+        selectedMonthExpenses.forEach(expense => {
+          if (expense.categoryId) {
+            if (!categoryTotals[expense.categoryId]) {
+              categoryTotals[expense.categoryId] = 0;
+            }
+            categoryTotals[expense.categoryId] += expense.amountConverted || 0;
+          }
+        });
+        
+        // Convert to array with category info and sort by amount descending
+        selectedMonthCategoryExpenses = Object.entries(categoryTotals)
+          .map(([categoryId, total]) => {
+            const category = expenseCategories.find(cat => cat.id === categoryId);
+            return {
+              categoryId,
+              total,
+              category: category || { name: 'Unknown', color: '#6c757d' }
+            };
+          })
+          .filter(item => item.total > 0)
+          .sort((a, b) => b.total - a.total);
+      }
+
+      // Calculate selected month total if a month is selected
+      const selectedMonthTotal = isMonthSelected && selectedMonthCategoryExpenses.length > 0
+        ? selectedMonthCategoryExpenses.reduce((sum, item) => sum + item.total, 0)
+        : 0;
+
       const newDashboardData = {
         totalAssets,
         topAssetCategories,
@@ -279,6 +330,8 @@ const ReportAnalytic = () => {
         yearToDateAverageExpenses: yearToDateAverage,
         recentMonthlyExpenses,
         maxMonthlyExpenses,
+        selectedMonthCategoryExpenses,
+        selectedMonthTotal,
       };
       
       // Update data first, then update ref, then set loading to false
@@ -294,7 +347,7 @@ const ReportAnalytic = () => {
       console.error('Error loading dashboard data:', error);
       setIsLoading(false);
     }
-  }, []);
+  }, [isMonthSelected, ytdSelectedMonth]);
 
   // Update ref when dashboardData changes
   useEffect(() => {
@@ -689,6 +742,7 @@ const ReportAnalytic = () => {
   const handleYtdMonthSelect = (year, month) => {
     const newDate = new Date(year, month, 1);
     setYtdSelectedMonth(newDate);
+    setIsMonthSelected(true); // Mark that a specific month is selected
     setYtdMonthPickerVisible(false);
     // Trigger data reload
     loadDashboardData();
@@ -848,7 +902,45 @@ const ReportAnalytic = () => {
 
   // Render monthly expenses bar chart
   const renderMonthlyExpensesChart = () => {
-    if (dashboardData.recentMonthlyExpenses.length === 0) {
+    // If a month is selected, show category expenses for that month
+    if (isMonthSelected && dashboardData.selectedMonthCategoryExpenses && dashboardData.selectedMonthCategoryExpenses.length > 0) {
+      const maxCategoryAmount = Math.max(...dashboardData.selectedMonthCategoryExpenses.map(item => item.total));
+      
+      return (
+        <View style={reportAnalyticStyles.monthlyChartContainer}>
+          {dashboardData.selectedMonthCategoryExpenses.map((item, index) => {
+            const percentage = maxCategoryAmount > 0 ? (item.total / maxCategoryAmount) * 100 : 0;
+            
+            return (
+              <View key={item.categoryId || index} style={reportAnalyticStyles.monthlyChartItem}>
+                <View style={reportAnalyticStyles.monthlyChartLabelContainer}>
+                  <Text style={reportAnalyticStyles.monthlyChartLabel} numberOfLines={1}>
+                    {item.category.name}
+                  </Text>
+                  <Text style={reportAnalyticStyles.monthlyChartValue}>
+                    {formatCurrency(item.total)}
+                  </Text>
+                </View>
+                <View style={reportAnalyticStyles.monthlyChartBarContainer}>
+                  <View 
+                    style={[
+                      reportAnalyticStyles.monthlyChartBar,
+                      { 
+                        width: `${percentage}%`,
+                        backgroundColor: item.category.color || '#6c757d'
+                      }
+                    ]} 
+                  />
+                </View>
+              </View>
+            );
+          })}
+        </View>
+      );
+    }
+    
+    // Default: Show recent 3 monthly expenses
+    if (!dashboardData.recentMonthlyExpenses || dashboardData.recentMonthlyExpenses.length === 0) {
       return (
         <Text style={reportAnalyticStyles.noDataText}>{t('reports.noMonthlyExpenseData')}</Text>
       );
@@ -1049,14 +1141,51 @@ const ReportAnalytic = () => {
                 </TouchableOpacity>
               </View>
               <View style={reportAnalyticStyles.cardContent}>
-                <Text style={reportAnalyticStyles.cardSubtitle}>{t('reports.recentMonthlyExpenses')}</Text>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={reportAnalyticStyles.cardSubtitle}>
+                      {isMonthSelected 
+                        ? t('reports.expensesByCategory')
+                        : t('reports.recentMonthlyExpenses')
+                      }
+                    </Text>
+                    {isMonthSelected && dashboardData.selectedMonthTotal > 0 && (
+                      <Text style={{ fontSize: 14, fontWeight: '600', color: '#2c3e50', marginTop: 4 }}>
+                        {t('reports.total')}: {formatCurrency(dashboardData.selectedMonthTotal)}
+                      </Text>
+                    )}
+                  </View>
+                  {isMonthSelected && (
+                    <TouchableOpacity
+                      onPress={() => {
+                        setIsMonthSelected(false);
+                        setYtdSelectedMonth(new Date());
+                        loadDashboardData();
+                      }}
+                      style={{
+                        paddingHorizontal: 8,
+                        paddingVertical: 4,
+                        borderRadius: 8,
+                        backgroundColor: '#f8f9fa',
+                        borderWidth: 1,
+                        borderColor: '#e9ecef',
+                      }}
+                    >
+                      <Text style={{ fontSize: 11, color: '#6c757d', fontWeight: '600' }}>
+                        {t('common.reset')}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
                 {/* Monthly Expenses Bar Chart */}
                 <View style={reportAnalyticStyles.chartContainer}>
                   {renderMonthlyExpensesChart()}
                 </View>
-                <Text style={reportAnalyticStyles.cardDescription}>
-                  {t('reports.averageMonthlyExpenses')} {ytdSelectedMonth.getFullYear()}
-                </Text>
+                {!isMonthSelected && (
+                  <Text style={reportAnalyticStyles.cardDescription}>
+                    {t('reports.averageMonthlyExpenses')} {ytdSelectedMonth.getFullYear()}
+                  </Text>
+                )}
               </View>
             </View>
 

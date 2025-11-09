@@ -219,6 +219,8 @@ export const zh = {
     yearToDateAverage: '年初至今平均',
     recentMonthlyExpenses: '最近月度支出',
     averageMonthlyExpenses: '年度平均月度支出',
+    expensesByCategory: '按类别支出',
+    total: '总计',
     noMonthlyExpenseData: '无月度支出数据',
     noDataAvailable: '图表无可用数据',
   },
@@ -241,6 +243,7 @@ export const zh = {
     close: '关闭',
     add: '添加',
     today: '今天',
+    reset: '重置',
   },
 };
 
