@@ -246,5 +246,28 @@ export const zh = {
     today: '今天',
     reset: '重置',
   },
+
+  // Purchase
+  purchase: {
+    removeAds: '移除广告',
+    removeAdsTitle: '移除广告',
+    removeAdsDescription: '享受无广告体验，支持应用开发。',
+    feature1: '无广告干扰',
+    feature2: '更快的应用性能',
+    feature3: '支持应用开发',
+    price: '价格',
+    buyNow: '立即购买',
+    success: '购买成功',
+    adsRemoved: '广告已移除。感谢您的支持！',
+    error: '购买错误',
+    errorMessage: '购买过程中发生错误。请重试。',
+    disclaimer: '费用将计入您的账户。订阅将自动续订，除非取消。',
+  },
+
+  // Ads
+  ads: {
+    bannerTitle: '广告',
+    bannerSubtitle: '点击了解更多',
+  },
 };
 

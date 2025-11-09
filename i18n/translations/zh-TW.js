@@ -246,5 +246,28 @@ export const zhTW = {
     today: '今天',
     reset: '重置',
   },
+
+  // Purchase
+  purchase: {
+    removeAds: '移除廣告',
+    removeAdsTitle: '移除廣告',
+    removeAdsDescription: '享受無廣告體驗，支持應用開發。',
+    feature1: '無廣告干擾',
+    feature2: '更快的應用性能',
+    feature3: '支持應用開發',
+    price: '價格',
+    buyNow: '立即購買',
+    success: '購買成功',
+    adsRemoved: '廣告已移除。感謝您的支持！',
+    error: '購買錯誤',
+    errorMessage: '購買過程中發生錯誤。請重試。',
+    disclaimer: '費用將計入您的帳戶。訂閱將自動續訂，除非取消。',
+  },
+
+  // Ads
+  ads: {
+    bannerTitle: '廣告',
+    bannerSubtitle: '點擊了解更多',
+  },
 };
 

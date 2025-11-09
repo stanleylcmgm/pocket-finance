@@ -246,5 +246,28 @@ export const es = {
     today: 'Hoy',
     reset: 'Restablecer',
   },
+
+  // Purchase
+  purchase: {
+    removeAds: 'Eliminar Anuncios',
+    removeAdsTitle: 'Eliminar Anuncios',
+    removeAdsDescription: 'Disfruta de una experiencia sin anuncios y apoya el desarrollo de esta aplicación.',
+    feature1: 'Sin anuncios',
+    feature2: 'Mejor rendimiento de la aplicación',
+    feature3: 'Apoya el desarrollo de la aplicación',
+    price: 'Precio',
+    buyNow: 'Comprar Ahora',
+    success: 'Compra Exitosa',
+    adsRemoved: 'Los anuncios han sido eliminados. ¡Gracias por tu apoyo!',
+    error: 'Error de Compra',
+    errorMessage: 'Ocurrió un error durante la compra. Por favor, inténtalo de nuevo.',
+    disclaimer: 'El pago se cargará a su cuenta. La suscripción se renueva automáticamente a menos que se cancele.',
+  },
+
+  // Ads
+  ads: {
+    bannerTitle: 'Anuncio',
+    bannerSubtitle: 'Toca para saber más',
+  },
 };
 

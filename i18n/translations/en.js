@@ -250,5 +250,28 @@ export const en = {
     today: 'Today',
     reset: 'Reset',
   },
+
+  // Purchase
+  purchase: {
+    removeAds: 'Remove Ads',
+    removeAdsTitle: 'Remove Advertisements',
+    removeAdsDescription: 'Enjoy an ad-free experience and support the development of this app.',
+    feature1: 'No advertisements',
+    feature2: 'Faster app performance',
+    feature3: 'Support app development',
+    price: 'Price',
+    buyNow: 'Buy Now',
+    success: 'Purchase Successful',
+    adsRemoved: 'Advertisements have been removed. Thank you for your support!',
+    error: 'Purchase Error',
+    errorMessage: 'An error occurred during the purchase. Please try again.',
+    disclaimer: 'Payment will be charged to your account. Subscription auto-renews unless cancelled.',
+  },
+
+  // Ads
+  ads: {
+    bannerTitle: 'Advertisement',
+    bannerSubtitle: 'Tap to learn more',
+  },
 };
 

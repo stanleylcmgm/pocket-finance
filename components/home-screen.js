@@ -23,6 +23,7 @@ import {
 import { getExpenses } from '../utils/expenses-data';
 import { useI18n } from '../i18n/i18n';
 import LanguageSelector from './language-selector';
+import RemoveAdsButton from './remove-ads-button';
 
 const HomeScreen = ({ navigation }) => {
   const { t } = useI18n();
@@ -274,7 +275,10 @@ const HomeScreen = ({ navigation }) => {
                 <Text style={homeScreenStyles.title}>{t('home.title')}</Text>
                 <Text style={homeScreenStyles.subtitle}>{t('home.subtitle')}</Text>
               </View>
-              <LanguageSelector />
+              <View style={{ flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
+                <LanguageSelector />
+                <RemoveAdsButton />
+              </View>
             </View>
           </View>
         </View>
