@@ -155,101 +155,109 @@ const ReportAnalytic = () => {
       const yearExpenses = await getExpensesByDateRange(yearStart, yearEnd);
       
       
-      // Calculate YTD average by summing monthly expenses and dividing by months with data
-      const monthlyExpensesForYTD = [];
-      // Exclude current month - only include months from January to previous month
-      for (let i = 0; i < currentMonth.getMonth(); i++) {
-        // Manually create month key to avoid date constructor issues
-        const monthKey = `${currentYear}-${String(i + 1).padStart(2, '0')}`;
-        // Get expenses for this month from Expenses Tracking
-        const monthExpenses = allExpenses.filter(expense => {
-          const expenseDate = new Date(expense.date);
-          const expenseMonthKey = toMonthKey(expenseDate);
-          return expenseMonthKey === monthKey;
-        });
-        
-        const monthTotal = monthExpenses.reduce((sum, expense) => sum + (expense.amountConverted || 0), 0);
-        monthlyExpensesForYTD.push(monthTotal);
-      }
-      
-      const totalYearExpenses = monthlyExpensesForYTD.reduce((sum, amount) => sum + amount, 0);
-      const monthsWithData = monthlyExpensesForYTD.filter(amount => amount > 0).length;
-      const yearToDateAverage = monthsWithData > 0 ? totalYearExpenses / monthsWithData : 0;
-
-      // Calculate recent 3 monthly expenses
-      const recentMonthlyExpenses = [];
-      
-      for (let i = 2; i >= 0; i--) {
-        const targetMonth = currentMonth.getMonth() - i;
-        const targetYear = currentMonth.getFullYear();
-        
-        // Handle year rollover
-        let actualYear = targetYear;
-        let actualMonth = targetMonth;
-        if (targetMonth < 0) {
-          actualYear = targetYear - 1;
-          actualMonth = 12 + targetMonth;
+      // Helper function to get month key using LOCAL time (not UTC) to match user's selected date
+      const getLocalMonthKey = (dateString) => {
+        // Parse the date string - handle both ISO strings and other formats
+        if (typeof dateString === 'string' && dateString.includes('T')) {
+          // For ISO strings, extract the date part directly to avoid timezone conversion issues
+          // Extract YYYY-MM-DD from ISO string (e.g., "2024-11-01T00:00:00.000Z" -> "2024-11-01")
+          const datePart = dateString.split('T')[0];
+          const [year, month] = datePart.split('-').map(Number);
+          // Use the year and month directly from the ISO string date part
+          // This matches what the user selected, regardless of timezone
+          return `${year}-${String(month).padStart(2, '0')}`;
+        } else {
+          // For other date formats, use Date object with local time
+          const date = new Date(dateString);
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          return `${year}-${month}`;
         }
-        
-        // Manually create month key
-        const monthKey = `${actualYear}-${String(actualMonth + 1).padStart(2, '0')}`;
-        
-        // Get expenses for this month from Expenses Tracking
-        const monthExpenses = allExpenses.filter(expense => {
-          const expenseDate = new Date(expense.date);
-          const expenseMonthKey = toMonthKey(expenseDate);
-          return expenseMonthKey === monthKey;
-        });
-        
-        const monthTotal = monthExpenses.reduce((sum, expense) => sum + (expense.amountConverted || 0), 0);
-        
-        // Create month name for display
-        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
-                           'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        const monthName = monthNames[actualMonth];
-        
-        recentMonthlyExpenses.push({
-          month: monthName,
-          amount: monthTotal,
-          monthKey: monthKey
-        });
-      }
+      };
       
-      // Sort by month descending (most recent first)
-      recentMonthlyExpenses.sort((a, b) => {
-        const monthOrder = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
-                           'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        return monthOrder.indexOf(b.month) - monthOrder.indexOf(a.month);
+      // Calculate YTD average by averaging monthly totals for the current year
+      // Group all expenses by month for the current year
+      const monthlyTotalsForYear = {};
+      allExpenses.forEach(expense => {
+        // Parse the date string to a Date object, then use LOCAL time methods
+        const expenseDate = new Date(expense.date);
+        const expenseYear = expenseDate.getFullYear();
+        
+        // Only include expenses from the current year
+        if (expenseYear === currentYear) {
+          const expenseMonth = expenseDate.getMonth() + 1; // getMonth() returns 0-11, we need 1-12
+          const expenseMonthKey = `${expenseYear}-${String(expenseMonth).padStart(2, '0')}`;
+          
+          if (!monthlyTotalsForYear[expenseMonthKey]) {
+            monthlyTotalsForYear[expenseMonthKey] = 0;
+          }
+          monthlyTotalsForYear[expenseMonthKey] += expense.amountConverted || 0;
+        }
       });
+      
+      // Calculate average of monthly totals
+      const monthlyTotals = Object.values(monthlyTotalsForYear);
+      const yearToDateAverage = monthlyTotals.length > 0 
+        ? monthlyTotals.reduce((sum, total) => sum + total, 0) / monthlyTotals.length 
+        : 0;
 
-      // Calculate max monthly expenses from recent 12 months
-      const monthlyExpenses12Months = [];
-      for (let i = 11; i >= 0; i--) {
-        const targetMonth = currentMonth.getMonth() - i;
-        const targetYear = currentMonth.getFullYear();
+      // Calculate recent 3 monthly expenses (most recent 3 months that have expenses)
+      // Group all expenses by month - use local time to get the correct month
+      const monthlyExpensesMap = {};
+      allExpenses.forEach(expense => {
+        // Parse the date string to a Date object, then use LOCAL time methods
+        // This ensures we get the month the user actually selected, not the UTC month
+        const expenseDate = new Date(expense.date);
+        // Use local time methods to get the month the user selected
+        const year = expenseDate.getFullYear();
+        const month = expenseDate.getMonth() + 1; // getMonth() returns 0-11, we need 1-12
+        const expenseMonthKey = `${year}-${String(month).padStart(2, '0')}`;
         
-        // Handle year rollover
-        let actualYear = targetYear;
-        let actualMonth = targetMonth;
-        if (targetMonth < 0) {
-          actualYear = targetYear - 1;
-          actualMonth = 12 + targetMonth;
+        if (!monthlyExpensesMap[expenseMonthKey]) {
+          monthlyExpensesMap[expenseMonthKey] = {
+            monthKey: expenseMonthKey,
+            amount: 0,
+            year: year,
+            month: month - 1 // Convert to 0-based month index (0-11) for display
+          };
         }
-        
-        // Manually create month key
-        const monthKey = `${actualYear}-${String(actualMonth + 1).padStart(2, '0')}`;
-        
-        // Get expenses for this month from Expenses Tracking
-        const monthExpenses = allExpenses.filter(expense => {
-          const expenseDate = new Date(expense.date);
-          const expenseMonthKey = toMonthKey(expenseDate);
-          return expenseMonthKey === monthKey;
-        });
-        
-        const monthTotal = monthExpenses.reduce((sum, expense) => sum + (expense.amountConverted || 0), 0);
-        monthlyExpenses12Months.push(monthTotal);
-      }
-      const maxMonthlyExpenses = Math.max(...monthlyExpenses12Months, yearToDateAverage);
+        monthlyExpensesMap[expenseMonthKey].amount += expense.amountConverted || 0;
+      });
+      
+      // Convert to array and sort by date (most recent first), then take top 3
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                         'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      
+      const allMonthlyExpenses = Object.values(monthlyExpensesMap)
+        .map(item => {
+          // Parse monthKey (format: YYYY-MM) to get year and month
+          const [year, month] = item.monthKey.split('-').map(Number);
+          const monthIndex = month - 1; // Convert to 0-based index (0-11)
+          
+          return {
+            month: monthNames[monthIndex],
+            amount: item.amount,
+            monthKey: item.monthKey,
+            year: year,
+            monthIndex: monthIndex
+          };
+        })
+        .sort((a, b) => {
+          // Sort by year first (descending), then by month (descending) - most recent first
+          if (a.year !== b.year) {
+            return b.year - a.year;
+          }
+          return b.monthIndex - a.monthIndex;
+        })
+        .slice(0, 3); // Take the 3 most recent months
+      
+      const recentMonthlyExpenses = allMonthlyExpenses;
+
+      // Calculate max monthly expenses from current year monthly totals
+      const monthlyTotalsArray = Object.values(monthlyTotalsForYear);
+      const maxMonthlyExpenses = monthlyTotalsArray.length > 0 
+        ? Math.max(...monthlyTotalsArray, yearToDateAverage) 
+        : yearToDateAverage;
 
       const newDashboardData = {
         totalAssets,
