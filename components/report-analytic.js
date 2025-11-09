@@ -6,6 +6,8 @@ import {
   ActivityIndicator,
   Dimensions,
   Animated,
+  Modal,
+  TouchableOpacity,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
@@ -33,6 +35,12 @@ import {
 const ReportAnalytic = () => {
   const { t } = useI18n();
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Month picker state for YTD Average Expenses Card
+  const [ytdSelectedMonth, setYtdSelectedMonth] = useState(new Date());
+  const [ytdMonthPickerVisible, setYtdMonthPickerVisible] = useState(false);
+  const [ytdSelectedYear, setYtdSelectedYear] = useState(new Date().getFullYear());
+  const [ytdSelectedMonthIndex, setYtdSelectedMonthIndex] = useState(new Date().getMonth());
   const [dashboardData, setDashboardData] = useState({
     totalAssets: 0,
     topAssetCategories: [],
@@ -175,16 +183,19 @@ const ReportAnalytic = () => {
         }
       };
       
-      // Calculate YTD average by averaging monthly totals for the current year
-      // Group all expenses by month for the current year
+      // Calculate YTD average by averaging monthly totals for the selected year
+      // Use the selected month from YTD card, or default to current month
+      const selectedYear = ytdSelectedMonth.getFullYear();
+      
+      // Group all expenses by month for the selected year
       const monthlyTotalsForYear = {};
       allExpenses.forEach(expense => {
         // Parse the date string to a Date object, then use LOCAL time methods
         const expenseDate = new Date(expense.date);
         const expenseYear = expenseDate.getFullYear();
         
-        // Only include expenses from the current year
-        if (expenseYear === currentYear) {
+        // Only include expenses from the selected year
+        if (expenseYear === selectedYear) {
           const expenseMonth = expenseDate.getMonth() + 1; // getMonth() returns 0-11, we need 1-12
           const expenseMonthKey = `${expenseYear}-${String(expenseMonth).padStart(2, '0')}`;
           
@@ -674,6 +685,167 @@ const ReportAnalytic = () => {
     }));
   };
 
+  // Handle month selection for YTD card
+  const handleYtdMonthSelect = (year, month) => {
+    const newDate = new Date(year, month, 1);
+    setYtdSelectedMonth(newDate);
+    setYtdMonthPickerVisible(false);
+    // Trigger data reload
+    loadDashboardData();
+  };
+
+  // Render month picker modal for YTD card
+  const renderYtdMonthPicker = () => (
+    <Modal
+      animationType="fade"
+      transparent={true}
+      visible={ytdMonthPickerVisible}
+      onRequestClose={() => setYtdMonthPickerVisible(false)}
+    >
+      <View style={{ 
+        flex: 1, 
+        backgroundColor: 'rgba(0, 0, 0, 0.6)', 
+        justifyContent: 'center', 
+        alignItems: 'center',
+        padding: 20,
+      }}>
+        <View style={{ 
+          backgroundColor: 'white', 
+          borderRadius: 24, 
+          maxWidth: 340, 
+          alignItems: 'center',
+          height: 370,
+          padding: 20,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 10 },
+          shadowOpacity: 0.25,
+          shadowRadius: 20,
+          elevation: 10,
+        }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
+            <View style={{ 
+              width: 36, 
+              height: 36, 
+              borderRadius: 18, 
+              backgroundColor: '#fff3e0', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              marginRight: 10,
+            }}>
+              <Ionicons name="calendar" size={18} color="#fd7e14" />
+            </View>
+            <Text style={{ fontSize: 20, fontWeight: '700', color: '#2c3e50' }}>{t('expenses.selectMonth')}</Text>
+          </View>          
+          <View style={{ 
+            flexDirection: 'row', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            gap: 20, 
+            marginLeft: 5,
+            marginBottom: 20,
+            paddingVertical: 10,
+            paddingRight: 30,
+            backgroundColor: '#f8f9fa',
+            borderRadius: 14,
+            width: '100%',
+          }}>
+            <TouchableOpacity 
+              onPress={() => setYtdSelectedYear(ytdSelectedYear - 1)}
+              style={{
+                padding: 6,
+                borderRadius: 8,
+                backgroundColor: 'white',
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 4,
+                elevation: 2,
+              }}
+            >
+              <Ionicons name="chevron-back" size={20} color="#007bff" />
+            </TouchableOpacity>
+            <Text style={{ fontSize: 24, fontWeight: '700', color: '#2c3e50', minWidth: 90, textAlign: 'center' }}>
+              {ytdSelectedYear}
+            </Text>
+            <TouchableOpacity 
+              onPress={() => setYtdSelectedYear(ytdSelectedYear + 1)}
+              style={{
+                padding: 6,
+                borderRadius: 8,
+                backgroundColor: 'white',
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 4,
+                elevation: 2,
+              }}
+            >
+              <Ionicons name="chevron-forward" size={20} color="#007bff" />
+            </TouchableOpacity>
+          </View>
+          
+          <View style={{ 
+            flexDirection: 'row', 
+            flexWrap: 'wrap', 
+            justifyContent: 'center', 
+            gap: 8, 
+            marginBottom: 20,
+            width: '100%',
+          }}>
+            {Array.from({ length: 12 }, (_, i) => {
+              const isSelected = ytdSelectedMonthIndex === i && ytdSelectedMonth.getFullYear() === ytdSelectedYear;
+              return (
+                <TouchableOpacity
+                  key={i}
+                  style={{
+                    paddingHorizontal: 14,
+                    paddingVertical: 10,
+                    borderRadius: 14,
+                    borderWidth: 2,
+                    borderColor: isSelected ? '#fd7e14' : '#e9ecef',
+                    backgroundColor: isSelected ? '#fd7e14' : 'white',
+                    minWidth: 60,
+                    alignItems: 'center',
+                    shadowColor: isSelected ? '#fd7e14' : '#000',
+                    shadowOffset: { width: 0, height: isSelected ? 4 : 2 },
+                    shadowOpacity: isSelected ? 0.3 : 0.08,
+                    shadowRadius: isSelected ? 8 : 4,
+                    elevation: isSelected ? 4 : 2,
+                  }}
+                  onPress={() => handleYtdMonthSelect(ytdSelectedYear, i)}
+                >
+                  <Text style={{
+                    color: isSelected ? 'white' : '#6c757d',
+                    fontSize: 13,
+                    fontWeight: isSelected ? '700' : '600',
+                  }}>
+                    {new Date(2000, i).toLocaleString('default', { month: 'short' })}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+          
+          <TouchableOpacity
+            style={{ 
+              paddingVertical: 12, 
+              paddingHorizontal: 28, 
+              borderRadius: 12, 
+              backgroundColor: '#f8f9fa',
+              borderWidth: 1,
+              borderColor: '#e9ecef',
+              width: '100%',
+              alignItems: 'center',
+            }}
+            onPress={() => setYtdMonthPickerVisible(false)}
+          >
+            <Text style={{ color: '#6c757d', fontSize: 15, fontWeight: '600' }}>{t('common.cancel')}</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+
   // Render monthly expenses bar chart
   const renderMonthlyExpensesChart = () => {
     if (dashboardData.recentMonthlyExpenses.length === 0) {
@@ -846,6 +1018,36 @@ const ReportAnalytic = () => {
                   {formatCurrency(displayYearToDateAverage)}
                 </Text>
               </View>
+              <View style={{ paddingBottom: 12, alignItems: 'flex-end' }}>
+                <TouchableOpacity 
+                  onPress={() => {
+                    setYtdSelectedYear(ytdSelectedMonth.getFullYear());
+                    setYtdSelectedMonthIndex(ytdSelectedMonth.getMonth());
+                    setYtdMonthPickerVisible(true);
+                  }}
+                  style={{ 
+                    flexDirection: 'row', 
+                    alignItems: 'center', 
+                    paddingHorizontal: 12,
+                    paddingVertical: 6,
+                    borderRadius: 12,
+                    backgroundColor: '#ffffff',
+                    borderWidth: 1,
+                    borderColor: '#e9ecef',
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.08,
+                    shadowRadius: 4,
+                    elevation: 2,
+                  }}
+                >
+                  <Ionicons name="calendar-outline" size={14} color="#fd7e14" style={{ marginRight: 6 }} />
+                  <Text style={{ fontSize: 13, color: '#2c3e50', fontWeight: '600', marginRight: 4 }}>
+                    {ytdSelectedMonth.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                  </Text>
+                  <Ionicons name="chevron-down" size={14} color="#6c757d" />
+                </TouchableOpacity>
+              </View>
               <View style={reportAnalyticStyles.cardContent}>
                 <Text style={reportAnalyticStyles.cardSubtitle}>{t('reports.recentMonthlyExpenses')}</Text>
                 {/* Monthly Expenses Bar Chart */}
@@ -853,7 +1055,7 @@ const ReportAnalytic = () => {
                   {renderMonthlyExpensesChart()}
                 </View>
                 <Text style={reportAnalyticStyles.cardDescription}>
-                  {t('reports.averageMonthlyExpenses')} {new Date().getFullYear()}
+                  {t('reports.averageMonthlyExpenses')} {ytdSelectedMonth.getFullYear()}
                 </Text>
               </View>
             </View>
@@ -982,6 +1184,9 @@ const ReportAnalytic = () => {
           </View>
         </ScrollView>
       </View>
+      
+      {/* Month Picker Modal for YTD Card */}
+      {renderYtdMonthPicker()}
     </View>
   );
 };
