@@ -835,6 +835,29 @@ const ReportAnalytic = () => {
               </Text>
             </View>
             
+            {/* Year-to-Date Average Expenses Card */}
+            <View style={reportAnalyticStyles.card}>
+              <View style={reportAnalyticStyles.cardHeader}>
+                <View style={reportAnalyticStyles.cardTitleContainer}>
+                  <Ionicons name="calendar" size={20} color="#fd7e14" />
+                  <Text style={reportAnalyticStyles.cardTitleSmall}>{t('reports.yearToDateAverage')}</Text>
+                </View>
+                <Text style={reportAnalyticStyles.cardAmountSmall}>
+                  {formatCurrency(displayYearToDateAverage)}
+                </Text>
+              </View>
+              <View style={reportAnalyticStyles.cardContent}>
+                <Text style={reportAnalyticStyles.cardSubtitle}>{t('reports.recentMonthlyExpenses')}</Text>
+                {/* Monthly Expenses Bar Chart */}
+                <View style={reportAnalyticStyles.chartContainer}>
+                  {renderMonthlyExpensesChart()}
+                </View>
+                <Text style={reportAnalyticStyles.cardDescription}>
+                  {t('reports.averageMonthlyExpenses')} {new Date().getFullYear()}
+                </Text>
+              </View>
+            </View>
+
             {/* Total Assets Card */}
             <View style={reportAnalyticStyles.card}>
               <View style={reportAnalyticStyles.cardHeader}>
@@ -953,29 +976,6 @@ const ReportAnalytic = () => {
                     )}
                   </View>
                 </View>
-              </View>
-            </View>
-
-            {/* Year-to-Date Average Expenses Card */}
-            <View style={reportAnalyticStyles.card}>
-              <View style={reportAnalyticStyles.cardHeader}>
-                <View style={reportAnalyticStyles.cardTitleContainer}>
-                  <Ionicons name="calendar" size={20} color="#fd7e14" />
-                  <Text style={reportAnalyticStyles.cardTitleSmall}>{t('reports.yearToDateAverage')}</Text>
-                </View>
-                <Text style={reportAnalyticStyles.cardAmountSmall}>
-                  {formatCurrency(displayYearToDateAverage)}
-                </Text>
-              </View>
-              <View style={reportAnalyticStyles.cardContent}>
-                <Text style={reportAnalyticStyles.cardSubtitle}>{t('reports.recentMonthlyExpenses')}</Text>
-                {/* Monthly Expenses Bar Chart */}
-                <View style={reportAnalyticStyles.chartContainer}>
-                  {renderMonthlyExpensesChart()}
-                </View>
-                <Text style={reportAnalyticStyles.cardDescription}>
-                  {t('reports.averageMonthlyExpenses')} {new Date().getFullYear()}
-                </Text>
               </View>
             </View>
 
