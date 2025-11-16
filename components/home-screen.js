@@ -276,7 +276,7 @@ const HomeScreen = ({ navigation }) => {
                 <Text style={homeScreenStyles.title}>{t('home.title')}</Text>
                 <Text style={homeScreenStyles.subtitle}>{t('home.subtitle')}</Text>
               </View>
-              <View style={{ flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
+              <View style={{ flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
                 <LanguageSelector />
                 <RemoveAdsButton />
               </View>

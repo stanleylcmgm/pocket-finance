@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
 
 export const homeScreenStyles = StyleSheet.create({
   // Container styles
@@ -10,7 +10,11 @@ export const homeScreenStyles = StyleSheet.create({
 
   // Header styles
   headerGradient: {
-    paddingTop: 60,
+    paddingTop: Platform.select({
+      ios: 65,
+      android: 25,
+      default: 65,
+    }),    
     paddingBottom: 20,
     backgroundColor: '#100C30',
   },
@@ -113,7 +117,7 @@ export const homeScreenStyles = StyleSheet.create({
   menuContainer: {
     paddingLeft: 20,
     paddingRight: 20,
-    paddingTop: 35,
+    paddingTop: 30,
   },
 
   sectionHeader: {
@@ -127,7 +131,6 @@ export const homeScreenStyles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#2c3e50',
     marginRight: 12,
-    margin: 0,
   },
 
   sectionLine: {
@@ -147,7 +150,11 @@ export const homeScreenStyles = StyleSheet.create({
 
   blockCard: {
     width: '45%',
-    height: 170,
+    height: Platform.select({
+      ios: 175,
+      android: 160,
+      default: 175,
+    }),
     borderRadius: 25,
     paddingTop: 15,
     paddingBottom: 15,
@@ -173,7 +180,11 @@ export const homeScreenStyles = StyleSheet.create({
   },
 
   blockTitle: {
-    fontSize: 15,
+    fontSize: Platform.select({
+      ios: 15,
+      android: 13,
+      default: 15,
+    }),
     fontWeight: 'bold',
     color: '#333',
     marginTop: 0,
@@ -186,8 +197,11 @@ export const homeScreenStyles = StyleSheet.create({
   },
 
   blockSubtitle: {
-    fontSize: 12,
-    color: '#666',
+    fontSize: Platform.select({
+      ios: 12,
+      android: 10,
+      default: 12,
+    }),        color: '#666',
     lineHeight: 16,
     marginTop: 0,
     marginBottom: 0,
