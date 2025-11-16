@@ -33,24 +33,28 @@ const AdBanner = ({
     }
   }, []);
 
-  // Don't show banner if ads are removed or still loading
-  if (isLoading || isAdsRemoved) {
+  // Don't show banner if ads are removed
+  if (isAdsRemoved) {
+    return null;
+  }
+
+  // Show loading state while checking purchase status
+  if (isLoading) {
     return null;
   }
 
   // Don't render if AdMob is not available (e.g., in Expo Go)
   // Show a placeholder in development so you can see where ads will appear
   if (!adMobAvailable || !BannerAd || !BannerAdSize || !adUnitId) {
-    // Show development placeholder when running in Expo Go
-    if (__DEV__) {
-      return (
-        <View style={[styles.container, styles.placeholderContainer]}>
-          <Text style={styles.placeholderText}>📱 Ad Banner (not available in Expo Go)</Text>
-          <Text style={styles.placeholderSubtext}>Build a custom dev build to see ads</Text>
-        </View>
-      );
-    }
-    return null;
+    // Always show development placeholder when AdMob is not available
+    return (
+      <View style={[styles.container, styles.placeholderContainer]}>
+        <Text style={styles.placeholderText}>📱 Ad Banner</Text>
+        <Text style={styles.placeholderSubtext}>
+          {__DEV__ ? 'Build a custom dev build to see ads' : 'Ad loading...'}
+        </Text>
+      </View>
+    );
   }
 
   const containerStyle = [

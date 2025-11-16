@@ -43,9 +43,16 @@ function AppContent() {
       
       try {
         // Initialize AdMob (only if available - requires custom dev build)
-        if (mobileAds) {
-          await mobileAds().initialize();
-          console.log('AdMob initialized');
+        if (mobileAds && adMobAvailable) {
+          try {
+            await mobileAds().initialize();
+            console.log('AdMob initialized successfully');
+          } catch (adError) {
+            console.warn('AdMob initialization error:', adError);
+            // Continue even if AdMob fails to initialize
+          }
+        } else {
+          console.log('AdMob not available (running in Expo Go or module not loaded)');
         }
         
         // Immediately hide the native splash screen

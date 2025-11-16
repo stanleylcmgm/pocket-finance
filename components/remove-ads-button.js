@@ -52,8 +52,9 @@ const RemoveAdsButton = () => {
     }
   };
 
-  // Don't show button if already purchased
-  if (isPurchased) {
+  // Don't show button if already purchased (but allow it to show while loading)
+  // Only hide if we've confirmed the purchase status
+  if (isPurchased && !isLoading) {
     return null;
   }
 

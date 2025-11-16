@@ -10,13 +10,20 @@ let InterstitialAd = null;
 const isAdMobAvailable = (() => {
   try {
     const adModule = require('react-native-google-mobile-ads');
+    // The default export is a function that returns the mobileAds object
     mobileAds = adModule.default;
     BannerAd = adModule.BannerAd;
     BannerAdSize = adModule.BannerAdSize;
     InterstitialAd = adModule.InterstitialAd;
-    return true;
+    
+    // Verify that we got the expected exports
+    if (mobileAds && typeof mobileAds === 'function') {
+      return true;
+    }
+    return false;
   } catch (error) {
     // AdMob not available (expected in Expo Go)
+    console.log('AdMob module not available:', error.message);
     return false;
   }
 })();
