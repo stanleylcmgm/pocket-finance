@@ -381,8 +381,12 @@ export const balanceSheetStyles = StyleSheet.create({
     padding: 24,
     width: '90%',
     maxWidth: 400,
+    maxHeight: '90%',
     borderWidth: 1,
     borderColor: '#e9ecef',
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    flex: 0,
   },  
   modalHeader: {
     flexDirection: 'row',

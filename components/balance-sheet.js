@@ -824,7 +824,7 @@ const BalanceSheet = () => {
       icon: newCategoryIcon || (categoriesModalType === 'income' ? 'cash' : 'pricetag'),
       color: newCategoryColor || (categoriesModalType === 'income' ? '#28a745' : '#dc3545'),
     };
-    categories.push(created);
+    setCategories([...categories, created]);
     setNewCategoryName('');
     setCategoriesVersion((v) => v + 1);
   };
@@ -835,7 +835,7 @@ const BalanceSheet = () => {
       Alert.alert(t('balance.cannotDelete'), t('balance.categoryInUse'));
       return;
     }
-    categories = categories.filter((c) => c.id !== categoryId);
+    setCategories(categories.filter((c) => c.id !== categoryId));
     setCategoriesVersion((v) => v + 1);
   };
 
@@ -856,8 +856,12 @@ const BalanceSheet = () => {
         visible={categoriesModalVisible}
         onRequestClose={() => setCategoriesModalVisible(false)}
       >
-        <View style={balanceSheetStyles.modalOverlay}>
-          <View style={[balanceSheetStyles.modalContentCategories ]}>
+        <KeyboardAvoidingView 
+          style={balanceSheetStyles.modalOverlay}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+        >
+          <View style={[balanceSheetStyles.modalContentCategories]}>
             {/* Fixed Header */}
             <View style={balanceSheetStyles.modalHeader}>
               <Text style={balanceSheetStyles.modalTitle}>
@@ -872,105 +876,114 @@ const BalanceSheet = () => {
               </TouchableOpacity>
             </View>
 
-                {/* Scrollable Categories List */}
-                <View style={{ height: 200, marginBottom: 12 }}>
-                  <ScrollView
-                    style={{ height: 200 }}
-                    contentContainerStyle={{ padding: 8, flexGrow: 1 }}
-                    showsVerticalScrollIndicator={true}
-                    scrollEnabled={true}
-                    nestedScrollEnabled={true}
-                    keyboardShouldPersistTaps="handled"
-                  >
-                    {filtered.map((c) => (
-                      <View key={c.id} style={[balanceSheetStyles.categoryRow, { marginBottom: 8 }]}>
-                        <View style={balanceSheetStyles.categoryRowLeft}>
-                          <View style={[balanceSheetStyles.categoryAvatar, { backgroundColor: c.color }]}>
-                            <Ionicons name={c.icon} size={18} color="#ffffff" />
-                          </View>
-                          <Text style={balanceSheetStyles.categoryRowName}>{c.name}</Text>
+            {/* Scrollable Content */}
+            <ScrollView
+              style={{ flexShrink: 1 }}
+              contentContainerStyle={{ paddingBottom: 12 }}
+              showsVerticalScrollIndicator={true}
+              keyboardShouldPersistTaps="handled"
+              nestedScrollEnabled={true}
+            >
+              {/* Scrollable Categories List */}
+              <View style={{ maxHeight: 200, marginBottom: 12 }}>
+                <ScrollView
+                  style={{ maxHeight: 200 }}
+                  contentContainerStyle={{ padding: 8 }}
+                  showsVerticalScrollIndicator={true}
+                  scrollEnabled={true}
+                  nestedScrollEnabled={true}
+                >
+                  {filtered.map((c) => (
+                    <View key={c.id} style={[balanceSheetStyles.categoryRow, { marginBottom: 8 }]}>
+                      <View style={balanceSheetStyles.categoryRowLeft}>
+                        <View style={[balanceSheetStyles.categoryAvatar, { backgroundColor: c.color }]}>
+                          <Ionicons name={c.icon} size={18} color="#ffffff" />
                         </View>
-                        <TouchableOpacity onPress={() => requestDeleteCategory(c.id)} style={balanceSheetStyles.categoryRowDelete}>
-                          <Ionicons name="trash" size={18} color="#dc3545" />
-                        </TouchableOpacity>
+                        <Text style={balanceSheetStyles.categoryRowName}>{c.name}</Text>
                       </View>
-                    ))}
-                    {filtered.length === 0 && (
-                      <View style={{ padding: 20, alignItems: 'center' }}>
-                        <Text style={{ color: '#6c757d', marginBottom: 8 }}>{t('balance.noCategoriesFound')}</Text>
-                      </View>
+                      <TouchableOpacity onPress={() => requestDeleteCategory(c.id)} style={balanceSheetStyles.categoryRowDelete}>
+                        <Ionicons name="trash" size={18} color="#dc3545" />
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                  {filtered.length === 0 && (
+                    <View style={{ padding: 20, alignItems: 'center' }}>
+                      <Text style={{ color: '#6c757d', marginBottom: 8 }}>{t('balance.noCategoriesFound')}</Text>
+                    </View>
+                  )}
+                </ScrollView>
+              </View>
+
+              {/* Add New Section */}
+              <View style={balanceSheetStyles.divider} />
+
+              <Text style={balanceSheetStyles.sectionLabel}>{t('balance.addNew')}</Text>
+              <View style={balanceSheetStyles.newPreviewRow}>
+                <View style={[balanceSheetStyles.categoryAvatar, { backgroundColor: newCategoryColor }]}>
+                  <Ionicons name={newCategoryIcon} size={18} color="#ffffff" />
+                </View>
+                <Text style={balanceSheetStyles.newPreviewText}>{newCategoryName || t('balance.preview')}</Text>
+              </View>
+              <TextInput
+                style={[balanceSheetStyles.input, balanceSheetStyles.inputUnfocused]}
+                placeholder={t('balance.categoryName')}
+                value={newCategoryName}
+                onChangeText={setNewCategoryName}
+              />
+
+              <Text style={balanceSheetStyles.inputLabel}>{t('expenses.icon')}</Text>
+              <View style={balanceSheetStyles.categoryContainer}>
+                {activeIconOptions.map((icon) => (
+                  <TouchableOpacity
+                    key={icon}
+                    style={[
+                      balanceSheetStyles.iconOption,
+                      newCategoryIcon === icon && balanceSheetStyles.iconOptionSelected,
+                    ]}
+                    onPress={() => setNewCategoryIcon(icon)}
+                  >
+                    <Ionicons name={icon} size={16} color={newCategoryIcon === icon ? 'white' : '#6c757d'} />
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <Text style={balanceSheetStyles.inputLabel}>{t('expenses.color')}</Text>
+              <View style={balanceSheetStyles.colorRow}>
+                {colorOptions.map((hex) => (
+                  <TouchableOpacity
+                    key={hex}
+                    style={[
+                      balanceSheetStyles.colorSwatch,
+                      { backgroundColor: hex },
+                      newCategoryColor === hex && balanceSheetStyles.colorSwatchSelected,
+                    ]}
+                    onPress={() => setNewCategoryColor(hex)}
+                  >
+                    {newCategoryColor === hex && (
+                      <Ionicons name="checkmark" size={16} color="#ffffff" />
                     )}
-                  </ScrollView>
-                </View>
-
-                {/* Fixed Add New Section */}
-                <View style={balanceSheetStyles.divider} />
-
-                <Text style={balanceSheetStyles.sectionLabel}>{t('balance.addNew')}</Text>
-                <View style={balanceSheetStyles.newPreviewRow}>
-                  <View style={[balanceSheetStyles.categoryAvatar, { backgroundColor: newCategoryColor }]}>
-                    <Ionicons name={newCategoryIcon} size={18} color="#ffffff" />
-                  </View>
-                  <Text style={balanceSheetStyles.newPreviewText}>{newCategoryName || t('balance.preview')}</Text>
-                </View>
-                <TextInput
-                  style={[balanceSheetStyles.input, balanceSheetStyles.inputUnfocused]}
-                  placeholder={t('balance.categoryName')}
-                  value={newCategoryName}
-                  onChangeText={setNewCategoryName}
-                />
-
-                <Text style={balanceSheetStyles.inputLabel}>{t('expenses.icon')}</Text>
-                <View style={balanceSheetStyles.categoryContainer}>
-                  {activeIconOptions.map((icon) => (
-                    <TouchableOpacity
-                      key={icon}
-                      style={[
-                        balanceSheetStyles.iconOption,
-                        newCategoryIcon === icon && balanceSheetStyles.iconOptionSelected,
-                      ]}
-                      onPress={() => setNewCategoryIcon(icon)}
-                    >
-                      <Ionicons name={icon} size={16} color={newCategoryIcon === icon ? 'white' : '#6c757d'} />
-                    </TouchableOpacity>
-                  ))}
-                </View>
-
-                <Text style={balanceSheetStyles.inputLabel}>{t('expenses.color')}</Text>
-                <View style={balanceSheetStyles.colorRow}>
-                  {colorOptions.map((hex) => (
-                    <TouchableOpacity
-                      key={hex}
-                      style={[
-                        balanceSheetStyles.colorSwatch,
-                        { backgroundColor: hex },
-                        newCategoryColor === hex && balanceSheetStyles.colorSwatchSelected,
-                      ]}
-                      onPress={() => setNewCategoryColor(hex)}
-                    >
-                      {newCategoryColor === hex && (
-                        <Ionicons name="checkmark" size={16} color="#ffffff" />
-                      )}
-                    </TouchableOpacity>
-                  ))}
-                </View>
-
-                <View style={balanceSheetStyles.modalButtons}>
-                  <TouchableOpacity
-                    style={[balanceSheetStyles.modalButton, balanceSheetStyles.cancelButton]}
-                    onPress={() => setCategoriesModalVisible(false)}
-                  >
-                    <Text style={balanceSheetStyles.cancelButtonText}>{t('expenses.close')}</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[balanceSheetStyles.modalButton, balanceSheetStyles.saveButton]}
-                    onPress={addCategory}
-                  >
-                    <Text style={balanceSheetStyles.saveButtonText}>{t('expenses.addCategory')}</Text>
-                  </TouchableOpacity>
-                </View>
+                ))}
+              </View>
+            </ScrollView>
+
+            {/* Fixed Bottom Buttons */}
+            <View style={balanceSheetStyles.modalButtons}>
+              <TouchableOpacity
+                style={[balanceSheetStyles.modalButton, balanceSheetStyles.cancelButton]}
+                onPress={() => setCategoriesModalVisible(false)}
+              >
+                <Text style={balanceSheetStyles.cancelButtonText}>{t('expenses.close')}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[balanceSheetStyles.modalButton, balanceSheetStyles.saveButton]}
+                onPress={addCategory}
+              >
+                <Text style={balanceSheetStyles.saveButtonText}>{t('expenses.addCategory')}</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
     );
   };
