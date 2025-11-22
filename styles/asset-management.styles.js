@@ -291,10 +291,12 @@ export const assetManagementStyles = StyleSheet.create({
     borderRadius: 20,
     padding: 24,
     width: '90%',
-    maxWidth: 400,
-    height: 580,
+    maxWidth: 350,
+    maxHeight: '90%',
     borderWidth: 1,
     borderColor: '#e9ecef',
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
   },
   modalHeader: {
     flexDirection: 'row',
@@ -438,6 +440,12 @@ export const assetManagementStyles = StyleSheet.create({
   modalButtons: {
     flexDirection: 'row',
     gap: 12,
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#e9ecef',
+    backgroundColor: 'white',
+    marginBottom: 0,
   },
   modalButton: {
     flex: 1,

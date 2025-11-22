@@ -675,143 +675,153 @@ const AssetManagement = () => {
       visible={modalVisible}
       onRequestClose={() => setModalVisible(false)}
     >
-      <TouchableOpacity
+      <KeyboardAvoidingView
         style={assetManagementStyles.modalOverlay}
-        activeOpacity={1}
-        onPress={() => {
-          Keyboard.dismiss();
-        }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={assetManagementStyles.modalContent}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+        <TouchableOpacity
+          activeOpacity={1}
+          onPress={() => {
+            Keyboard.dismiss();
+          }}
+          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
         >
-          <View style={assetManagementStyles.modalHeader}>
-            <Text style={assetManagementStyles.modalTitle}>
-              {editingAsset ? t('asset.editAssetTitle') : t('asset.addAssetTitle')}
-            </Text>
-            <View style={assetManagementStyles.modalHeaderButtons}>
-              <TouchableOpacity 
-                onPress={() => Keyboard.dismiss()}
-                style={assetManagementStyles.keyboardDismissButton}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              >
-                <Ionicons name="keyboard-outline" size={20} color="#6c757d" />
-              </TouchableOpacity>
-              <TouchableOpacity 
+          <View style={assetManagementStyles.modalContent}>
+            <View style={assetManagementStyles.modalHeader}>
+              <Text style={assetManagementStyles.modalTitle}>
+                {editingAsset ? t('asset.editAssetTitle') : t('asset.addAssetTitle')}
+              </Text>
+              <View style={assetManagementStyles.modalHeaderButtons}>
+                <TouchableOpacity 
+                  onPress={() => Keyboard.dismiss()}
+                  style={assetManagementStyles.keyboardDismissButton}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
+                  <Ionicons name="keyboard-outline" size={20} color="#6c757d" />
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  onPress={() => setModalVisible(false)}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
+                  <Ionicons name="close" size={24} color="#6c757d" />
+                </TouchableOpacity>
+              </View>
+            </View>
+            
+            <ScrollView
+              style={{ flexShrink: 1 }}
+              contentContainerStyle={{ paddingBottom: 12 }}
+              showsVerticalScrollIndicator={true}
+              keyboardShouldPersistTaps="handled"
+              nestedScrollEnabled={true}
+            >
+              <Text style={assetManagementStyles.inputLabel}>{t('asset.assetName')}</Text>
+              <TextInput
+                style={[
+                  assetManagementStyles.input,
+                  isNameFocused
+                    ? assetManagementStyles.inputFocused
+                    : assetManagementStyles.inputUnfocused,
+                ]}
+                placeholder={t('asset.enterAssetName')}
+                placeholderTextColor="#6c757d"
+                value={formData.name}
+                onChangeText={(text) => setFormData({ ...formData, name: text })}
+                onFocus={() => setIsNameFocused(true)}
+                onBlur={() => setIsNameFocused(false)}
+                returnKeyType="next"
+                onSubmitEditing={() => {
+                  // Focus on amount field when user presses next
+                }}
+              />
+
+              <Text style={assetManagementStyles.inputLabel}>{t('asset.amount')}</Text>
+              <TextInput
+                style={[
+                  assetManagementStyles.input,
+                  isAmountFocused
+                    ? assetManagementStyles.inputFocused
+                    : assetManagementStyles.inputUnfocused,
+                ]}
+                placeholder={t('asset.enterAmount')}
+                placeholderTextColor="#6c757d"
+                value={formData.amount}
+                onChangeText={handleAmountChange}
+                keyboardType="numeric"
+                onFocus={() => setIsAmountFocused(true)}
+                onBlur={() => setIsAmountFocused(false)}
+                returnKeyType="done"
+                onSubmitEditing={() => Keyboard.dismiss()}
+              />
+              
+              <Text style={assetManagementStyles.inputLabel}>{t('asset.category')}</Text>
+              <View style={assetManagementStyles.categoryContainer}>
+                {assetCategories.map((category, index) => (
+                  <TouchableOpacity
+                    key={`category-${category.id}-${index}`}
+                    style={[
+                      assetManagementStyles.categoryButton,
+                      formData.categoryId === category.id && assetManagementStyles.categoryButtonSelected
+                    ]}
+                    onPress={() => {
+                      const newFormData = { ...formData, categoryId: category.id };
+                      // Auto-fill asset name if it's empty
+                      if (!formData.name.trim()) {
+                        newFormData.name = category.name;
+                      }
+                      setFormData(newFormData);
+                    }}
+                  >
+                    <Ionicons 
+                      name={category.icon} 
+                      size={16} 
+                      color={formData.categoryId === category.id ? 'white' : category.color} 
+                    />
+                    <Text style={[
+                      assetManagementStyles.categoryButtonText,
+                      formData.categoryId === category.id && assetManagementStyles.categoryButtonTextSelected
+                    ]}>
+                      {category.name}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <Text style={assetManagementStyles.inputLabel}>{t('asset.description')}</Text>
+              <TextInput
+                style={[
+                  assetManagementStyles.input,
+                  assetManagementStyles.inputUnfocused,
+                ]}
+                placeholder={t('asset.enterDescription')}
+                placeholderTextColor="#6c757d"
+                value={formData.note}
+                onChangeText={(text) => setFormData({ ...formData, note: text })}
+                multiline
+                numberOfLines={3}
+                returnKeyType="done"
+                onSubmitEditing={() => Keyboard.dismiss()}
+              />
+            </ScrollView>
+            
+            <View style={assetManagementStyles.modalButtons}>
+              <TouchableOpacity
+                style={[assetManagementStyles.modalButton, assetManagementStyles.cancelButton]}
                 onPress={() => setModalVisible(false)}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
-                <Ionicons name="close" size={24} color="#6c757d" />
+                <Text style={assetManagementStyles.cancelButtonText}>{t('asset.cancel')}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[assetManagementStyles.modalButton, assetManagementStyles.saveButton]}
+                onPress={saveAsset}
+              >
+                <Text style={assetManagementStyles.saveButtonText}>{t('asset.save')}</Text>
               </TouchableOpacity>
             </View>
           </View>
-          
-          <Text style={assetManagementStyles.inputLabel}>{t('asset.assetName')}</Text>
-          <TextInput
-            style={[
-              assetManagementStyles.input,
-              isNameFocused
-                ? assetManagementStyles.inputFocused
-                : assetManagementStyles.inputUnfocused,
-            ]}
-            placeholder={t('asset.enterAssetName')}
-            placeholderTextColor="#6c757d"
-            value={formData.name}
-            onChangeText={(text) => setFormData({ ...formData, name: text })}
-            onFocus={() => setIsNameFocused(true)}
-            onBlur={() => setIsNameFocused(false)}
-            returnKeyType="next"
-            onSubmitEditing={() => {
-              // Focus on amount field when user presses next
-            }}
-          />
-
-          <Text style={assetManagementStyles.inputLabel}>{t('asset.amount')}</Text>
-          <TextInput
-            style={[
-              assetManagementStyles.input,
-              isAmountFocused
-                ? assetManagementStyles.inputFocused
-                : assetManagementStyles.inputUnfocused,
-            ]}
-            placeholder={t('asset.enterAmount')}
-            placeholderTextColor="#6c757d"
-            value={formData.amount}
-            onChangeText={handleAmountChange}
-            keyboardType="numeric"
-            onFocus={() => setIsAmountFocused(true)}
-            onBlur={() => setIsAmountFocused(false)}
-            returnKeyType="done"
-            onSubmitEditing={() => Keyboard.dismiss()}
-          />
-          
-          <Text style={assetManagementStyles.inputLabel}>{t('asset.category')}</Text>
-          <View style={assetManagementStyles.categoryContainer}>
-            {assetCategories.map((category, index) => (
-              <TouchableOpacity
-                key={`category-${category.id}-${index}`}
-                style={[
-                  assetManagementStyles.categoryButton,
-                  formData.categoryId === category.id && assetManagementStyles.categoryButtonSelected
-                ]}
-                onPress={() => {
-                  const newFormData = { ...formData, categoryId: category.id };
-                  // Auto-fill asset name if it's empty
-                  if (!formData.name.trim()) {
-                    newFormData.name = category.name;
-                  }
-                  setFormData(newFormData);
-                }}
-              >
-                <Ionicons 
-                  name={category.icon} 
-                  size={16} 
-                  color={formData.categoryId === category.id ? 'white' : category.color} 
-                />
-                <Text style={[
-                  assetManagementStyles.categoryButtonText,
-                  formData.categoryId === category.id && assetManagementStyles.categoryButtonTextSelected
-                ]}>
-                  {category.name}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          <Text style={assetManagementStyles.inputLabel}>{t('asset.description')}</Text>
-          <TextInput
-            style={[
-              assetManagementStyles.input,
-              assetManagementStyles.inputUnfocused,
-            ]}
-            placeholder={t('asset.enterDescription')}
-            placeholderTextColor="#6c757d"
-            value={formData.note}
-            onChangeText={(text) => setFormData({ ...formData, note: text })}
-            multiline
-            numberOfLines={3}
-            returnKeyType="done"
-            onSubmitEditing={() => Keyboard.dismiss()}
-          />
-          
-          <View style={assetManagementStyles.modalButtons}>
-            <TouchableOpacity
-              style={[assetManagementStyles.modalButton, assetManagementStyles.cancelButton]}
-              onPress={() => setModalVisible(false)}
-            >
-              <Text style={assetManagementStyles.cancelButtonText}>{t('asset.cancel')}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[assetManagementStyles.modalButton, assetManagementStyles.saveButton]}
-              onPress={saveAsset}
-            >
-              <Text style={assetManagementStyles.saveButtonText}>{t('asset.save')}</Text>
-            </TouchableOpacity>
-          </View>
-        </KeyboardAvoidingView>
-      </TouchableOpacity>
+        </TouchableOpacity>
+      </KeyboardAvoidingView>
     </Modal>
   );
 
@@ -873,7 +883,11 @@ const AssetManagement = () => {
         visible={categoriesModalVisible}
         onRequestClose={() => setCategoriesModalVisible(false)}
       >
-        <View style={assetManagementStyles.modalOverlay}>
+        <KeyboardAvoidingView
+          style={assetManagementStyles.modalOverlay}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+        >
           <View style={assetManagementStyles.modalContent}>
             {/* Fixed Header */}
             <View style={assetManagementStyles.modalHeader}>
@@ -887,86 +901,95 @@ const AssetManagement = () => {
               </TouchableOpacity>
             </View>
 
-            {/* Scrollable Categories Grid */}
-            <View style={{ height: 200, marginBottom: 12 }}>
-              <ScrollView
-                style={{ height: 200 }}
-                contentContainerStyle={[assetManagementStyles.categoryGrid, { padding: 8, flexGrow: 1 }]}
-                showsVerticalScrollIndicator={true}
-                scrollEnabled={true}
-                nestedScrollEnabled={true}
-                keyboardShouldPersistTaps="handled"
-              >
-                {assetCategories.map((c, index) => (
-                  <View key={`category-tile-${c.id}-${index}`} style={assetManagementStyles.categoryTile}>
-                    <View style={assetManagementStyles.categoryTileLeft}>
-                      <View style={[assetManagementStyles.categoryAvatar, { backgroundColor: c.color }]}>
-                        <Ionicons name={c.icon} size={16} color="#ffffff" />
+            {/* Scrollable Content */}
+            <ScrollView
+              style={{ flexShrink: 1 }}
+              contentContainerStyle={{ paddingBottom: 12 }}
+              showsVerticalScrollIndicator={true}
+              keyboardShouldPersistTaps="handled"
+              nestedScrollEnabled={true}
+            >
+              {/* Scrollable Categories Grid */}
+              <View style={{ maxHeight: 200, marginBottom: 12 }}>
+                <ScrollView
+                  style={{ maxHeight: 200 }}
+                  contentContainerStyle={[assetManagementStyles.categoryGrid, { padding: 8 }]}
+                  showsVerticalScrollIndicator={true}
+                  scrollEnabled={true}
+                  nestedScrollEnabled={true}
+                >
+                  {assetCategories.map((c, index) => (
+                    <View key={`category-tile-${c.id}-${index}`} style={assetManagementStyles.categoryTile}>
+                      <View style={assetManagementStyles.categoryTileLeft}>
+                        <View style={[assetManagementStyles.categoryAvatar, { backgroundColor: c.color }]}>
+                          <Ionicons name={c.icon} size={16} color="#ffffff" />
+                        </View>
+                        <Text style={assetManagementStyles.categoryTileName}>{c.name}</Text>
                       </View>
-                      <Text style={assetManagementStyles.categoryTileName}>{c.name}</Text>
+                      <TouchableOpacity onPress={() => requestDeleteCategory(c.id)} style={assetManagementStyles.categoryTileDelete}>
+                        <Ionicons name="trash" size={18} color="#dc3545" />
+                      </TouchableOpacity>
                     </View>
-                    <TouchableOpacity onPress={() => requestDeleteCategory(c.id)} style={assetManagementStyles.categoryTileDelete}>
-                      <Ionicons name="trash" size={18} color="#dc3545" />
-                    </TouchableOpacity>
-                  </View>
-                ))}
-                {assetCategories.length === 0 && (
-                  <Text style={{ color: '#6c757d' }}>{t('asset.noCategoriesFound')}</Text>
-                )}
-              </ScrollView>
-            </View>
-
-            <View style={assetManagementStyles.divider} />
-
-            <Text style={assetManagementStyles.sectionLabel}>{t('asset.addNewCategory')}</Text>
-            <View style={assetManagementStyles.newPreviewRow}>
-              <View style={[assetManagementStyles.categoryAvatar, { backgroundColor: newCategoryColor }]}>
-                <Ionicons name={newCategoryIcon} size={18} color="#ffffff" />
-              </View>
-              <Text style={assetManagementStyles.newPreviewText}>{newCategoryName || t('asset.preview')}</Text>
-            </View>
-            <TextInput
-              style={[assetManagementStyles.input, assetManagementStyles.inputUnfocused]}
-              placeholder={t('asset.categoryName')}
-              value={newCategoryName}
-              onChangeText={setNewCategoryName}
-            />
-
-            <Text style={assetManagementStyles.inputLabel}>{t('asset.icon')}</Text>
-            <View style={assetManagementStyles.categoryContainer}>
-              {iconOptions.map((icon, index) => (
-                <TouchableOpacity
-                  key={`icon-${icon}-${index}`}
-                  style={[
-                    assetManagementStyles.iconOption,
-                    newCategoryIcon === icon && assetManagementStyles.iconOptionSelected,
-                  ]}
-                  onPress={() => setNewCategoryIcon(icon)}
-                >
-                  <Ionicons name={icon} size={16} color={newCategoryIcon === icon ? 'white' : '#6c757d'} />
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            <Text style={assetManagementStyles.inputLabel}>{t('asset.color')}</Text>
-            <View style={assetManagementStyles.colorRow}>
-              {colorOptions.map((hex, index) => (
-                <TouchableOpacity
-                  key={`color-${hex}-${index}`}
-                  style={[
-                    assetManagementStyles.colorSwatch,
-                    { backgroundColor: hex },
-                    newCategoryColor === hex && assetManagementStyles.colorSwatchSelected,
-                  ]}
-                  onPress={() => setNewCategoryColor(hex)}
-                >
-                  {newCategoryColor === hex && (
-                    <Ionicons name="checkmark" size={16} color="#ffffff" />
+                  ))}
+                  {assetCategories.length === 0 && (
+                    <Text style={{ color: '#6c757d' }}>{t('asset.noCategoriesFound')}</Text>
                   )}
-                </TouchableOpacity>
-              ))}
-            </View>
+                </ScrollView>
+              </View>
 
+              <View style={assetManagementStyles.divider} />
+
+              <Text style={assetManagementStyles.sectionLabel}>{t('asset.addNewCategory')}</Text>
+              <View style={assetManagementStyles.newPreviewRow}>
+                <View style={[assetManagementStyles.categoryAvatar, { backgroundColor: newCategoryColor }]}>
+                  <Ionicons name={newCategoryIcon} size={18} color="#ffffff" />
+                </View>
+                <Text style={assetManagementStyles.newPreviewText}>{newCategoryName || t('asset.preview')}</Text>
+              </View>
+              <TextInput
+                style={[assetManagementStyles.input, assetManagementStyles.inputUnfocused]}
+                placeholder={t('asset.categoryName')}
+                value={newCategoryName}
+                onChangeText={setNewCategoryName}
+              />
+
+              <Text style={assetManagementStyles.inputLabel}>{t('asset.icon')}</Text>
+              <View style={assetManagementStyles.categoryContainer}>
+                {iconOptions.map((icon, index) => (
+                  <TouchableOpacity
+                    key={`icon-${icon}-${index}`}
+                    style={[
+                      assetManagementStyles.iconOption,
+                      newCategoryIcon === icon && assetManagementStyles.iconOptionSelected,
+                    ]}
+                    onPress={() => setNewCategoryIcon(icon)}
+                  >
+                    <Ionicons name={icon} size={16} color={newCategoryIcon === icon ? 'white' : '#6c757d'} />
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <Text style={assetManagementStyles.inputLabel}>{t('asset.color')}</Text>
+              <View style={assetManagementStyles.colorRow}>
+                {colorOptions.map((hex, index) => (
+                  <TouchableOpacity
+                    key={`color-${hex}-${index}`}
+                    style={[
+                      assetManagementStyles.colorSwatch,
+                      { backgroundColor: hex },
+                      newCategoryColor === hex && assetManagementStyles.colorSwatchSelected,
+                    ]}
+                    onPress={() => setNewCategoryColor(hex)}
+                  >
+                    {newCategoryColor === hex && (
+                      <Ionicons name="checkmark" size={16} color="#ffffff" />
+                    )}
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </ScrollView>
+
+            {/* Fixed Bottom Buttons */}
             <View style={assetManagementStyles.modalButtons}>
               <TouchableOpacity
                 style={[assetManagementStyles.modalButton, assetManagementStyles.cancelButton]}
@@ -974,15 +997,15 @@ const AssetManagement = () => {
               >
                 <Text style={assetManagementStyles.cancelButtonText}>{t('asset.close')}</Text>
               </TouchableOpacity>
-                             <TouchableOpacity
-                 style={[assetManagementStyles.modalButton, assetManagementStyles.saveButton]}
-                 onPress={addCategory}
-               >
-                 <Text style={assetManagementStyles.saveButtonText}>{t('asset.addCategory')}</Text>
-               </TouchableOpacity>
-             </View>
-           </View>
-         </View>
+              <TouchableOpacity
+                style={[assetManagementStyles.modalButton, assetManagementStyles.saveButton]}
+                onPress={addCategory}
+              >
+                <Text style={assetManagementStyles.saveButtonText}>{t('asset.addCategory')}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
        </Modal>
      );
    };
