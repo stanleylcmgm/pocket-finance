@@ -306,7 +306,7 @@ export const balanceSheetStyles = StyleSheet.create({
     borderRadius: 20,
     padding: 24,
     width: '90%',
-    maxWidth: 400,
+    maxWidth: 350,
     alignItems: 'center',
   },
   monthPickerTitle: {
@@ -370,10 +370,12 @@ export const balanceSheetStyles = StyleSheet.create({
     borderRadius: 20,
     padding: 24,
     width: '90%',
-    maxWidth: 400,
-    height: '560',
+    maxWidth: 350,
+    maxHeight: '90%',
     borderWidth: 1,
     borderColor: '#e9ecef',
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
   },
   modalContentCategories: {
     backgroundColor: 'white',
@@ -608,6 +610,12 @@ export const balanceSheetStyles = StyleSheet.create({
   modalButtons: {
     flexDirection: 'row',
     gap: 12,
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#e9ecef',
+    backgroundColor: 'white',
+    marginBottom: 0,
   },
   modalButton: {
     flex: 1,

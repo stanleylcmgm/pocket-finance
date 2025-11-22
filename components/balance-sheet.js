@@ -663,143 +663,153 @@ const BalanceSheet = () => {
       visible={modalVisible}
       onRequestClose={() => setModalVisible(false)}
     >
-      <TouchableOpacity
+      <KeyboardAvoidingView
         style={balanceSheetStyles.modalOverlay}
-        activeOpacity={1}
-        onPress={() => {
-          Keyboard.dismiss();
-        }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={balanceSheetStyles.modalContent}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+        <TouchableOpacity
+          activeOpacity={1}
+          onPress={() => {
+            Keyboard.dismiss();
+          }}
+          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
         >
-          <View style={balanceSheetStyles.modalHeader}>
-            <Text style={balanceSheetStyles.modalTitle}>
-              {editingTransaction 
-                ? (modalType === 'income' ? t('balance.editIncomeTitle') : t('balance.editExpenseTitle'))
-                : (modalType === 'income' ? t('balance.addIncomeTitle') : t('balance.addExpenseTitle'))}
-            </Text>
-            <View style={balanceSheetStyles.modalHeaderButtons}>
-              <TouchableOpacity 
-                onPress={() => Keyboard.dismiss()}
-                style={balanceSheetStyles.keyboardDismissButton}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              >
-                <Ionicons name="keyboard-outline" size={20} color="#6c757d" />
-              </TouchableOpacity>
-              <TouchableOpacity 
+          <View style={balanceSheetStyles.modalContent}>
+            <View style={balanceSheetStyles.modalHeader}>
+              <Text style={balanceSheetStyles.modalTitle}>
+                {editingTransaction 
+                  ? (modalType === 'income' ? t('balance.editIncomeTitle') : t('balance.editExpenseTitle'))
+                  : (modalType === 'income' ? t('balance.addIncomeTitle') : t('balance.addExpenseTitle'))}
+              </Text>
+              <View style={balanceSheetStyles.modalHeaderButtons}>
+                <TouchableOpacity 
+                  onPress={() => Keyboard.dismiss()}
+                  style={balanceSheetStyles.keyboardDismissButton}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
+                  <Ionicons name="keyboard-outline" size={20} color="#6c757d" />
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  onPress={() => setModalVisible(false)}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
+                  <Ionicons name="close" size={24} color="#6c757d" />
+                </TouchableOpacity>
+              </View>
+            </View>
+            
+            <ScrollView
+              style={{ flexShrink: 1 }}
+              contentContainerStyle={{ paddingBottom: 12 }}
+              showsVerticalScrollIndicator={true}
+              keyboardShouldPersistTaps="handled"
+              nestedScrollEnabled={true}
+            >
+              {/* Description moved to top */}
+              <Text style={balanceSheetStyles.inputLabel}>
+                {modalType === 'income' ? t('balance.incomeDescription') : t('balance.expenseDescription')}
+              </Text>
+              <TextInput
+                style={[
+                  balanceSheetStyles.input,
+                  isDescriptionFocused
+                    ? balanceSheetStyles.inputFocused
+                    : balanceSheetStyles.inputUnfocused,
+                ]}
+                placeholder={modalType === 'income' ? t('balance.enterIncome') : t('balance.enterExpense')}
+                placeholderTextColor="#6c757d"
+                value={formData.note}
+                onChangeText={(text) => setFormData({ ...formData, note: text })}
+                multiline
+                onFocus={() => setIsDescriptionFocused(true)}
+                onBlur={() => setIsDescriptionFocused(false)}
+                returnKeyType="next"
+                onSubmitEditing={() => {
+                  // Focus on amount field when user presses next
+                }}
+              />
+
+              <Text style={balanceSheetStyles.inputLabel}>{t('balance.amount')}</Text>
+              <TextInput
+                style={[
+                  balanceSheetStyles.input,
+                  isAmountFocused
+                    ? balanceSheetStyles.inputFocused
+                    : balanceSheetStyles.inputUnfocused,
+                ]}
+                placeholder={t('balance.enterAmount')}
+                placeholderTextColor="#6c757d"
+                value={formData.amount}
+                onChangeText={handleAmountChange}
+                keyboardType="numeric"
+                onFocus={() => setIsAmountFocused(true)}
+                onBlur={() => setIsAmountFocused(false)}
+                returnKeyType="done"
+                onSubmitEditing={() => Keyboard.dismiss()}
+              />
+
+              <Text style={balanceSheetStyles.inputLabel}>{t('balance.category')}</Text>
+              <View style={balanceSheetStyles.categoryScrollContainer}>
+                <ScrollView
+                  style={balanceSheetStyles.categoryScrollView}
+                  contentContainerStyle={balanceSheetStyles.categoryContainer}
+                  showsVerticalScrollIndicator={true}
+                  nestedScrollEnabled={true}
+                >
+                  {categories
+                    .filter(cat => cat.type === modalType && (cat.subtype === 'formal' || cat.subtype === 'other'))
+                    .map((category) => (
+                      <TouchableOpacity
+                        key={category.id}
+                        style={[
+                          balanceSheetStyles.categoryButton,
+                          formData.categoryId === category.id && balanceSheetStyles.categoryButtonSelected
+                        ]}
+                        onPress={() => {
+                          const newFormData = { ...formData, categoryId: category.id };
+                          // Auto-fill description with category name if description is empty
+                          if (!formData.note || formData.note.trim() === '') {
+                            newFormData.note = category.name;
+                          }
+                          setFormData(newFormData);
+                        }}
+                      >
+                        <Ionicons 
+                          name={category.icon} 
+                          size={18} 
+                          color={formData.categoryId === category.id ? 'white' : category.color} 
+                        />
+                        <Text style={[
+                          balanceSheetStyles.categoryButtonText,
+                          formData.categoryId === category.id && balanceSheetStyles.categoryButtonTextSelected
+                        ]}>
+                          {category.name}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                </ScrollView>
+              </View>
+            </ScrollView>
+            
+            {/* Account section removed per request */}          
+            <View style={balanceSheetStyles.modalButtons}>
+              <TouchableOpacity
+                style={[balanceSheetStyles.modalButton, balanceSheetStyles.cancelButton]}
                 onPress={() => setModalVisible(false)}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
-                <Ionicons name="close" size={24} color="#6c757d" />
+                <Text style={balanceSheetStyles.cancelButtonText}>{t('common.cancel')}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[balanceSheetStyles.modalButton, balanceSheetStyles.saveButton]}
+                onPress={saveTransaction}
+              >
+                <Text style={balanceSheetStyles.saveButtonText}>{t('common.save')}</Text>
               </TouchableOpacity>
             </View>
           </View>
-          
-          {/* Description moved to top */}
-          <Text style={balanceSheetStyles.inputLabel}>
-            {modalType === 'income' ? t('balance.incomeDescription') : t('balance.expenseDescription')}
-          </Text>
-          <TextInput
-            style={[
-              balanceSheetStyles.input,
-              isDescriptionFocused
-                ? balanceSheetStyles.inputFocused
-                : balanceSheetStyles.inputUnfocused,
-            ]}
-            placeholder={modalType === 'income' ? t('balance.enterIncome') : t('balance.enterExpense')}
-            placeholderTextColor="#6c757d"
-            value={formData.note}
-            onChangeText={(text) => setFormData({ ...formData, note: text })}
-            multiline
-            onFocus={() => setIsDescriptionFocused(true)}
-            onBlur={() => setIsDescriptionFocused(false)}
-            returnKeyType="next"
-            onSubmitEditing={() => {
-              // Focus on amount field when user presses next
-            }}
-          />
-
-          <Text style={balanceSheetStyles.inputLabel}>{t('balance.amount')}</Text>
-          <TextInput
-            style={[
-              balanceSheetStyles.input,
-              isAmountFocused
-                ? balanceSheetStyles.inputFocused
-                : balanceSheetStyles.inputUnfocused,
-            ]}
-            placeholder={t('balance.enterAmount')}
-            placeholderTextColor="#6c757d"
-            value={formData.amount}
-            onChangeText={handleAmountChange}
-            keyboardType="numeric"
-            onFocus={() => setIsAmountFocused(true)}
-            onBlur={() => setIsAmountFocused(false)}
-            returnKeyType="done"
-            onSubmitEditing={() => Keyboard.dismiss()}
-          />
-
-          <Text style={balanceSheetStyles.inputLabel}>{t('balance.category')}</Text>
-          <View style={balanceSheetStyles.categoryScrollContainer}>
-            <ScrollView
-              style={balanceSheetStyles.categoryScrollView}
-              contentContainerStyle={balanceSheetStyles.categoryContainer}
-              showsVerticalScrollIndicator={true}
-              nestedScrollEnabled={true}
-            >
-              {categories
-                .filter(cat => cat.type === modalType && (cat.subtype === 'formal' || cat.subtype === 'other'))
-                .map((category) => (
-                  <TouchableOpacity
-                    key={category.id}
-                    style={[
-                      balanceSheetStyles.categoryButton,
-                      formData.categoryId === category.id && balanceSheetStyles.categoryButtonSelected
-                    ]}
-                    onPress={() => {
-                      const newFormData = { ...formData, categoryId: category.id };
-                      // Auto-fill description with category name if description is empty
-                      if (!formData.note || formData.note.trim() === '') {
-                        newFormData.note = category.name;
-                      }
-                      setFormData(newFormData);
-                    }}
-                  >
-                    <Ionicons 
-                      name={category.icon} 
-                      size={18} 
-                      color={formData.categoryId === category.id ? 'white' : category.color} 
-                    />
-                    <Text style={[
-                      balanceSheetStyles.categoryButtonText,
-                      formData.categoryId === category.id && balanceSheetStyles.categoryButtonTextSelected
-                    ]}>
-                      {category.name}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-            </ScrollView>
-          </View>
-          
-          {/* Account section removed per request */}          
-          <View style={balanceSheetStyles.modalButtons}>
-            <TouchableOpacity
-              style={[balanceSheetStyles.modalButton, balanceSheetStyles.cancelButton]}
-              onPress={() => setModalVisible(false)}
-            >
-              <Text style={balanceSheetStyles.cancelButtonText}>{t('common.cancel')}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[balanceSheetStyles.modalButton, balanceSheetStyles.saveButton]}
-              onPress={saveTransaction}
-            >
-              <Text style={balanceSheetStyles.saveButtonText}>{t('common.save')}</Text>
-            </TouchableOpacity>
-          </View>
-        </KeyboardAvoidingView>
-      </TouchableOpacity>
+        </TouchableOpacity>
+      </KeyboardAvoidingView>
     </Modal>
   );
 
