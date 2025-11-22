@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { View, StyleSheet, Text } from 'react-native';
 import { getAdUnitId } from '../utils/admob-config';
 import { BannerAd, BannerAdSize, adMobAvailable } from '../utils/admob-wrapper';
@@ -23,6 +23,8 @@ const AdBanner = ({
   const { isAdsRemoved, isLoading } = useRemoveAds();
   const [adUnitId, setAdUnitId] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [retryKey, setRetryKey] = useState(0); // Key to force ad reload
+  const retryTimerRef = useRef(null);
 
   useEffect(() => {
     // Get ad unit ID (AdMob is initialized in App.js)
@@ -31,6 +33,16 @@ const AdBanner = ({
       const unitId = getAdUnitId('banner');
       setAdUnitId(unitId);
     }
+  }, []);
+
+  // Cleanup retry timer on unmount
+  useEffect(() => {
+    return () => {
+      if (retryTimerRef.current) {
+        clearTimeout(retryTimerRef.current);
+        retryTimerRef.current = null;
+      }
+    };
   }, []);
 
   // Don't show banner if ads are removed
@@ -70,6 +82,7 @@ const AdBanner = ({
   return (
     <View style={containerStyle}>
       <BannerAd
+        key={retryKey}
         unitId={adUnitId}
         size={adSize}
         requestOptions={{
@@ -77,10 +90,40 @@ const AdBanner = ({
         }}
         onAdLoaded={() => {
           setIsLoaded(true);
+          // Clear any retry timer when ad loads successfully
+          if (retryTimerRef.current) {
+            clearTimeout(retryTimerRef.current);
+            retryTimerRef.current = null;
+          }
           console.log('Banner ad loaded');
         }}
         onAdFailedToLoad={(error) => {
-          console.error('Banner ad failed to load:', error);
+          // Check multiple possible error formats
+          const errorCode = error?.code || error?.nativeEvent?.code;
+          const errorMessage = error?.message || error?.nativeEvent?.message || String(error || '');
+          const isNoFillError = 
+            errorCode === 'googleMobileAds/error-code-no-fill' ||
+            errorMessage?.includes('no-fill') ||
+            errorMessage?.includes('no ad was returned due to lack of ad inventory') ||
+            errorMessage?.includes('error-code-no-fill');
+          
+          if (isNoFillError) {
+            // Suppress the error message, but retry loading the ad every 5 seconds
+            // Clear any existing retry timer
+            if (retryTimerRef.current) {
+              clearTimeout(retryTimerRef.current);
+            }
+            
+            // Set up retry timer to reload ad after 5 seconds
+            retryTimerRef.current = setTimeout(() => {
+              // Force ad reload by changing the key prop
+              setRetryKey(prev => prev + 1);
+              retryTimerRef.current = null;
+            }, 5000);
+          } else {
+            // Log other errors (not no-fill)
+            console.error('Banner ad failed to load:', error);
+          }
           setIsLoaded(false);
         }}
       />
