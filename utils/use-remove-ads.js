@@ -44,3 +44,18 @@ export const checkAdsRemoved = async () => {
   }
 };
 
+/**
+ * Utility function to reset ads removal (for testing purposes)
+ * This will remove the purchase status and allow ads to show again
+ */
+export const resetAdsRemoval = async () => {
+  try {
+    await AsyncStorage.removeItem(REMOVE_ADS_KEY);
+    console.log('Ads removal reset successfully. Ads will now show.');
+    return true;
+  } catch (error) {
+    console.error('Error resetting ads removal:', error);
+    return false;
+  }
+};
+

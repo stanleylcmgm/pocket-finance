@@ -5,6 +5,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Animated,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
@@ -24,11 +25,26 @@ import { getExpenses } from '../utils/expenses-data';
 import { useI18n } from '../i18n/i18n';
 import LanguageSelector from './language-selector';
 import RemoveAdsButton from './remove-ads-button';
+import { resetAdsRemoval } from '../utils/use-remove-ads';
 import AdBanner from './ad-banner';
 
 const HomeScreen = ({ navigation }) => {
   const { t } = useI18n();
   const [activeTab, setActiveTab] = useState('home');
+  
+  // Temporary function to reset ads removal (for testing)
+  const handleResetAds = async () => {
+    try {
+      await resetAdsRemoval();
+      Alert.alert(
+        'Ads Reset',
+        'Ads removal has been reset. Please reload the app to see ads again.',
+        [{ text: 'OK' }]
+      );
+    } catch (error) {
+      Alert.alert('Error', 'Failed to reset ads removal.');
+    }
+  };
   const [totalAssets, setTotalAssets] = useState(0);
   const [monthlyExpensesTotal, setMonthlyExpensesTotal] = useState(0);
   const [balanceSheetBalance, setBalanceSheetBalance] = useState(0);
@@ -279,6 +295,24 @@ const HomeScreen = ({ navigation }) => {
               <View style={{ flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
                 <LanguageSelector />
                 <RemoveAdsButton />
+                {/* Temporary Reset Ads Button - Remove after testing */}
+                <TouchableOpacity
+                  onPress={handleResetAds}
+                  style={{
+                    backgroundColor: '#ff6b6b',
+                    paddingHorizontal: 12,
+                    paddingVertical: 6,
+                    borderRadius: 8,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 4,
+                  }}
+                >
+                  <Ionicons name="refresh" size={14} color="white" />
+                  <Text style={{ color: 'white', fontSize: 12, fontWeight: '600' }}>
+                    Reset Ads
+                  </Text>
+                </TouchableOpacity>
               </View>
             </View>
           </View>
