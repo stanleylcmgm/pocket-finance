@@ -816,38 +816,47 @@ const ExpensesTracking = () => {
       visible={modalVisible}
       onRequestClose={() => setModalVisible(false)}
     >
-      <TouchableOpacity
+      <KeyboardAvoidingView
         style={expensesTrackingStyles.modalOverlay}
-        activeOpacity={1}
-        onPress={() => {
-          Keyboard.dismiss();
-        }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={expensesTrackingStyles.modalContent}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+        <TouchableOpacity
+          activeOpacity={1}
+          onPress={() => {
+            Keyboard.dismiss();
+          }}
+          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
         >
-          <View style={expensesTrackingStyles.modalHeader}>
-            <Text style={expensesTrackingStyles.modalTitle}>
-              {editingExpense ? t('expenses.editExpenseTitle') : t('expenses.addExpenseTitle')}
-            </Text>
-            <View style={expensesTrackingStyles.modalHeaderButtons}>
-              <TouchableOpacity 
-                onPress={() => Keyboard.dismiss()}
-                style={expensesTrackingStyles.keyboardDismissButton}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              >
-                <Ionicons name="keyboard-outline" size={20} color="#6c757d" />
-              </TouchableOpacity>
-              <TouchableOpacity 
-                onPress={() => setModalVisible(false)}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              >
-                <Ionicons name="close" size={24} color="#6c757d" />
-              </TouchableOpacity>
+          <View style={expensesTrackingStyles.modalContent}>
+            <View style={expensesTrackingStyles.modalHeader}>
+              <Text style={expensesTrackingStyles.modalTitle}>
+                {editingExpense ? t('expenses.editExpenseTitle') : t('expenses.addExpenseTitle')}
+              </Text>
+              <View style={expensesTrackingStyles.modalHeaderButtons}>
+                <TouchableOpacity 
+                  onPress={() => Keyboard.dismiss()}
+                  style={expensesTrackingStyles.keyboardDismissButton}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
+                  <Ionicons name="keyboard-outline" size={20} color="#6c757d" />
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  onPress={() => setModalVisible(false)}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
+                  <Ionicons name="close" size={24} color="#6c757d" />
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
+            
+            <ScrollView
+              style={{ flexShrink: 1 }}
+              contentContainerStyle={{ paddingBottom: 12 }}
+              showsVerticalScrollIndicator={true}
+              keyboardShouldPersistTaps="handled"
+              nestedScrollEnabled={true}
+            >
             <Text style={expensesTrackingStyles.inputLabel}>{t('expenses.expenseName')}</Text>
             <TextInput
               style={[
@@ -963,23 +972,25 @@ const ExpensesTracking = () => {
               returnKeyType="done"
               onSubmitEditing={() => Keyboard.dismiss()}
             />
-          
-          <View style={expensesTrackingStyles.modalButtons}>
-            <TouchableOpacity
-              style={[expensesTrackingStyles.modalButton, expensesTrackingStyles.cancelButton]}
-              onPress={() => setModalVisible(false)}
-            >
-              <Text style={expensesTrackingStyles.cancelButtonText}>{t('common.cancel')}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[expensesTrackingStyles.modalButton, expensesTrackingStyles.saveButton]}
-              onPress={saveExpense}
-            >
-              <Text style={expensesTrackingStyles.saveButtonText}>{t('expenses.save')}</Text>
-            </TouchableOpacity>
+            </ScrollView>
+            
+            <View style={expensesTrackingStyles.modalButtons}>
+              <TouchableOpacity
+                style={[expensesTrackingStyles.modalButton, expensesTrackingStyles.cancelButton]}
+                onPress={() => setModalVisible(false)}
+              >
+                <Text style={expensesTrackingStyles.cancelButtonText}>{t('common.cancel')}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[expensesTrackingStyles.modalButton, expensesTrackingStyles.saveButton]}
+                onPress={saveExpense}
+              >
+                <Text style={expensesTrackingStyles.saveButtonText}>{t('expenses.save')}</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </KeyboardAvoidingView>
-      </TouchableOpacity>
+        </TouchableOpacity>
+      </KeyboardAvoidingView>
     </Modal>
   );
 
