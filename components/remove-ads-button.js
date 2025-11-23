@@ -1,61 +1,169 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Modal, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useI18n } from '../i18n/i18n';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRemoveAds } from '../utils/use-remove-ads';
-
-const REMOVE_ADS_KEY = '@remove_ads_purchased';
+import { useIAP } from '../utils/use-iap';
+import { IAP_CONFIG } from '../utils/iap-config';
 
 const RemoveAdsButton = () => {
   const { t } = useI18n();
   const { isAdsRemoved: isPurchased, refreshStatus } = useRemoveAds();
+  const { 
+    isConnected, 
+    isLoading: iapLoading, 
+    products, 
+    error: iapError,
+    purchaseProduct, 
+    restorePurchases,
+    fetchProducts 
+  } = useIAP();
   const [modalVisible, setModalVisible] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [purchaseInProgress, setPurchaseInProgress] = useState(false);
 
-  const handlePurchase = async () => {
-    setIsLoading(true);
-    try {
-      // TODO: Implement actual in-app purchase logic here
-      // For now, this is a placeholder that simulates a purchase
-      
-      // Simulate purchase process
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // In a real implementation, you would:
-      // 1. Initialize the purchase SDK (expo-in-app-purchases or RevenueCat)
-      // 2. Request the product
-      // 3. Process the purchase
-      // 4. Verify the purchase with your backend
-      // 5. Store the purchase status
-      
-      // For demo purposes, we'll just store it locally
-      await AsyncStorage.setItem(REMOVE_ADS_KEY, 'true');
-      // Refresh the purchase status in the hook
-      await refreshStatus();
+  // Fetch products when modal opens
+  useEffect(() => {
+    if (modalVisible && isConnected) {
+      fetchProducts();
+    }
+  }, [modalVisible, isConnected]);
+
+  // Get product details
+  const product = products.find(p => p.productId === IAP_CONFIG.getProductId());
+  const productPrice = product?.price || '$1.99';
+  const productTitle = product?.title || t('purchase.removeAdsTitle');
+
+  // Monitor purchase status changes
+  useEffect(() => {
+    if (isPurchased && purchaseInProgress) {
+      // Purchase completed successfully
+      setPurchaseInProgress(false);
       setModalVisible(false);
-      
       Alert.alert(
         t('purchase.success'),
         t('purchase.adsRemoved'),
         [{ text: t('common.close'), style: 'default' }]
       );
-    } catch (error) {
-      console.error('Purchase error:', error);
+    }
+  }, [isPurchased, purchaseInProgress, t]);
+
+  const handlePurchase = async () => {
+    if (!isConnected) {
       Alert.alert(
         t('purchase.error'),
-        t('purchase.errorMessage'),
+        'Store not connected. Please try again.',
+        [{ text: t('common.close'), style: 'default' }]
+      );
+      return;
+    }
+
+    setIsProcessing(true);
+    setPurchaseInProgress(true);
+    try {
+      const result = await purchaseProduct();
+      
+      if (result.success) {
+        // Purchase initiated - will be handled by listener
+        // The useEffect will handle the completion
+        console.log('Purchase initiated, waiting for completion...');
+      } else if (result.canceled) {
+        // User canceled
+        setPurchaseInProgress(false);
+        console.log('Purchase canceled by user');
+      } else {
+        // Purchase failed
+        setPurchaseInProgress(false);
+        Alert.alert(
+          t('purchase.error'),
+          result.message || t('purchase.errorMessage'),
+          [{ text: t('common.close'), style: 'default' }]
+        );
+      }
+    } catch (error) {
+      console.error('Purchase error:', error);
+      setPurchaseInProgress(false);
+      Alert.alert(
+        t('purchase.error'),
+        error.message || t('purchase.errorMessage'),
         [{ text: t('common.close'), style: 'default' }]
       );
     } finally {
-      setIsLoading(false);
+      setIsProcessing(false);
     }
   };
+
+  const handleRestorePurchases = async () => {
+    setIsProcessing(true);
+    try {
+      const result = await restorePurchases();
+      
+      if (result.success && result.restored) {
+        await refreshStatus();
+        setModalVisible(false);
+        
+        Alert.alert(
+          t('purchase.success'),
+          'Your purchase has been restored successfully!',
+          [{ text: t('common.close'), style: 'default' }]
+        );
+      } else if (result.success && !result.restored) {
+        Alert.alert(
+          'No Purchases Found',
+          'No previous purchases were found to restore.',
+          [{ text: t('common.close'), style: 'default' }]
+        );
+      } else {
+        Alert.alert(
+          t('purchase.error'),
+          result.message || 'Failed to restore purchases. Please try again.',
+          [{ text: t('common.close'), style: 'default' }]
+        );
+      }
+    } catch (error) {
+      console.error('Restore error:', error);
+      Alert.alert(
+        t('purchase.error'),
+        error.message || 'Failed to restore purchases.',
+        [{ text: t('common.close'), style: 'default' }]
+      );
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // Refresh status when modal opens to check for recent purchases
+  useEffect(() => {
+    if (modalVisible) {
+      refreshStatus();
+    }
+  }, [modalVisible, refreshStatus]);
+
+  const isLoading = iapLoading || isProcessing;
 
   // Don't show button if already purchased (but allow it to show while loading)
   // Only hide if we've confirmed the purchase status
   if (isPurchased && !isLoading) {
     return null;
+  }
+
+  // If IAP is disabled, show a message instead of the purchase button
+  if (!IAP_CONFIG.enabled) {
+    return (
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => {
+          Alert.alert(
+            'Remove Ads',
+            'In-app purchases are currently disabled. Enable IAP in utils/iap-config.js to use this feature.\n\nFor testing in Expo Go, IAP is disabled by default.',
+            [{ text: t('common.close'), style: 'default' }]
+          );
+        }}
+      >
+        <Ionicons name="close-circle" size={18} color="#fff" />
+        <Text style={styles.buttonText}>{t('purchase.removeAds')}</Text>
+      </TouchableOpacity>
+    );
   }
 
   return (
@@ -101,14 +209,23 @@ const RemoveAdsButton = () => {
 
             <View style={styles.priceContainer}>
               <Text style={styles.priceLabel}>{t('purchase.price')}</Text>
-              <Text style={styles.priceValue}>$1.99</Text>
+              <Text style={styles.priceValue}>{productPrice}</Text>
+              {!IAP_CONFIG.enabled && (
+                <Text style={styles.errorText}>IAP is disabled in config</Text>
+              )}
+              {!isConnected && IAP_CONFIG.enabled && (
+                <Text style={styles.connectionStatus}>Connecting to store...</Text>
+              )}
+              {iapError && IAP_CONFIG.enabled && (
+                <Text style={styles.errorText}>{iapError}</Text>
+              )}
             </View>
 
             <View style={styles.buttonContainer}>
               <TouchableOpacity
-                style={[styles.purchaseButton, isLoading && styles.purchaseButtonDisabled]}
+                style={[styles.purchaseButton, (isLoading || !isConnected) && styles.purchaseButtonDisabled]}
                 onPress={handlePurchase}
-                disabled={isLoading}
+                disabled={isLoading || !isConnected}
               >
                 {isLoading ? (
                   <ActivityIndicator color="#fff" />
@@ -118,6 +235,15 @@ const RemoveAdsButton = () => {
                     <Text style={styles.purchaseButtonText}>{t('purchase.buyNow')}</Text>
                   </>
                 )}
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={styles.restoreButton}
+                onPress={handleRestorePurchases}
+                disabled={isLoading || !isConnected}
+              >
+                <Ionicons name="refresh" size={16} color="#6c757d" />
+                <Text style={styles.restoreButtonText}>Restore Purchases</Text>
               </TouchableOpacity>
               
               <TouchableOpacity
@@ -257,10 +383,38 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
   },
+  restoreButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    gap: 6,
+    opacity: 0.8,
+  },
+  restoreButtonText: {
+    color: '#6c757d',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  cancelButton: {
+    alignItems: 'center',
+    paddingVertical: 12,
+  },
   cancelButtonText: {
     color: '#6c757d',
     fontSize: 14,
     fontWeight: '600',
+  },
+  connectionStatus: {
+    fontSize: 12,
+    color: '#6c757d',
+    marginTop: 8,
+    fontStyle: 'italic',
+  },
+  errorText: {
+    fontSize: 12,
+    color: '#dc3545',
+    marginTop: 8,
   },
   disclaimer: {
     fontSize: 11,
