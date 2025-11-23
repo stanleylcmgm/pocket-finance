@@ -41,16 +41,16 @@ export const ADMOB_CONFIG = {
       ios: 'ca-app-pub-2240821992848494/5758176445', // iOS Production Interstitial (update when you create one)
       android: 'ca-app-pub-2240821992848494/3862032038', // Android Production Interstitial (update when you create one)
     },
-    // Rewarded Ad IDs (optional)
+    // Rewarded Ad IDs
     rewarded: {
-      ios: 'ca-app-pub-2240821992848494/5758176445', // iOS Production Rewarded (update when you create one)
-      android: 'ca-app-pub-2240821992848494/3862032038', // Android Production Rewarded (update when you create one)
+      ios: 'ca-app-pub-2240821992848494/2544260098', // iOS Production Rewarded (same as Android for now)
+      android: 'ca-app-pub-2240821992848494/2544260098', // Android Production Rewarded
     },
   },
   
   // Set to false when ready for production
   // Set to true to use Google's test ads during development
-  useTestAds: false,
+  useTestAds: true,
 };
 
 // Helper function to get the correct ad unit ID based on platform

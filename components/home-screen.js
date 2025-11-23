@@ -27,10 +27,12 @@ import LanguageSelector from './language-selector';
 import RemoveAdsButton from './remove-ads-button';
 import { resetAdsRemoval } from '../utils/use-remove-ads';
 import AdBanner from './ad-banner';
+import { useRewardedAd } from './ad-rewarded';
 
 const HomeScreen = ({ navigation }) => {
   const { t } = useI18n();
   const [activeTab, setActiveTab] = useState('home');
+  const { showAd: showRewardedAd } = useRewardedAd();
   
   // Temporary function to reset ads removal (for testing)
   const handleResetAds = async () => {
@@ -264,7 +266,23 @@ const HomeScreen = ({ navigation }) => {
     } else if (screenName === 'AssetManagement') {
       navigation.navigate('AssetManagement');
     } else if (screenName === 'Reports') {
-      navigation.navigate('Reports');
+      // Show rewarded ad before navigating to Reports
+      showRewardedAd(
+        (reward) => {
+          // User earned reward - navigate to Reports
+          console.log('Reward earned:', reward);
+          navigation.navigate('Reports');
+        },
+        () => {
+          // Ad closed - navigate to Reports even if user didn't complete the ad
+          navigation.navigate('Reports');
+        },
+        (error) => {
+          // Ad failed to load - navigate to Reports anyway
+          console.error('Rewarded ad error:', error);
+          navigation.navigate('Reports');
+        }
+      );
     }
   };
 
@@ -277,6 +295,7 @@ const HomeScreen = ({ navigation }) => {
         'asset-management': 'AssetManagement',
         'reports': 'Reports',
       };
+      // Use navigateToScreen which will handle rewarded ad for Reports
       navigateToScreen(screenMap[tabId]);
     }
   };

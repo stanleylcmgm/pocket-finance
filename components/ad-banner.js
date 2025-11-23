@@ -95,7 +95,7 @@ const AdBanner = ({
             clearTimeout(retryTimerRef.current);
             retryTimerRef.current = null;
           }
-          console.log('Banner ad loaded');
+          console.log('Banner ad loaded successfully');
         }}
         onAdFailedToLoad={(error) => {
           // Check multiple possible error formats
@@ -107,22 +107,41 @@ const AdBanner = ({
             errorMessage?.includes('no ad was returned due to lack of ad inventory') ||
             errorMessage?.includes('error-code-no-fill');
           
+          console.log('Banner ad failed to load:', {
+            errorCode,
+            errorMessage,
+            isNoFillError,
+            adUnitId,
+            retryKey,
+          });
+          
           if (isNoFillError) {
-            // Suppress the error message, but retry loading the ad every 5 seconds
-            // Clear any existing retry timer
+            // For "no ad" errors, continuously retry every 5 seconds until an ad loads
+            // Clear any existing retry timer first
             if (retryTimerRef.current) {
               clearTimeout(retryTimerRef.current);
+              retryTimerRef.current = null;
             }
             
             // Set up retry timer to reload ad after 5 seconds
+            // This will keep retrying every 5 seconds until an ad successfully loads
             retryTimerRef.current = setTimeout(() => {
+              console.log('Retrying to load banner ad... (attempt after 5 seconds)');
               // Force ad reload by changing the key prop
+              // This will trigger BannerAd to remount and try loading again
               setRetryKey(prev => prev + 1);
               retryTimerRef.current = null;
+              // Note: If this retry also fails with no-fill, onAdFailedToLoad
+              // will be called again, which will schedule another retry
             }, 5000);
           } else {
-            // Log other errors (not no-fill)
-            console.error('Banner ad failed to load:', error);
+            // Log other errors (not no-fill) - these won't retry automatically
+            console.error('Banner ad failed to load (non-retryable error):', error);
+            // Clear retry timer for non-retryable errors
+            if (retryTimerRef.current) {
+              clearTimeout(retryTimerRef.current);
+              retryTimerRef.current = null;
+            }
           }
           setIsLoaded(false);
         }}
@@ -136,12 +155,21 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     backgroundColor: 'transparent',
+    minHeight: 50, // Ensure minimum height so banner is always visible
+    justifyContent: 'center',
+    zIndex: 1000, // Ensure banner is above other content
+    elevation: 10, // For Android
   },
   topPosition: {
     marginTop: 0,
   },
   bottomPosition: {
     marginBottom: 0,
+    // Ensure the banner stays at the bottom and is visible
+    width: '100%',
+    backgroundColor: '#ffffff', // Add background to ensure visibility
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
   },
   placeholderContainer: {
     backgroundColor: '#f0f0f0',
@@ -151,6 +179,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: 60,
+    width: '100%',
   },
   placeholderText: {
     fontSize: 12,
