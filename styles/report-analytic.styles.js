@@ -535,4 +535,109 @@ export const reportAnalyticStyles = StyleSheet.create({
     backgroundColor: '#6c757d',
     opacity: 0.7,
   },
+
+  // Financial Analysis Styles
+  healthScoreContainer: {
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    marginBottom: 16,
+    marginTop: 8,
+  },
+
+  healthScoreHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+
+  healthScoreLabel: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#2c3e50',
+  },
+
+  healthScoreValue: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+
+  healthScoreBar: {
+    height: 8,
+    backgroundColor: 'rgba(0,0,0,0.1)',
+    borderRadius: 4,
+    overflow: 'hidden',
+    marginBottom: 8,
+  },
+
+  healthScoreFill: {
+    height: '100%',
+    borderRadius: 4,
+  },
+
+  healthScoreStatus: {
+    fontSize: 12,
+    fontWeight: '600',
+    textTransform: 'capitalize',
+  },
+
+  adviceListContainer: {
+    gap: 12,
+    marginTop: 8,
+  },
+
+  adviceItem: {
+    padding: 12,
+    borderRadius: 10,
+    backgroundColor: '#f8f9fa',
+    borderLeftWidth: 4,
+    marginBottom: 4,
+  },
+
+  adviceItemHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+    gap: 8,
+  },
+
+  adviceItemIcon: {
+    marginRight: 4,
+  },
+
+  adviceItemTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#2c3e50',
+    flex: 1,
+  },
+
+  adviceItemMessage: {
+    fontSize: 13,
+    lineHeight: 18,
+    color: '#6c757d',
+    marginBottom: 4,
+  },
+
+  adviceItemAction: {
+    fontSize: 12,
+    lineHeight: 16,
+    color: '#495057',
+    fontStyle: 'italic',
+    marginTop: 4,
+  },
+
+  analysisLoadingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    gap: 8,
+  },
+
+  analysisLoadingText: {
+    fontSize: 13,
+    color: '#6c757d',
+  },
 });

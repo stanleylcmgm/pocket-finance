@@ -32,10 +32,16 @@ import {
   getExpensesByYear,
   getExpensesByDateRange
 } from '../utils/expenses-data';
+import {
+  getComprehensiveFinancialAnalysis,
+  getTopFinancialInsight
+} from '../utils/financial-analysis';
 
 const ReportAnalytic = () => {
   const { t } = useI18n();
   const [isLoading, setIsLoading] = useState(true);
+  const [financialAnalysis, setFinancialAnalysis] = useState(null);
+  const [isLoadingAnalysis, setIsLoadingAnalysis] = useState(false);
   
   // Month picker state for YTD Average Expenses Card
   const [ytdSelectedMonth, setYtdSelectedMonth] = useState(new Date());
@@ -96,6 +102,37 @@ const ReportAnalytic = () => {
   const isAnimatingRef = useRef(false);
   const isMountedRef = useRef(false);
   const dashboardDataRef = useRef(dashboardData);
+
+  // Load financial analysis
+  const loadFinancialAnalysis = useCallback(async () => {
+    try {
+      setIsLoadingAnalysis(true);
+      const analysis = await getComprehensiveFinancialAnalysis(t);
+      setFinancialAnalysis(analysis);
+    } catch (error) {
+      console.error('Error loading financial analysis:', error);
+      // Try to get at least the top insight
+      try {
+        const insight = await getTopFinancialInsight(t);
+        setFinancialAnalysis({
+          summary: {},
+          health: { score: insight.healthScore, status: insight.healthStatus },
+          trends: {},
+          categories: {},
+          advice: [{
+            type: insight.type,
+            title: insight.title,
+            message: insight.message,
+            priority: 1
+          }]
+        });
+      } catch (err) {
+        console.error('Error loading top insight:', err);
+      }
+    } finally {
+      setIsLoadingAnalysis(false);
+    }
+  }, [t]);
 
   // Load all dashboard data
   const loadDashboardData = useCallback(async () => {
@@ -357,7 +394,8 @@ const ReportAnalytic = () => {
 
   useEffect(() => {
     loadDashboardData();
-  }, [loadDashboardData]);
+    loadFinancialAnalysis();
+  }, [loadDashboardData, loadFinancialAnalysis]);
 
   // Function to trigger animation
   const triggerAnimation = useCallback(() => {
@@ -1087,18 +1125,169 @@ const ReportAnalytic = () => {
         <ScrollView style={reportAnalyticStyles.scrollView} showsVerticalScrollIndicator={false}>
           <View style={reportAnalyticStyles.scrollContent}>
             
-            {/* Financial Advice Card */}
-            <View style={reportAnalyticStyles.adviceCard}>
-              <View style={reportAnalyticStyles.adviceHeader}>
-                <View style={reportAnalyticStyles.adviceIcon}>
-                  <Ionicons name="bulb" size={14} color="#2196f3" />
+            {/* Financial Analysis & Advice Card */}
+            {financialAnalysis && (
+              <View style={reportAnalyticStyles.adviceCard}>
+                <View style={reportAnalyticStyles.adviceHeader}>
+                  <View style={reportAnalyticStyles.adviceIcon}>
+                    <Ionicons name="bulb" size={14} color="#2196f3" />
+                  </View>
+                  <Text style={reportAnalyticStyles.adviceTitle}>{t('reports.financialInsight')}</Text>
                 </View>
-                <Text style={reportAnalyticStyles.adviceTitle}>{t('reports.financialInsight')}</Text>
+                
+                {/* Health Score */}
+                {financialAnalysis.health && (
+                  <View style={[
+                    reportAnalyticStyles.healthScoreContainer,
+                    {
+                      backgroundColor: 
+                        financialAnalysis.health.status === 'excellent' ? '#e8f5e9' :
+                        financialAnalysis.health.status === 'good' ? '#e3f2fd' :
+                        financialAnalysis.health.status === 'fair' ? '#fff3e0' :
+                        financialAnalysis.health.status === 'poor' ? '#fdeaea' :
+                        '#f5f5f5',
+                      borderColor:
+                        financialAnalysis.health.status === 'excellent' ? '#c8e6c9' :
+                        financialAnalysis.health.status === 'good' ? '#bbdefb' :
+                        financialAnalysis.health.status === 'fair' ? '#ffe0b2' :
+                        financialAnalysis.health.status === 'poor' ? '#f5c6cb' :
+                        '#e0e0e0'
+                    }
+                  ]}>
+                    <View style={reportAnalyticStyles.healthScoreHeader}>
+                      <Text style={reportAnalyticStyles.healthScoreLabel}>
+                        {t('reports.financialHealth')}
+                      </Text>
+                      <Text style={[
+                        reportAnalyticStyles.healthScoreValue,
+                        {
+                          color:
+                            financialAnalysis.health.status === 'excellent' ? '#2e7d32' :
+                            financialAnalysis.health.status === 'good' ? '#1976d2' :
+                            financialAnalysis.health.status === 'fair' ? '#f57c00' :
+                            financialAnalysis.health.status === 'poor' ? '#c62828' :
+                            '#616161'
+                        }
+                      ]}>
+                        {financialAnalysis.health.score}/100
+                      </Text>
+                    </View>
+                    <View style={reportAnalyticStyles.healthScoreBar}>
+                      <View 
+                        style={[
+                          reportAnalyticStyles.healthScoreFill,
+                          {
+                            width: `${financialAnalysis.health.score}%`,
+                            backgroundColor:
+                              financialAnalysis.health.status === 'excellent' ? '#4caf50' :
+                              financialAnalysis.health.status === 'good' ? '#2196f3' :
+                              financialAnalysis.health.status === 'fair' ? '#ff9800' :
+                              financialAnalysis.health.status === 'poor' ? '#f44336' :
+                              '#9e9e9e'
+                          }
+                        ]}
+                      />
+                    </View>
+                    <Text style={[
+                      reportAnalyticStyles.healthScoreStatus,
+                      {
+                        color:
+                          financialAnalysis.health.status === 'excellent' ? '#2e7d32' :
+                          financialAnalysis.health.status === 'good' ? '#1976d2' :
+                          financialAnalysis.health.status === 'fair' ? '#f57c00' :
+                          financialAnalysis.health.status === 'poor' ? '#c62828' :
+                          '#616161'
+                      }
+                    ]}>
+                      {t(`reports.healthStatus.${financialAnalysis.health.status}`)}
+                    </Text>
+                  </View>
+                )}
+
+                {/* Top Advice Items */}
+                {financialAnalysis.advice && financialAnalysis.advice.length > 0 && (
+                  <View style={reportAnalyticStyles.adviceListContainer}>
+                    {financialAnalysis.advice.slice(0, 3).map((item, index) => (
+                      <View 
+                        key={index} 
+                        style={[
+                          reportAnalyticStyles.adviceItem,
+                          {
+                            borderLeftColor:
+                              item.type === 'critical' ? '#f44336' :
+                              item.type === 'warning' ? '#ff9800' :
+                              item.type === 'positive' ? '#4caf50' :
+                              '#2196f3'
+                          }
+                        ]}
+                      >
+                        <View style={reportAnalyticStyles.adviceItemHeader}>
+                          <Ionicons 
+                            name={
+                              item.type === 'critical' ? 'alert-circle' :
+                              item.type === 'warning' ? 'warning' :
+                              item.type === 'positive' ? 'checkmark-circle' :
+                              'information-circle'
+                            }
+                            size={16}
+                            color={
+                              item.type === 'critical' ? '#f44336' :
+                              item.type === 'warning' ? '#ff9800' :
+                              item.type === 'positive' ? '#4caf50' :
+                              '#2196f3'
+                            }
+                            style={reportAnalyticStyles.adviceItemIcon}
+                          />
+                          <Text style={reportAnalyticStyles.adviceItemTitle}>
+                            {item.title}
+                          </Text>
+                        </View>
+                        <Text style={reportAnalyticStyles.adviceItemMessage}>
+                          {item.message}
+                        </Text>
+                        {item.action && (
+                          <Text style={reportAnalyticStyles.adviceItemAction}>
+                            💡 {item.action}
+                          </Text>
+                        )}
+                      </View>
+                    ))}
+                  </View>
+                )}
+
+                {/* Fallback message if no analysis available */}
+                {(!financialAnalysis.advice || financialAnalysis.advice.length === 0) && (
+                  <Text style={reportAnalyticStyles.adviceMessage}>
+                    {t('reports.financialAdvice')}
+                  </Text>
+                )}
+
+                {/* Loading state */}
+                {isLoadingAnalysis && (
+                  <View style={reportAnalyticStyles.analysisLoadingContainer}>
+                    <ActivityIndicator size="small" color="#2196f3" />
+                    <Text style={reportAnalyticStyles.analysisLoadingText}>
+                      {t('reports.analyzing')}
+                    </Text>
+                  </View>
+                )}
               </View>
-              <Text style={reportAnalyticStyles.adviceMessage}>
-                {t('reports.financialAdvice')}
-              </Text>
-            </View>
+            )}
+
+            {/* Fallback if analysis not loaded yet */}
+            {!financialAnalysis && !isLoadingAnalysis && (
+              <View style={reportAnalyticStyles.adviceCard}>
+                <View style={reportAnalyticStyles.adviceHeader}>
+                  <View style={reportAnalyticStyles.adviceIcon}>
+                    <Ionicons name="bulb" size={14} color="#2196f3" />
+                  </View>
+                  <Text style={reportAnalyticStyles.adviceTitle}>{t('reports.financialInsight')}</Text>
+                </View>
+                <Text style={reportAnalyticStyles.adviceMessage}>
+                  {t('reports.financialAdvice')}
+                </Text>
+              </View>
+            )}
             
             {/* Year-to-Date Average Expenses Card */}
             <View style={reportAnalyticStyles.card}>
