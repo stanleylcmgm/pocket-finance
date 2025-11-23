@@ -5,6 +5,8 @@ import { getAdUnitId } from '../utils/admob-config';
 
 // Create a singleton instance to manage rewarded ads
 let rewardedAd = null;
+let isAdShowing = false; // Flag to prevent multiple simultaneous ad shows
+let currentListeners = []; // Track current listeners to clean them up
 
 export const loadRewardedAd = () => {
   if (!adMobAvailable || !RewardedAd) {
@@ -25,24 +27,42 @@ export const loadRewardedAd = () => {
 };
 
 export const showRewardedAd = (onRewarded, onAdClosed, onError) => {
+  // Prevent multiple simultaneous ad shows
+  if (isAdShowing) {
+    console.log('Rewarded ad is already showing, ignoring duplicate call');
+    return;
+  }
+
   if (!adMobAvailable || !RewardedAd) {
     console.log('RewardedAd not available');
     if (onError) onError(new Error('RewardedAd not available'));
     return;
   }
 
+  // Clean up any existing listeners first
+  currentListeners.forEach(unsubscribe => {
+    try {
+      unsubscribe();
+    } catch (err) {
+      console.log('Error cleaning up listener:', err);
+    }
+  });
+  currentListeners = [];
+
   if (!rewardedAd) {
     // Load and show if not already loaded
     rewardedAd = loadRewardedAd();
   }
 
+  // Set flag to prevent duplicate calls
+  isAdShowing = true;
+
   // Set up event listeners
   const unsubscribeLoaded = rewardedAd.addAdEventListener(RewardedAdEventType.LOADED, () => {
     console.log('Rewarded ad loaded, showing...');
-    if (rewardedAd && rewardedAd.loaded) {
+    if (rewardedAd && rewardedAd.loaded && isAdShowing) {
       rewardedAd.show();
     }
-    unsubscribeLoaded();
   });
 
   const unsubscribeEarnedReward = rewardedAd.addAdEventListener(
@@ -52,12 +72,24 @@ export const showRewardedAd = (onRewarded, onAdClosed, onError) => {
       if (onRewarded) {
         onRewarded(reward);
       }
-      unsubscribeEarnedReward();
     }
   );
 
   const unsubscribeClosed = rewardedAd.addAdEventListener(AdEventType.CLOSED, () => {
     console.log('Rewarded ad closed');
+    // Reset flag
+    isAdShowing = false;
+    
+    // Clean up all listeners
+    currentListeners.forEach(unsubscribe => {
+      try {
+        unsubscribe();
+      } catch (err) {
+        console.log('Error cleaning up listener:', err);
+      }
+    });
+    currentListeners = [];
+    
     // Reload the ad for next time
     if (rewardedAd) {
       rewardedAd.load();
@@ -65,16 +97,35 @@ export const showRewardedAd = (onRewarded, onAdClosed, onError) => {
     if (onAdClosed) {
       onAdClosed();
     }
-    unsubscribeClosed();
   });
 
   const unsubscribeError = rewardedAd.addAdEventListener(AdEventType.ERROR, (error) => {
     console.error('Rewarded ad error:', error);
+    // Reset flag on error
+    isAdShowing = false;
+    
+    // Clean up all listeners
+    currentListeners.forEach(unsubscribe => {
+      try {
+        unsubscribe();
+      } catch (err) {
+        console.log('Error cleaning up listener:', err);
+      }
+    });
+    currentListeners = [];
+    
     if (onError) {
       onError(error);
     }
-    unsubscribeError();
   });
+
+  // Store listeners for cleanup
+  currentListeners = [
+    unsubscribeLoaded,
+    unsubscribeEarnedReward,
+    unsubscribeClosed,
+    unsubscribeError,
+  ];
 
   // If ad is already loaded, show it immediately
   if (rewardedAd.loaded) {
@@ -83,14 +134,6 @@ export const showRewardedAd = (onRewarded, onAdClosed, onError) => {
     // Otherwise, wait for it to load
     rewardedAd.load();
   }
-
-  // Cleanup after a timeout
-  setTimeout(() => {
-    unsubscribeLoaded();
-    unsubscribeEarnedReward();
-    unsubscribeClosed();
-    unsubscribeError();
-  }, 60000); // 60 second timeout
 };
 
 // Hook to use rewarded ads in components

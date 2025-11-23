@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -33,6 +33,7 @@ const HomeScreen = ({ navigation }) => {
   const { t } = useI18n();
   const [activeTab, setActiveTab] = useState('home');
   const { showAd: showRewardedAd } = useRewardedAd();
+  const isNavigatingRef = useRef(false); // Prevent multiple navigation calls
   
   // Temporary function to reset ads removal (for testing)
   const handleResetAds = async () => {
@@ -266,20 +267,31 @@ const HomeScreen = ({ navigation }) => {
     } else if (screenName === 'AssetManagement') {
       navigation.navigate('AssetManagement');
     } else if (screenName === 'Reports') {
+      // Prevent multiple navigation calls
+      if (isNavigatingRef.current) {
+        console.log('Navigation to Reports already in progress, ignoring duplicate call');
+        return;
+      }
+      
+      isNavigatingRef.current = true;
+      
       // Show rewarded ad before navigating to Reports
       showRewardedAd(
         (reward) => {
           // User earned reward - navigate to Reports
           console.log('Reward earned:', reward);
+          isNavigatingRef.current = false;
           navigation.navigate('Reports');
         },
         () => {
           // Ad closed - navigate to Reports even if user didn't complete the ad
+          isNavigatingRef.current = false;
           navigation.navigate('Reports');
         },
         (error) => {
           // Ad failed to load - navigate to Reports anyway
           console.error('Rewarded ad error:', error);
+          isNavigatingRef.current = false;
           navigation.navigate('Reports');
         }
       );
