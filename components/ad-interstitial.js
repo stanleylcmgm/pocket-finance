@@ -1,11 +1,16 @@
 import React, { useEffect, useRef } from 'react';
-import { InterstitialAd, AdEventType, TestIds } from 'react-native-google-mobile-ads';
+import { InterstitialAd, AdEventType, adMobAvailable } from '../utils/admob-wrapper';
 import { getAdUnitId } from '../utils/admob-config';
 
 // Create a singleton instance to manage interstitial ads
 let interstitialAd = null;
 
 export const loadInterstitialAd = () => {
+  if (!adMobAvailable || !InterstitialAd) {
+    console.log('InterstitialAd not available');
+    return null;
+  }
+
   const adUnitId = getAdUnitId('interstitial');
   
   interstitialAd = InterstitialAd.createForAdRequest(adUnitId, {
@@ -19,6 +24,11 @@ export const loadInterstitialAd = () => {
 };
 
 export const showInterstitialAd = () => {
+  if (!adMobAvailable || !InterstitialAd || !AdEventType) {
+    console.log('InterstitialAd not available');
+    return;
+  }
+
   if (interstitialAd) {
     const unsubscribeLoaded = interstitialAd.addAdEventListener(AdEventType.LOADED, () => {
       console.log('Interstitial ad loaded, showing...');
@@ -56,11 +66,13 @@ export const showInterstitialAd = () => {
   } else {
     // Load and show if not already loaded
     const ad = loadInterstitialAd();
-    const unsubscribeLoaded = ad.addAdEventListener(AdEventType.LOADED, () => {
-      ad.show();
-      unsubscribeLoaded();
-    });
-    ad.load();
+    if (ad) {
+      const unsubscribeLoaded = ad.addAdEventListener(AdEventType.LOADED, () => {
+        ad.show();
+        unsubscribeLoaded();
+      });
+      ad.load();
+    }
   }
 };
 
@@ -69,8 +81,10 @@ export const useInterstitialAd = () => {
   const adRef = useRef(null);
 
   useEffect(() => {
-    // Load ad on mount
-    adRef.current = loadInterstitialAd();
+    // Load ad on mount only if AdMob is available
+    if (adMobAvailable && InterstitialAd) {
+      adRef.current = loadInterstitialAd();
+    }
 
     return () => {
       // Cleanup if needed
@@ -79,6 +93,11 @@ export const useInterstitialAd = () => {
   }, []);
 
   const showAd = () => {
+    if (!adMobAvailable || !InterstitialAd) {
+      console.log('InterstitialAd not available');
+      return;
+    }
+
     if (adRef.current) {
       showInterstitialAd();
     } else {

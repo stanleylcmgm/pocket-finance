@@ -6,6 +6,9 @@ let BannerAd = null;
 let BannerAdSize = null;
 let InterstitialAd = null;
 let RewardedAd = null;
+let AdEventType = null;
+let RewardedAdEventType = null;
+let TestIds = null;
 
 // Try to load AdMob - this will fail silently in Expo Go
 const isAdMobAvailable = (() => {
@@ -17,6 +20,9 @@ const isAdMobAvailable = (() => {
     BannerAdSize = adModule.BannerAdSize;
     InterstitialAd = adModule.InterstitialAd;
     RewardedAd = adModule.RewardedAd;
+    AdEventType = adModule.AdEventType;
+    RewardedAdEventType = adModule.RewardedAdEventType;
+    TestIds = adModule.TestIds;
     
     // Verify that we got the expected exports
     if (mobileAds && typeof mobileAds === 'function') {
@@ -31,5 +37,5 @@ const isAdMobAvailable = (() => {
 })();
 
 export const adMobAvailable = isAdMobAvailable;
-export { mobileAds, BannerAd, BannerAdSize, InterstitialAd, RewardedAd };
+export { mobileAds, BannerAd, BannerAdSize, InterstitialAd, RewardedAd, AdEventType, RewardedAdEventType, TestIds };
 

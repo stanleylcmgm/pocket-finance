@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { RewardedAd, adMobAvailable } from '../utils/admob-wrapper';
-import { AdEventType, RewardedAdEventType } from 'react-native-google-mobile-ads';
+import { RewardedAd, adMobAvailable, AdEventType, RewardedAdEventType } from '../utils/admob-wrapper';
 import { getAdUnitId } from '../utils/admob-config';
 
 // Create a singleton instance to manage rewarded ads
@@ -33,7 +32,7 @@ export const showRewardedAd = (onRewarded, onAdClosed, onError) => {
     return;
   }
 
-  if (!adMobAvailable || !RewardedAd) {
+  if (!adMobAvailable || !RewardedAd || !AdEventType || !RewardedAdEventType) {
     console.log('RewardedAd not available');
     if (onError) onError(new Error('RewardedAd not available'));
     return;
@@ -144,7 +143,7 @@ export const useRewardedAd = () => {
 
   useEffect(() => {
     // Load ad on mount
-    if (adMobAvailable && RewardedAd) {
+    if (adMobAvailable && RewardedAd && RewardedAdEventType && AdEventType) {
       adRef.current = loadRewardedAd();
 
       // Listen for loaded state
@@ -177,7 +176,14 @@ export const useRewardedAd = () => {
   }, []);
 
   const showAd = (onRewarded, onAdClosed, onError) => {
-    if (!adRef.current && adMobAvailable && RewardedAd) {
+    if (!adMobAvailable || !RewardedAd || !AdEventType || !RewardedAdEventType) {
+      if (onError) {
+        onError(new Error('RewardedAd not available'));
+      }
+      return;
+    }
+
+    if (!adRef.current) {
       // Reload if ad is null
       adRef.current = loadRewardedAd();
       setIsLoading(true);

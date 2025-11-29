@@ -123,3 +123,6 @@ Store handles payment with the price YOU SET in the console
 - ✅ **Your code fetches and displays the price from the store**
 - ✅ **This is the standard and required way for all in-app purchases**
 
+
+
+
