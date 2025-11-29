@@ -1,11 +1,16 @@
 import React, { useEffect, useRef } from 'react';
 import { InterstitialAd, AdEventType, adMobAvailable } from '../utils/admob-wrapper';
-import { getAdUnitId } from '../utils/admob-config';
+import { getAdUnitId, ADMOB_CONFIG } from '../utils/admob-config';
 
 // Create a singleton instance to manage interstitial ads
 let interstitialAd = null;
 
 export const loadInterstitialAd = () => {
+  if (!ADMOB_CONFIG.adsEnabled) {
+    console.log('Ads are disabled in config');
+    return null;
+  }
+
   if (!adMobAvailable || !InterstitialAd) {
     console.log('InterstitialAd not available');
     return null;
@@ -24,6 +29,11 @@ export const loadInterstitialAd = () => {
 };
 
 export const showInterstitialAd = () => {
+  if (!ADMOB_CONFIG.adsEnabled) {
+    console.log('Ads are disabled in config');
+    return;
+  }
+
   if (!adMobAvailable || !InterstitialAd || !AdEventType) {
     console.log('InterstitialAd not available');
     return;
@@ -81,8 +91,8 @@ export const useInterstitialAd = () => {
   const adRef = useRef(null);
 
   useEffect(() => {
-    // Load ad on mount only if AdMob is available
-    if (adMobAvailable && InterstitialAd) {
+    // Load ad on mount only if ads are enabled and AdMob is available
+    if (ADMOB_CONFIG.adsEnabled && adMobAvailable && InterstitialAd) {
       adRef.current = loadInterstitialAd();
     }
 
@@ -93,6 +103,11 @@ export const useInterstitialAd = () => {
   }, []);
 
   const showAd = () => {
+    if (!ADMOB_CONFIG.adsEnabled) {
+      console.log('Ads are disabled in config');
+      return;
+    }
+
     if (!adMobAvailable || !InterstitialAd) {
       console.log('InterstitialAd not available');
       return;

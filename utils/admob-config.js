@@ -51,6 +51,10 @@ export const ADMOB_CONFIG = {
   // Set to false when ready for production
   // Set to true to use Google's test ads during development
   useTestAds: true,
+  
+  // Set to false to completely disable all ads temporarily
+  // This is useful for development or testing without ads
+  adsEnabled: false,
 };
 
 // Helper function to get the correct ad unit ID based on platform

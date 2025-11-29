@@ -11,6 +11,7 @@ import { I18nProvider, useI18n } from './i18n/i18n';
 
 // Conditionally import AdMob (only works in custom development builds, not Expo Go)
 import { mobileAds, adMobAvailable } from './utils/admob-wrapper';
+import { ADMOB_CONFIG } from './utils/admob-config';
 
 // Keep the native splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -42,8 +43,8 @@ function AppContent() {
       const minDisplayTime = 2000; // Minimum 2 seconds
       
       try {
-        // Initialize AdMob (only if available - requires custom dev build)
-        if (mobileAds && adMobAvailable) {
+        // Initialize AdMob (only if ads are enabled and available - requires custom dev build)
+        if (ADMOB_CONFIG.adsEnabled && mobileAds && adMobAvailable) {
           try {
             await mobileAds().initialize();
             console.log('AdMob initialized successfully');
@@ -52,7 +53,11 @@ function AppContent() {
             // Continue even if AdMob fails to initialize
           }
         } else {
-          console.log('AdMob not available (running in Expo Go or module not loaded)');
+          if (!ADMOB_CONFIG.adsEnabled) {
+            console.log('AdMob disabled in config');
+          } else {
+            console.log('AdMob not available (running in Expo Go or module not loaded)');
+          }
         }
         
         // Immediately hide the native splash screen

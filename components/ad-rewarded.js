@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { RewardedAd, adMobAvailable, AdEventType, RewardedAdEventType } from '../utils/admob-wrapper';
-import { getAdUnitId } from '../utils/admob-config';
+import { getAdUnitId, ADMOB_CONFIG } from '../utils/admob-config';
 
 // Create a singleton instance to manage rewarded ads
 let rewardedAd = null;
@@ -8,6 +8,11 @@ let isAdShowing = false; // Flag to prevent multiple simultaneous ad shows
 let currentListeners = []; // Track current listeners to clean them up
 
 export const loadRewardedAd = () => {
+  if (!ADMOB_CONFIG.adsEnabled) {
+    console.log('Ads are disabled in config');
+    return null;
+  }
+
   if (!adMobAvailable || !RewardedAd) {
     console.log('RewardedAd not available');
     return null;
@@ -29,6 +34,12 @@ export const showRewardedAd = (onRewarded, onAdClosed, onError) => {
   // Prevent multiple simultaneous ad shows
   if (isAdShowing) {
     console.log('Rewarded ad is already showing, ignoring duplicate call');
+    return;
+  }
+
+  if (!ADMOB_CONFIG.adsEnabled) {
+    console.log('Ads are disabled in config');
+    if (onError) onError(new Error('Ads are disabled'));
     return;
   }
 
@@ -142,8 +153,8 @@ export const useRewardedAd = () => {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    // Load ad on mount
-    if (adMobAvailable && RewardedAd && RewardedAdEventType && AdEventType) {
+    // Load ad on mount only if ads are enabled
+    if (ADMOB_CONFIG.adsEnabled && adMobAvailable && RewardedAd && RewardedAdEventType && AdEventType) {
       adRef.current = loadRewardedAd();
 
       // Listen for loaded state
@@ -176,6 +187,13 @@ export const useRewardedAd = () => {
   }, []);
 
   const showAd = (onRewarded, onAdClosed, onError) => {
+    if (!ADMOB_CONFIG.adsEnabled) {
+      if (onError) {
+        onError(new Error('Ads are disabled'));
+      }
+      return;
+    }
+
     if (!adMobAvailable || !RewardedAd || !AdEventType || !RewardedAdEventType) {
       if (onError) {
         onError(new Error('RewardedAd not available'));

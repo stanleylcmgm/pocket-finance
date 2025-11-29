@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { View, StyleSheet, Text } from 'react-native';
-import { getAdUnitId } from '../utils/admob-config';
+import { getAdUnitId, ADMOB_CONFIG } from '../utils/admob-config';
 import { BannerAd, BannerAdSize, adMobAvailable } from '../utils/admob-wrapper';
 import { useRemoveAds } from '../utils/use-remove-ads';
 
@@ -44,6 +44,11 @@ const AdBanner = ({
       }
     };
   }, []);
+
+  // Don't show banner if ads are disabled in config
+  if (!ADMOB_CONFIG.adsEnabled) {
+    return null;
+  }
 
   // Don't show banner if ads are removed
   if (isAdsRemoved) {
