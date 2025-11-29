@@ -327,23 +327,25 @@ const HomeScreen = ({ navigation }) => {
                 <LanguageSelector />
                 <RemoveAdsButton />
                 {/* Temporary Reset Ads Button - Remove after testing */}
-                <TouchableOpacity
-                  onPress={handleResetAds}
-                  style={{
-                    backgroundColor: '#ff6b6b',
-                    paddingHorizontal: 12,
-                    paddingVertical: 6,
-                    borderRadius: 8,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    gap: 4,
-                  }}
-                >
-                  <Ionicons name="refresh" size={14} color="white" />
-                  <Text style={{ color: 'white', fontSize: 12, fontWeight: '600' }}>
-                    Reset Ads
-                  </Text>
-                </TouchableOpacity>
+                {false && (
+                  <TouchableOpacity
+                    onPress={handleResetAds}
+                    style={{
+                      backgroundColor: '#ff6b6b',
+                      paddingHorizontal: 12,
+                      paddingVertical: 6,
+                      borderRadius: 8,
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      gap: 4,
+                    }}
+                  >
+                    <Ionicons name="refresh" size={14} color="white" />
+                    <Text style={{ color: 'white', fontSize: 12, fontWeight: '600' }}>
+                      Reset Ads
+                    </Text>
+                  </TouchableOpacity>
+                )}
               </View>
             </View>
           </View>
