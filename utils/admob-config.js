@@ -54,7 +54,7 @@ export const ADMOB_CONFIG = {
   
   // Set to false to completely disable all ads temporarily
   // This is useful for development or testing without ads
-  adsEnabled: false,
+  adsEnabled: true,
 };
 
 // Helper function to get the correct ad unit ID based on platform

@@ -327,7 +327,7 @@ const HomeScreen = ({ navigation }) => {
                 <LanguageSelector />
                 <RemoveAdsButton />
                 {/* Temporary Reset Ads Button - Remove after testing */}
-                {false && (
+                {true && (
                   <TouchableOpacity
                     onPress={handleResetAds}
                     style={{
