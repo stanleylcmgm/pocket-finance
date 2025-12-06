@@ -131,6 +131,30 @@ function AppContent() {
     }
   }, [appIsReady]);
 
+  // Check isLoading first - show loading screen while database initializes
+  if (isLoading) {
+    return (
+      <SafeAreaProvider>
+        <LinearGradient
+          colors={['#667eea', '#764ba2', '#f093fb']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.splashContainer}
+        >
+          <Image 
+            source={require('./assets/icon.png')} 
+            style={styles.iconSmall}
+            resizeMode="contain"
+          />
+          <ActivityIndicator size="large" color="#ffffff" style={{ marginTop: 30 }} />
+          <Text style={styles.loadingText}>{t('app.initializingDatabase')}</Text>
+        </LinearGradient>
+        <StatusBar style="light" />
+      </SafeAreaProvider>
+    );
+  }
+
+  // Show animated splash screen after loading but before app is ready
   if (!appIsReady) {
     return (
       <SafeAreaProvider>
@@ -170,28 +194,6 @@ function AppContent() {
               <Text style={styles.loadingStatusText}>... loading the data</Text>
             </Animated.View>
           </Animated.View>
-        </LinearGradient>
-        <StatusBar style="light" />
-      </SafeAreaProvider>
-    );
-  }
-
-  if (isLoading) {
-    return (
-      <SafeAreaProvider>
-        <LinearGradient
-          colors={['#667eea', '#764ba2', '#f093fb']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.splashContainer}
-        >
-          <Image 
-            source={require('./assets/icon.png')} 
-            style={styles.iconSmall}
-            resizeMode="contain"
-          />
-          <ActivityIndicator size="large" color="#ffffff" style={{ marginTop: 30 }} />
-          <Text style={styles.loadingText}>{t('app.initializingDatabase')}</Text>
         </LinearGradient>
         <StatusBar style="light" />
       </SafeAreaProvider>
