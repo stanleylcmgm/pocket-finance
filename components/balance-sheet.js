@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -55,9 +55,9 @@ const BalanceSheet = () => {
   const [displayBalance, setDisplayBalance] = useState(0);
 
   // Animated values for the summary cards
-  const animatedIncome = useState(new Animated.Value(0))[0];
-  const animatedExpenses = useState(new Animated.Value(0))[0];
-  const animatedBalance = useState(new Animated.Value(0))[0];
+  const animatedIncome = useRef(new Animated.Value(0)).current;
+  const animatedExpenses = useRef(new Animated.Value(0)).current;
+  const animatedBalance = useRef(new Animated.Value(0)).current;
   
   // Database data state
   const [categories, setCategories] = useState([]);

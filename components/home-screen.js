@@ -58,9 +58,9 @@ const HomeScreen = ({ navigation }) => {
   const [displayBalance, setDisplayBalance] = useState(0);
 
   // Animated values for the stat cards
-  const animatedAssets = useState(new Animated.Value(0))[0];
-  const animatedExpenses = useState(new Animated.Value(0))[0];
-  const animatedBalance = useState(new Animated.Value(0))[0];
+  const animatedAssets = useRef(new Animated.Value(0)).current;
+  const animatedExpenses = useRef(new Animated.Value(0)).current;
+  const animatedBalance = useRef(new Animated.Value(0)).current;
 
   // Load stats data
   const loadStats = useCallback(async () => {
