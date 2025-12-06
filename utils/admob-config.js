@@ -6,7 +6,7 @@ export const ADMOB_CONFIG = {
   // Your AdMob App IDs
   // Get these from https://apps.admob.com/ → Apps → Your App
   appId: {
-    ios: 'ca-app-pub-2240821992848494~5694597260', // iOS App ID
+    ios: 'ca-app-pub-2240821992848494~7813719484', // iOS App ID
     android: 'ca-app-pub-2240821992848494~7813719484', // Android App ID
   },
   
@@ -33,7 +33,7 @@ export const ADMOB_CONFIG = {
   adUnitIds: {
     // Banner Ad IDs
     banner: {
-      ios: 'ca-app-pub-2240821992848494/5758176445', // iOS Production Banner
+      ios: 'ca-app-pub-2240821992848494/3862032038', // iOS Production Banner
       android: 'ca-app-pub-2240821992848494/3862032038', // Android Production Banner
     },
     // Interstitial Ad IDs
@@ -50,7 +50,7 @@ export const ADMOB_CONFIG = {
   
   // Set to false when ready for production
   // Set to true to use Google's test ads during development
-  useTestAds: true,
+  useTestAds: false,
   
   // Set to false to completely disable all ads temporarily
   // This is useful for development or testing without ads

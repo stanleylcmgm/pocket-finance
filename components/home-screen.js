@@ -326,8 +326,8 @@ const HomeScreen = ({ navigation }) => {
               <View style={{ flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
                 <LanguageSelector />
                 <RemoveAdsButton />
-                {/* Temporary Reset Ads Button - Remove after testing */}
-                {true && (
+                {/* Temporary Reset Ads Button - Removed for production */}
+                {false && (
                   <TouchableOpacity
                     onPress={handleResetAds}
                     style={{
