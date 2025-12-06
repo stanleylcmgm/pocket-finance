@@ -9,7 +9,7 @@ export const IAP_CONFIG = {
   // Enable/Disable IAP functionality
   // Set to false to disable IAP (useful for testing in Expo Go)
   // Set to true when ready to use real in-app purchases
-  enabled: false, // TODO: Set to true when ready to enable IAP
+  enabled: true, // Enabled for production
 
   // Product IDs for "Remove Ads" purchase
   // IMPORTANT: These must match the product IDs you create in App Store Connect and Google Play Console
