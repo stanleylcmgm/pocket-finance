@@ -25,6 +25,7 @@ const AdBanner = ({
   const [isLoaded, setIsLoaded] = useState(false);
   const [retryKey, setRetryKey] = useState(0); // Key to force ad reload
   const retryTimerRef = useRef(null);
+  const retryCountRef = useRef(0); // Track number of retry attempts (max 5)
 
   useEffect(() => {
     // Get ad unit ID (AdMob is initialized in App.js)
@@ -32,6 +33,8 @@ const AdBanner = ({
     if (adMobAvailable && BannerAd && BannerAdSize) {
       const unitId = getAdUnitId('banner');
       setAdUnitId(unitId);
+      // Reset retry count when ad unit ID is set
+      retryCountRef.current = 0;
     }
   }, []);
 
@@ -100,6 +103,8 @@ const AdBanner = ({
             clearTimeout(retryTimerRef.current);
             retryTimerRef.current = null;
           }
+          // Reset retry count on successful load
+          retryCountRef.current = 0;
           console.log('Banner ad loaded successfully');
         }}
         onAdFailedToLoad={(error) => {
@@ -121,7 +126,21 @@ const AdBanner = ({
           });
           
           if (isNoFillError) {
-            // For "no ad" errors, continuously retry every 5 seconds until an ad loads
+            // Check if we've reached the maximum retry limit (5 attempts)
+            if (retryCountRef.current >= 5) {
+              console.log('Banner ad retry limit reached (5 attempts). Stopping retries.');
+              // Clear any existing retry timer
+              if (retryTimerRef.current) {
+                clearTimeout(retryTimerRef.current);
+                retryTimerRef.current = null;
+              }
+              return;
+            }
+            
+            // Increment retry count
+            retryCountRef.current += 1;
+            
+            // For "no ad" errors, retry up to 5 times, every 5 seconds
             // Clear any existing retry timer first
             if (retryTimerRef.current) {
               clearTimeout(retryTimerRef.current);
@@ -129,15 +148,14 @@ const AdBanner = ({
             }
             
             // Set up retry timer to reload ad after 5 seconds
-            // This will keep retrying every 5 seconds until an ad successfully loads
             retryTimerRef.current = setTimeout(() => {
-              console.log('Retrying to load banner ad... (attempt after 5 seconds)');
+              console.log(`Retrying to load banner ad... (attempt ${retryCountRef.current}/5 after 5 seconds)`);
               // Force ad reload by changing the key prop
               // This will trigger BannerAd to remount and try loading again
               setRetryKey(prev => prev + 1);
               retryTimerRef.current = null;
               // Note: If this retry also fails with no-fill, onAdFailedToLoad
-              // will be called again, which will schedule another retry
+              // will be called again, which will check the retry count and schedule another retry if under limit
             }, 5000);
           } else {
             // Log other errors (not no-fill) - these won't retry automatically
