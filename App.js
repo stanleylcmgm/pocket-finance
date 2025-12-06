@@ -38,6 +38,10 @@ function AppContent() {
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
+    let isMounted = true;
+    let pulseTimeoutId = null;
+    let appReadyTimeoutId = null;
+
     async function prepare() {
       const startTime = Date.now();
       const minDisplayTime = 2000; // Minimum 2 seconds
@@ -60,8 +64,7 @@ function AppContent() {
           }
         }
         
-        // Immediately hide the native splash screen
-        await SplashScreen.hideAsync();
+        if (!isMounted) return;
         
         // Start animations
         Animated.parallel([
@@ -85,30 +88,36 @@ function AppContent() {
         ]).start();
 
         // Pulse animation for icon (start after initial scale animation)
-        setTimeout(() => {
-          Animated.loop(
-            Animated.sequence([
-              Animated.timing(pulseAnim, {
-                toValue: 1.05,
-                duration: 1500,
-                useNativeDriver: true,
-              }),
-              Animated.timing(pulseAnim, {
-                toValue: 1,
-                duration: 1500,
-                useNativeDriver: true,
-              }),
-            ])
-          ).start();
+        pulseTimeoutId = setTimeout(() => {
+          if (isMounted) {
+            Animated.loop(
+              Animated.sequence([
+                Animated.timing(pulseAnim, {
+                  toValue: 1.05,
+                  duration: 1500,
+                  useNativeDriver: true,
+                }),
+                Animated.timing(pulseAnim, {
+                  toValue: 1,
+                  duration: 1500,
+                  useNativeDriver: true,
+                }),
+              ])
+            ).start();
+          }
         }, 800);
         
         // Initialize database
         const success = await initDatabase();
+        if (!isMounted) return;
         setIsDbInitialized(success);
       } catch (e) {
         console.warn(e);
-        setIsDbInitialized(false);
+        if (isMounted) {
+          setIsDbInitialized(false);
+        }
       } finally {
+        if (!isMounted) return;
         setIsLoading(false);
         
         // Calculate remaining time to ensure minimum 2 seconds display
@@ -116,20 +125,33 @@ function AppContent() {
         const remainingTime = Math.max(0, minDisplayTime - elapsedTime);
         
         // Wait for remaining time before transitioning
-        setTimeout(() => {
-          setAppIsReady(true);
+        appReadyTimeoutId = setTimeout(() => {
+          if (isMounted) {
+            setAppIsReady(true);
+          }
         }, remainingTime);
       }
     }
 
     prepare();
+
+    // Cleanup function to cancel timeouts and prevent state updates on unmount
+    return () => {
+      isMounted = false;
+      if (pulseTimeoutId) {
+        clearTimeout(pulseTimeoutId);
+      }
+      if (appReadyTimeoutId) {
+        clearTimeout(appReadyTimeoutId);
+      }
+    };
   }, []);
 
   const onLayoutRootView = useCallback(async () => {
-    if (appIsReady) {
-      await SplashScreen.hideAsync();
-    }
-  }, [appIsReady]);
+    // Hide the native splash screen once the animated component is laid out
+    // This ensures a smooth transition from native splash to animated splash
+    await SplashScreen.hideAsync();
+  }, []);
 
   // Check isLoading first - show loading screen while database initializes
   if (isLoading) {
