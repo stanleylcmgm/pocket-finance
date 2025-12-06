@@ -181,16 +181,96 @@ Once approved:
 
 ### Privacy Policy
 
-Since your app uses AdMob, you **MUST** have a privacy policy that covers:
+Since your app uses AdMob and IAP, you **MUST** have a privacy policy that covers:
 - Data collection (AdMob collects device info, location, etc.)
 - Third-party services (Google AdMob)
+- In-app purchases
 - User rights
 - Contact information
 
-You can:
-- Host it on your website
-- Use a free service like GitHub Pages
-- Use privacy policy generators
+**You don't need website hosting!** Here are free options:
+
+#### Option 1: Google Sites (Easiest - Recommended) ⭐
+
+1. Go to https://sites.google.com
+2. Click **"Create"** or **"Blank"** to create a new site
+3. Name your site (e.g., "Pocket Finance Privacy Policy")
+4. Click on the page and add your privacy policy content
+5. Click **"Publish"** in the top right
+6. Choose a URL (e.g., `pocket-finance-privacy.sites.google.com`)
+7. Click **"Publish"** again
+8. Copy the published URL - this is your Privacy Policy URL!
+
+**Example URL format:** `https://sites.google.com/view/pocket-finance-privacy/home`
+
+#### Option 2: GitHub Pages (Free, Professional)
+
+1. Create a GitHub account at https://github.com (if you don't have one)
+2. Create a new repository (e.g., `pocket-finance-privacy`)
+3. Create a file named `index.html` with your privacy policy
+4. Go to repository **Settings** → **Pages**
+5. Select **main branch** as source
+6. Click **Save**
+7. Your URL will be: `https://yourusername.github.io/pocket-finance-privacy/`
+
+#### Option 3: Netlify Drop (Drag & Drop)
+
+1. Go to https://app.netlify.com/drop
+2. Create an HTML file with your privacy policy
+3. Drag and drop the HTML file onto the page
+4. Get an instant URL like: `https://random-name-123.netlify.app`
+
+#### Option 4: Privacy Policy Generators
+
+These services generate and host privacy policies for you:
+- **PrivacyPolicyGenerator.net** - Generates and provides hosting
+- **FreePrivacyPolicy.com** - Free generator with hosting
+- **Termly.io** - Free tier available
+
+#### Creating Your Privacy Policy Content
+
+Your privacy policy should include:
+
+1. **Introduction**: What data you collect
+2. **Data Collection**: 
+   - AdMob collects: Device identifiers, location data, advertising ID
+   - App collects: Financial data (stored locally on device)
+3. **Third-Party Services**: Google AdMob, Google Play Billing
+4. **Data Storage**: Local device storage (SQLite)
+5. **User Rights**: Access, delete data
+6. **Contact Information**: Your email address
+7. **Updates**: Policy may change
+
+**Quick Template:**
+```
+Privacy Policy for Pocket Finance
+
+Last Updated: [Date]
+
+Introduction
+Pocket Finance ("we", "our", "us") is committed to protecting your privacy.
+
+Data We Collect
+- Financial data you enter (stored locally on your device)
+- AdMob may collect: device identifiers, location data, advertising ID
+
+Third-Party Services
+- Google AdMob: Displays ads and may collect data per Google's privacy policy
+- Google Play Billing: Processes in-app purchases
+
+Data Storage
+Your financial data is stored locally on your device using SQLite. We do not transmit this data to external servers.
+
+Contact Us
+Email: [your-email@example.com]
+
+Changes to This Policy
+We may update this policy. The "Last Updated" date will reflect changes.
+```
+
+**Important:** Once you have your privacy policy URL, add it to:
+- Google Play Console → **Store presence** → **Main store listing** → Privacy Policy URL
+- Google Play Console → **Policy** → **App content** → Privacy Policy URL
 
 ### Keystore Security
 
