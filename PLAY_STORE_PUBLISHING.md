@@ -108,12 +108,47 @@ This will:
 
 ### 4.4 Configure Pricing and Distribution
 
-1. Go to **Monetization setup** → **Products** → **In-app products** (if using IAP)
-2. Go to **Monetization setup** → **Monetize with ads** (if using AdMob)
-3. Go to **Pricing and distribution**:
-   - Select countries/regions
-   - Set pricing (if paid app)
-   - Accept content guidelines
+#### 4.4.1 Set Up In-App Products (IAP)
+
+**Important:** Google Play Console now calls this "One-time products" (not "In-app products"). Here's how to find it:
+
+1. In the **left sidebar**, look under **"Monetise with Play"** section
+2. Click on **"Products"** (it has a dropdown arrow ▶)
+3. This will expand to show:
+   - **App pricing** (for paid apps)
+   - **One-time products** ← Click this (this is what you need for IAP!)
+   - **Subscriptions** (for recurring subscriptions)
+4. Click **"One-time products"**
+5. Click **"Create product"** button (or **"Create one-time product"**)
+6. Fill in:
+   - **Product ID**: `remove_ads` (must match your `iap-config.js` product ID)
+   - **Name**: "Remove Ads" (or your product name)
+   - **Description**: Describe what the purchase does
+   - **Price**: Set the price for your product
+   - **Status**: Set to "Active" when ready
+7. Click **"Save"**
+
+**Note:** The Product ID must exactly match what you have in `utils/iap-config.js`:
+- Your config has: `android: 'remove_ads'`
+- So your Product ID in Play Console should be: `remove_ads`
+
+**Why "One-time products"?** Google renamed "In-app products" to "One-time products" to distinguish them from subscriptions (which are recurring). For your "Remove Ads" purchase, this is the correct option since it's a one-time purchase, not a subscription.
+
+#### 4.4.2 Set Up AdMob (if using ads)
+
+1. In the **left sidebar**, under **"Monetise with Play"**
+2. Look for **"Monetise with ads"** or go to **AdMob** directly
+3. Link your AdMob account if not already linked
+4. Your AdMob App ID is already configured in your app: `ca-app-pub-2240821992848494~7813719484`
+
+#### 4.4.3 Configure Pricing and Distribution
+
+1. In the **left sidebar**, go to **"Pricing and distribution"** (usually under "Policy" or main menu)
+2. Configure:
+   - **Countries/regions**: Select where your app will be available
+   - **Pricing**: Set to "Free" (since you're using IAP, not a paid app)
+   - **Content guidelines**: Accept the content guidelines
+3. Click **"Save"**
 
 ## Step 5: Upload Your App
 

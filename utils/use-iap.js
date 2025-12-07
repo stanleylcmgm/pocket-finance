@@ -5,10 +5,10 @@ import { IAP_CONFIG } from './iap-config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Conditionally import react-native-iap only if IAP is enabled
-let RNIap = null;
+let IAP = null;
 if (IAP_CONFIG.enabled) {
   try {
-    RNIap = require('react-native-iap');
+    IAP = require('react-native-iap');
   } catch (err) {
     console.log('react-native-iap not available (expected in Expo Go)');
   }
@@ -29,7 +29,7 @@ export const useIAP = () => {
   const [error, setError] = useState(null);
 
   // If IAP is disabled, return disabled state
-  if (!IAP_CONFIG.enabled || !RNIap) {
+  if (!IAP_CONFIG.enabled || !IAP) {
     return {
       isConnected: false,
       isLoading: false,
@@ -49,6 +49,16 @@ export const useIAP = () => {
     };
   }
 
+  // Extract methods from react-native-iap v14 (methods are stable, so this is safe)
+  const initConnection = IAP.initConnection;
+  const getProducts = IAP.getProducts;
+  const requestPurchase = IAP.requestPurchase;
+  const purchaseUpdatedListener = IAP.purchaseUpdatedListener;
+  const purchaseErrorListener = IAP.purchaseErrorListener;
+  const finishTransaction = IAP.finishTransaction;
+  const getAvailablePurchases = IAP.getAvailablePurchases;
+  const endConnection = IAP.endConnection;
+
   // Connect to store on mount
   useEffect(() => {
     let purchaseUpdateSubscription;
@@ -64,22 +74,22 @@ export const useIAP = () => {
         const productIds = [productId];
         
         // Initialize connection
-        await RNIap.initConnection();
+        await initConnection();
         setIsConnected(true);
         console.log('Connected to store successfully');
         
         // Fetch products
-        const fetchedProducts = await RNIap.getProducts(productIds);
+        const fetchedProducts = await getProducts({ skus: productIds });
         setProducts(fetchedProducts);
         console.log('Products fetched:', fetchedProducts);
         
         // Set up purchase listeners
-        purchaseUpdateSubscription = RNIap.purchaseUpdatedListener(async (purchase) => {
+        purchaseUpdateSubscription = purchaseUpdatedListener(async (purchase) => {
           console.log('Purchase updated:', purchase);
           try {
             await verifyAndStorePurchase(purchase);
             // Finish the transaction to acknowledge the purchase
-            await RNIap.finishTransaction(purchase);
+            await finishTransaction({ purchase, isConsumable: false });
             setIsLoading(false);
           } catch (err) {
             console.error('Error processing purchase update:', err);
@@ -87,7 +97,7 @@ export const useIAP = () => {
           }
         });
 
-        purchaseErrorSubscription = RNIap.purchaseErrorListener((error) => {
+        purchaseErrorSubscription = purchaseErrorListener((error) => {
           console.error('Purchase error:', error);
           setError(error.message || 'Purchase failed');
         });
@@ -111,7 +121,7 @@ export const useIAP = () => {
       if (purchaseErrorSubscription) {
         purchaseErrorSubscription.remove();
       }
-      RNIap.endConnection().catch(err => {
+      endConnection().catch(err => {
         console.error('Error ending connection:', err);
       });
     };
@@ -125,7 +135,7 @@ export const useIAP = () => {
       const productId = IAP_CONFIG.getProductId();
       const productIds = [productId];
       
-      const fetchedProducts = await RNIap.getProducts(productIds);
+      const fetchedProducts = await getProducts({ skus: productIds });
       setProducts(fetchedProducts);
       console.log('Products fetched:', fetchedProducts);
       return fetchedProducts;
@@ -149,7 +159,25 @@ export const useIAP = () => {
       
       // Request purchase - this will trigger the purchase flow
       // The actual purchase completion is handled by purchaseUpdatedListener
-      await RNIap.requestPurchase(targetProductId);
+      // For react-native-iap v14, Android requires skus array, iOS uses productId
+      if (Platform.OS === 'android') {
+        await requestPurchase({
+          request: {
+            android: {
+              skus: [targetProductId],
+            },
+          },
+        });
+      } else {
+        // iOS
+        await requestPurchase({
+          request: {
+            ios: {
+              productId: targetProductId,
+            },
+          },
+        });
+      }
       
       // Return success - the listener will handle the actual purchase
       return {
@@ -223,7 +251,7 @@ export const useIAP = () => {
       console.log('Restoring purchases...');
       
       // Get available purchases
-      const purchases = await RNIap.getAvailablePurchases();
+      const purchases = await getAvailablePurchases();
       
       // Check if user has purchased remove ads
       const productId = IAP_CONFIG.getProductId();
@@ -236,7 +264,7 @@ export const useIAP = () => {
         await verifyAndStorePurchase(removeAdsPurchase);
         // Finish the transaction (if not already finished)
         try {
-          await RNIap.finishTransaction(removeAdsPurchase);
+          await finishTransaction({ purchase: removeAdsPurchase, isConsumable: false });
         } catch (err) {
           // Transaction might already be finished, that's okay
           console.log('Transaction already finished or error finishing:', err);
