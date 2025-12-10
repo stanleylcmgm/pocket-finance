@@ -6,12 +6,47 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Conditionally import react-native-iap only if IAP is enabled
 let IAP = null;
+let IAP_LOAD_ERROR = null;
+
 if (IAP_CONFIG.enabled) {
   try {
-    IAP = require('react-native-iap');
+    console.log('Attempting to load react-native-iap module...');
+    // Try both default and named exports
+    const rnIapModule = require('react-native-iap');
+    console.log('react-native-iap module loaded:', typeof rnIapModule);
+    console.log('Module keys:', rnIapModule ? Object.keys(rnIapModule).slice(0, 20) : 'null');
+    
+    IAP = rnIapModule.default || rnIapModule;
+    
+    // Verify critical methods exist
+    if (!IAP) {
+      console.error('react-native-iap module is null or undefined after extraction');
+      IAP_LOAD_ERROR = 'Module loaded but is null/undefined';
+      IAP = null;
+    } else {
+      console.log('IAP module extracted successfully');
+      console.log('IAP has requestPurchase:', typeof IAP.requestPurchase === 'function');
+      console.log('IAP has initConnection:', typeof IAP.initConnection === 'function');
+      
+      if (typeof IAP.requestPurchase !== 'function') {
+        console.error('IAP.requestPurchase is not a function. Available methods:', Object.keys(IAP).slice(0, 20));
+        IAP_LOAD_ERROR = 'requestPurchase method not found';
+      } else {
+        console.log('react-native-iap loaded successfully!');
+      }
+    }
   } catch (err) {
-    console.log('react-native-iap not available (expected in Expo Go)');
+    console.error('Failed to load react-native-iap:', err);
+    console.error('Error details:', {
+      message: err.message,
+      code: err.code,
+      name: err.name,
+    });
+    IAP_LOAD_ERROR = err.message || 'Failed to require react-native-iap';
+    IAP = null;
   }
+} else {
+  console.log('IAP is disabled in config');
 }
 
 const REMOVE_ADS_KEY = '@remove_ads_purchased';
@@ -29,7 +64,7 @@ export const useIAP = () => {
   const [error, setError] = useState(null);
 
   // If IAP is disabled, return disabled state
-  if (!IAP_CONFIG.enabled || !IAP) {
+  if (!IAP_CONFIG.enabled) {
     return {
       isConnected: false,
       isLoading: false,
@@ -48,16 +83,36 @@ export const useIAP = () => {
       fetchProducts: async () => [],
     };
   }
+  
+  // If IAP module failed to load
+  if (!IAP) {
+    const errorMsg = IAP_LOAD_ERROR 
+      ? `react-native-iap module failed to load: ${IAP_LOAD_ERROR}. Make sure the native module is properly installed and linked.`
+      : 'react-native-iap module is not available. Rebuild the app after installing the package.';
+    
+    console.error(errorMsg);
+    
+    return {
+      isConnected: false,
+      isLoading: false,
+      products: [],
+      error: errorMsg,
+      purchaseProduct: async () => ({
+        success: false,
+        canceled: false,
+        message: errorMsg,
+      }),
+      restorePurchases: async () => ({
+        success: false,
+        restored: false,
+        message: errorMsg,
+      }),
+      fetchProducts: async () => [],
+    };
+  }
 
-  // Extract methods from react-native-iap v14 (methods are stable, so this is safe)
-  const initConnection = IAP.initConnection;
-  const getProducts = IAP.getProducts;
-  const requestPurchase = IAP.requestPurchase;
-  const purchaseUpdatedListener = IAP.purchaseUpdatedListener;
-  const purchaseErrorListener = IAP.purchaseErrorListener;
-  const finishTransaction = IAP.finishTransaction;
-  const getAvailablePurchases = IAP.getAvailablePurchases;
-  const endConnection = IAP.endConnection;
+  // Access methods directly from react-native-iap v14
+  // Don't extract them as they need to maintain their context
 
   // Connect to store on mount
   useEffect(() => {
@@ -69,27 +124,55 @@ export const useIAP = () => {
         setIsLoading(true);
         setError(null);
         
+        // Verify IAP module is available
+        if (!IAP) {
+          throw new Error('IAP module is not available');
+        }
+        
+        // Verify required methods exist
+        const requiredMethods = ['initConnection', 'getProducts', 'purchaseUpdatedListener', 'purchaseErrorListener'];
+        const missingMethods = requiredMethods.filter(method => typeof IAP[method] !== 'function');
+        if (missingMethods.length > 0) {
+          console.error('Missing IAP methods:', missingMethods);
+          console.error('Available methods:', Object.keys(IAP));
+          throw new Error(`Missing IAP methods: ${missingMethods.join(', ')}`);
+        }
+        
         // Get product IDs for current platform
         const productId = IAP_CONFIG.getProductId();
         const productIds = [productId];
         
+        console.log('Initializing IAP connection...');
         // Initialize connection
-        await initConnection();
+        if (typeof IAP.initConnection !== 'function') {
+          throw new Error('IAP.initConnection is not a function');
+        }
+        await IAP.initConnection();
         setIsConnected(true);
         console.log('Connected to store successfully');
         
         // Fetch products
-        const fetchedProducts = await getProducts({ skus: productIds });
+        if (typeof IAP.getProducts !== 'function') {
+          throw new Error('IAP.getProducts is not a function');
+        }
+        const fetchedProducts = await IAP.getProducts({ skus: productIds });
         setProducts(fetchedProducts);
         console.log('Products fetched:', fetchedProducts);
         
         // Set up purchase listeners
-        purchaseUpdateSubscription = purchaseUpdatedListener(async (purchase) => {
+        if (typeof IAP.purchaseUpdatedListener !== 'function') {
+          throw new Error('IAP.purchaseUpdatedListener is not a function');
+        }
+        purchaseUpdateSubscription = IAP.purchaseUpdatedListener(async (purchase) => {
           console.log('Purchase updated:', purchase);
           try {
             await verifyAndStorePurchase(purchase);
             // Finish the transaction to acknowledge the purchase
-            await finishTransaction({ purchase, isConsumable: false });
+            if (typeof IAP.finishTransaction === 'function') {
+              await IAP.finishTransaction({ purchase, isConsumable: false });
+            } else {
+              console.error('IAP.finishTransaction is not a function');
+            }
             setIsLoading(false);
           } catch (err) {
             console.error('Error processing purchase update:', err);
@@ -97,13 +180,17 @@ export const useIAP = () => {
           }
         });
 
-        purchaseErrorSubscription = purchaseErrorListener((error) => {
+        if (typeof IAP.purchaseErrorListener !== 'function') {
+          throw new Error('IAP.purchaseErrorListener is not a function');
+        }
+        purchaseErrorSubscription = IAP.purchaseErrorListener((error) => {
           console.error('Purchase error:', error);
           setError(error.message || 'Purchase failed');
         });
         
       } catch (err) {
         console.error('Error initializing IAP:', err);
+        console.error('Error stack:', err.stack);
         setError(err.message || 'Failed to connect to store');
         setIsConnected(false);
       } finally {
@@ -121,7 +208,7 @@ export const useIAP = () => {
       if (purchaseErrorSubscription) {
         purchaseErrorSubscription.remove();
       }
-      endConnection().catch(err => {
+      IAP.endConnection().catch(err => {
         console.error('Error ending connection:', err);
       });
     };
@@ -135,7 +222,7 @@ export const useIAP = () => {
       const productId = IAP_CONFIG.getProductId();
       const productIds = [productId];
       
-      const fetchedProducts = await getProducts({ skus: productIds });
+      const fetchedProducts = await IAP.getProducts({ skus: productIds });
       setProducts(fetchedProducts);
       console.log('Products fetched:', fetchedProducts);
       return fetchedProducts;
@@ -153,31 +240,62 @@ export const useIAP = () => {
       setIsLoading(true);
       setError(null);
       
+      // Safety check
+      if (!IAP || typeof IAP.requestPurchase !== 'function') {
+        const errorMsg = 'IAP.requestPurchase is not available. Check react-native-iap installation.';
+        console.error(errorMsg);
+        console.error('IAP object:', IAP);
+        console.error('Available methods:', IAP ? Object.keys(IAP) : 'IAP is null');
+        setError(errorMsg);
+        setIsLoading(false);
+        return {
+          success: false,
+          canceled: false,
+          message: errorMsg,
+        };
+      }
+      
       const targetProductId = productId || IAP_CONFIG.getProductId();
       
       console.log('Attempting to purchase product:', targetProductId);
+      console.log('Platform:', Platform.OS);
+      console.log('IAP methods available:', {
+        hasRequestPurchase: typeof IAP.requestPurchase === 'function',
+        hasInitConnection: typeof IAP.initConnection === 'function',
+        IAPType: typeof IAP,
+        IAPKeys: IAP ? Object.keys(IAP).slice(0, 10) : 'null',
+      });
       
       // Request purchase - this will trigger the purchase flow
       // The actual purchase completion is handled by purchaseUpdatedListener
-      // For react-native-iap v14, Android requires skus array, iOS uses productId
+      // For react-native-iap v14, Android requires skus array
+      let purchaseRequest;
       if (Platform.OS === 'android') {
-        await requestPurchase({
+        // Android: use skus array
+        purchaseRequest = {
           request: {
             android: {
               skus: [targetProductId],
             },
           },
-        });
+        };
       } else {
-        // iOS
-        await requestPurchase({
+        // iOS: use sku (singular)
+        purchaseRequest = {
           request: {
             ios: {
-              productId: targetProductId,
+              sku: targetProductId,
             },
           },
-        });
+        };
       }
+      
+      console.log('Calling requestPurchase with:', JSON.stringify(purchaseRequest));
+      
+      // Call requestPurchase
+      await IAP.requestPurchase(purchaseRequest);
+      
+      console.log('Purchase request initiated successfully');
       
       // Return success - the listener will handle the actual purchase
       return {
@@ -186,6 +304,12 @@ export const useIAP = () => {
       };
     } catch (err) {
       console.error('Error purchasing product:', err);
+      console.error('Error details:', {
+        message: err.message,
+        code: err.code,
+        name: err.name,
+        stack: err.stack?.substring(0, 500),
+      });
       setIsLoading(false);
       
       // Check if user canceled
@@ -251,7 +375,7 @@ export const useIAP = () => {
       console.log('Restoring purchases...');
       
       // Get available purchases
-      const purchases = await getAvailablePurchases();
+      const purchases = await IAP.getAvailablePurchases();
       
       // Check if user has purchased remove ads
       const productId = IAP_CONFIG.getProductId();
@@ -264,7 +388,7 @@ export const useIAP = () => {
         await verifyAndStorePurchase(removeAdsPurchase);
         // Finish the transaction (if not already finished)
         try {
-          await finishTransaction({ purchase: removeAdsPurchase, isConsumable: false });
+          await IAP.finishTransaction({ purchase: removeAdsPurchase, isConsumable: false });
         } catch (err) {
           // Transaction might already be finished, that's okay
           console.log('Transaction already finished or error finishing:', err);
