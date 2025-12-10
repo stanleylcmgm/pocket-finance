@@ -5,34 +5,64 @@ import { IAP_CONFIG } from './iap-config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Conditionally import react-native-iap only if IAP is enabled
-let IAP = null;
+let RNIap = null;
 let IAP_LOAD_ERROR = null;
 
 if (IAP_CONFIG.enabled) {
   try {
     console.log('Attempting to load react-native-iap module...');
-    // Try both default and named exports
+    // Try different import patterns for react-native-iap v14
     const rnIapModule = require('react-native-iap');
     console.log('react-native-iap module loaded:', typeof rnIapModule);
-    console.log('Module keys:', rnIapModule ? Object.keys(rnIapModule).slice(0, 20) : 'null');
+    console.log('Module keys:', rnIapModule ? Object.keys(rnIapModule).slice(0, 30) : 'null');
     
-    IAP = rnIapModule.default || rnIapModule;
+    // Try different export patterns
+    // Pattern 1: Direct export (most common)
+    if (rnIapModule && typeof rnIapModule.initConnection === 'function') {
+      RNIap = rnIapModule;
+      console.log('Using direct export pattern');
+    }
+    // Pattern 2: Default export
+    else if (rnIapModule?.default && typeof rnIapModule.default.initConnection === 'function') {
+      RNIap = rnIapModule.default;
+      console.log('Using default export pattern');
+    }
+    // Pattern 3: Check if it's a namespace object
+    else if (rnIapModule && Object.keys(rnIapModule).length > 0) {
+      // Try to use it directly anyway
+      RNIap = rnIapModule;
+      console.log('Using module as-is (may need native linking)');
+    }
     
     // Verify critical methods exist
-    if (!IAP) {
-      console.error('react-native-iap module is null or undefined after extraction');
+    if (!RNIap) {
+      console.error('react-native-iap module is null or undefined');
       IAP_LOAD_ERROR = 'Module loaded but is null/undefined';
-      IAP = null;
+      RNIap = null;
     } else {
-      console.log('IAP module extracted successfully');
-      console.log('IAP has requestPurchase:', typeof IAP.requestPurchase === 'function');
-      console.log('IAP has initConnection:', typeof IAP.initConnection === 'function');
+      // Check for methods - they should be directly on the module
+      // Note: react-native-iap v14 uses fetchProducts, not getProducts
+      const hasInitConnection = typeof RNIap.initConnection === 'function';
+      const hasFetchProducts = typeof RNIap.fetchProducts === 'function';
+      const hasRequestPurchase = typeof RNIap.requestPurchase === 'function';
+      const hasPurchaseUpdatedListener = typeof RNIap.purchaseUpdatedListener === 'function';
+      const hasPurchaseErrorListener = typeof RNIap.purchaseErrorListener === 'function';
       
-      if (typeof IAP.requestPurchase !== 'function') {
-        console.error('IAP.requestPurchase is not a function. Available methods:', Object.keys(IAP).slice(0, 20));
-        IAP_LOAD_ERROR = 'requestPurchase method not found';
+      console.log('IAP methods check:', {
+        hasInitConnection,
+        hasFetchProducts,
+        hasRequestPurchase,
+        hasPurchaseUpdatedListener,
+        hasPurchaseErrorListener,
+        allKeys: Object.keys(RNIap).slice(0, 30),
+      });
+      
+      if (!hasInitConnection || !hasFetchProducts || !hasRequestPurchase) {
+        console.error('Missing IAP methods. Available methods:', Object.keys(RNIap).slice(0, 30));
+        IAP_LOAD_ERROR = `Missing methods: initConnection=${hasInitConnection}, fetchProducts=${hasFetchProducts}, requestPurchase=${hasRequestPurchase}`;
+        // Don't set RNIap to null here - we'll handle the error in the hook
       } else {
-        console.log('react-native-iap loaded successfully!');
+        console.log('react-native-iap loaded successfully with all required methods!');
       }
     }
   } catch (err) {
@@ -41,9 +71,10 @@ if (IAP_CONFIG.enabled) {
       message: err.message,
       code: err.code,
       name: err.name,
+      stack: err.stack?.substring(0, 500),
     });
     IAP_LOAD_ERROR = err.message || 'Failed to require react-native-iap';
-    IAP = null;
+    RNIap = null;
   }
 } else {
   console.log('IAP is disabled in config');
@@ -85,7 +116,7 @@ export const useIAP = () => {
   }
   
   // If IAP module failed to load
-  if (!IAP) {
+  if (!RNIap) {
     const errorMsg = IAP_LOAD_ERROR 
       ? `react-native-iap module failed to load: ${IAP_LOAD_ERROR}. Make sure the native module is properly installed and linked.`
       : 'react-native-iap module is not available. Rebuild the app after installing the package.';
@@ -112,7 +143,7 @@ export const useIAP = () => {
   }
 
   // Access methods directly from react-native-iap v14
-  // Don't extract them as they need to maintain their context
+  // Methods are exported directly from the module
 
   // Connect to store on mount
   useEffect(() => {
@@ -125,16 +156,17 @@ export const useIAP = () => {
         setError(null);
         
         // Verify IAP module is available
-        if (!IAP) {
+        if (!RNIap) {
           throw new Error('IAP module is not available');
         }
         
         // Verify required methods exist
-        const requiredMethods = ['initConnection', 'getProducts', 'purchaseUpdatedListener', 'purchaseErrorListener'];
-        const missingMethods = requiredMethods.filter(method => typeof IAP[method] !== 'function');
+        // Note: react-native-iap v14 uses fetchProducts, not getProducts
+        const requiredMethods = ['initConnection', 'fetchProducts', 'purchaseUpdatedListener', 'purchaseErrorListener'];
+        const missingMethods = requiredMethods.filter(method => typeof RNIap[method] !== 'function');
         if (missingMethods.length > 0) {
           console.error('Missing IAP methods:', missingMethods);
-          console.error('Available methods:', Object.keys(IAP));
+          console.error('Available methods:', Object.keys(RNIap));
           throw new Error(`Missing IAP methods: ${missingMethods.join(', ')}`);
         }
         
@@ -144,34 +176,34 @@ export const useIAP = () => {
         
         console.log('Initializing IAP connection...');
         // Initialize connection
-        if (typeof IAP.initConnection !== 'function') {
-          throw new Error('IAP.initConnection is not a function');
+        if (typeof RNIap.initConnection !== 'function') {
+          throw new Error('RNIap.initConnection is not a function');
         }
-        await IAP.initConnection();
+        await RNIap.initConnection();
         setIsConnected(true);
         console.log('Connected to store successfully');
         
-        // Fetch products
-        if (typeof IAP.getProducts !== 'function') {
-          throw new Error('IAP.getProducts is not a function');
+        // Fetch products - react-native-iap v14 uses fetchProducts with { skus: [...] }
+        if (typeof RNIap.fetchProducts !== 'function') {
+          throw new Error('RNIap.fetchProducts is not a function');
         }
-        const fetchedProducts = await IAP.getProducts({ skus: productIds });
+        const fetchedProducts = await RNIap.fetchProducts({ skus: productIds });
         setProducts(fetchedProducts);
         console.log('Products fetched:', fetchedProducts);
         
         // Set up purchase listeners
-        if (typeof IAP.purchaseUpdatedListener !== 'function') {
-          throw new Error('IAP.purchaseUpdatedListener is not a function');
+        if (typeof RNIap.purchaseUpdatedListener !== 'function') {
+          throw new Error('RNIap.purchaseUpdatedListener is not a function');
         }
-        purchaseUpdateSubscription = IAP.purchaseUpdatedListener(async (purchase) => {
+        purchaseUpdateSubscription = RNIap.purchaseUpdatedListener(async (purchase) => {
           console.log('Purchase updated:', purchase);
           try {
             await verifyAndStorePurchase(purchase);
             // Finish the transaction to acknowledge the purchase
-            if (typeof IAP.finishTransaction === 'function') {
-              await IAP.finishTransaction({ purchase, isConsumable: false });
+            if (typeof RNIap.finishTransaction === 'function') {
+              await RNIap.finishTransaction({ purchase, isConsumable: false });
             } else {
-              console.error('IAP.finishTransaction is not a function');
+              console.error('RNIap.finishTransaction is not a function');
             }
             setIsLoading(false);
           } catch (err) {
@@ -180,10 +212,10 @@ export const useIAP = () => {
           }
         });
 
-        if (typeof IAP.purchaseErrorListener !== 'function') {
-          throw new Error('IAP.purchaseErrorListener is not a function');
+        if (typeof RNIap.purchaseErrorListener !== 'function') {
+          throw new Error('RNIap.purchaseErrorListener is not a function');
         }
-        purchaseErrorSubscription = IAP.purchaseErrorListener((error) => {
+        purchaseErrorSubscription = RNIap.purchaseErrorListener((error) => {
           console.error('Purchase error:', error);
           setError(error.message || 'Purchase failed');
         });
@@ -208,7 +240,7 @@ export const useIAP = () => {
       if (purchaseErrorSubscription) {
         purchaseErrorSubscription.remove();
       }
-      IAP.endConnection().catch(err => {
+      RNIap.endConnection().catch(err => {
         console.error('Error ending connection:', err);
       });
     };
@@ -222,7 +254,8 @@ export const useIAP = () => {
       const productId = IAP_CONFIG.getProductId();
       const productIds = [productId];
       
-      const fetchedProducts = await IAP.getProducts({ skus: productIds });
+      // react-native-iap v14 uses fetchProducts, not getProducts
+      const fetchedProducts = await RNIap.fetchProducts({ skus: productIds });
       setProducts(fetchedProducts);
       console.log('Products fetched:', fetchedProducts);
       return fetchedProducts;
@@ -241,11 +274,24 @@ export const useIAP = () => {
       setError(null);
       
       // Safety check
-      if (!IAP || typeof IAP.requestPurchase !== 'function') {
-        const errorMsg = 'IAP.requestPurchase is not available. Check react-native-iap installation.';
+      if (!RNIap || typeof RNIap.requestPurchase !== 'function') {
+        const errorMsg = 'RNIap.requestPurchase is not available. Check react-native-iap installation.';
         console.error(errorMsg);
-        console.error('IAP object:', IAP);
-        console.error('Available methods:', IAP ? Object.keys(IAP) : 'IAP is null');
+        console.error('RNIap object:', RNIap);
+        console.error('Available methods:', RNIap ? Object.keys(RNIap) : 'RNIap is null');
+        setError(errorMsg);
+        setIsLoading(false);
+        return {
+          success: false,
+          canceled: false,
+          message: errorMsg,
+        };
+      }
+      
+      // Ensure connection is established
+      if (!isConnected) {
+        const errorMsg = 'Store connection not established. Please wait and try again.';
+        console.error(errorMsg);
         setError(errorMsg);
         setIsLoading(false);
         return {
@@ -257,22 +303,37 @@ export const useIAP = () => {
       
       const targetProductId = productId || IAP_CONFIG.getProductId();
       
+      // Validate product ID
+      if (!targetProductId || typeof targetProductId !== 'string' || targetProductId.trim() === '') {
+        const errorMsg = 'Invalid product ID';
+        console.error(errorMsg, targetProductId);
+        setError(errorMsg);
+        setIsLoading(false);
+        return {
+          success: false,
+          canceled: false,
+          message: errorMsg,
+        };
+      }
+      
       console.log('Attempting to purchase product:', targetProductId);
       console.log('Platform:', Platform.OS);
       console.log('IAP methods available:', {
-        hasRequestPurchase: typeof IAP.requestPurchase === 'function',
-        hasInitConnection: typeof IAP.initConnection === 'function',
-        IAPType: typeof IAP,
-        IAPKeys: IAP ? Object.keys(IAP).slice(0, 10) : 'null',
+        hasRequestPurchase: typeof RNIap.requestPurchase === 'function',
+        hasInitConnection: typeof RNIap.initConnection === 'function',
+        RNIapType: typeof RNIap,
+        RNIapKeys: RNIap ? Object.keys(RNIap).slice(0, 10) : 'null',
       });
       
       // Request purchase - this will trigger the purchase flow
       // The actual purchase completion is handled by purchaseUpdatedListener
       // For react-native-iap v14, Android requires skus array
+      // Note: type is optional and defaults to 'in-app', but we'll be explicit
       let purchaseRequest;
       if (Platform.OS === 'android') {
         // Android: use skus array
         purchaseRequest = {
+          type: 'in-app', // Explicitly specify product type
           request: {
             android: {
               skus: [targetProductId],
@@ -282,6 +343,7 @@ export const useIAP = () => {
       } else {
         // iOS: use sku (singular)
         purchaseRequest = {
+          type: 'in-app', // Explicitly specify product type
           request: {
             ios: {
               sku: targetProductId,
@@ -291,9 +353,15 @@ export const useIAP = () => {
       }
       
       console.log('Calling requestPurchase with:', JSON.stringify(purchaseRequest));
+      console.log('Product ID being used:', targetProductId);
+      
+      // Ensure we have a valid product ID
+      if (!targetProductId) {
+        throw new Error('Product ID is required for purchase');
+      }
       
       // Call requestPurchase
-      await IAP.requestPurchase(purchaseRequest);
+      await RNIap.requestPurchase(purchaseRequest);
       
       console.log('Purchase request initiated successfully');
       
@@ -375,7 +443,7 @@ export const useIAP = () => {
       console.log('Restoring purchases...');
       
       // Get available purchases
-      const purchases = await IAP.getAvailablePurchases();
+      const purchases = await RNIap.getAvailablePurchases();
       
       // Check if user has purchased remove ads
       const productId = IAP_CONFIG.getProductId();
@@ -388,7 +456,7 @@ export const useIAP = () => {
         await verifyAndStorePurchase(removeAdsPurchase);
         // Finish the transaction (if not already finished)
         try {
-          await IAP.finishTransaction({ purchase: removeAdsPurchase, isConsumable: false });
+          await RNIap.finishTransaction({ purchase: removeAdsPurchase, isConsumable: false });
         } catch (err) {
           // Transaction might already be finished, that's okay
           console.log('Transaction already finished or error finishing:', err);
