@@ -104,15 +104,36 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+        release {
+            // Production signing - uses upload keystore for Google Play App Signing
+            // If you don't have a keystore yet, create one with:
+            // keytool -genkeypair -v -storetype PKCS12 -keystore release.keystore -alias upload -keyalg RSA -keysize 2048 -validity 10000
+            if (project.hasProperty('MYAPP_RELEASE_STORE_FILE')) {
+                storeFile file(MYAPP_RELEASE_STORE_FILE)
+                storePassword MYAPP_RELEASE_STORE_PASSWORD
+                keyAlias MYAPP_RELEASE_KEY_ALIAS
+                keyPassword MYAPP_RELEASE_KEY_PASSWORD
+            }
+        }
     }
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
         }
         release {
-            // Caution! In production, you need to generate your own keystore file.
-            // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
+            // Use release signing config if keystore is configured
+            if (project.hasProperty('MYAPP_RELEASE_STORE_FILE')) {
+                def keystoreFile = file(MYAPP_RELEASE_STORE_FILE)
+                if (keystoreFile.exists()) {
+                    signingConfig signingConfigs.release
+                } else {
+                    throw new GradleException("Release keystore not found at: ${keystoreFile.absolutePath}")
+                }
+            } else {
+                // Fallback to debug for local testing (NOT for production!)
+                println "WARNING: Using debug keystore for release build. Configure MYAPP_RELEASE_STORE_FILE in gradle.properties for production."
+                signingConfig signingConfigs.debug
+            }
             def enableShrinkResources = findProperty('android.enableShrinkResourcesInReleaseBuilds') ?: 'false'
             shrinkResources enableShrinkResources.toBoolean()
             minifyEnabled enableMinifyInReleaseBuilds
