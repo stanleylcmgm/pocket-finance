@@ -47,14 +47,22 @@ function AppContent() {
       const minDisplayTime = 2000; // Minimum 2 seconds
       
       try {
-        // Initialize AdMob (only if ads are enabled and available - requires custom dev build)
+        // Initialize AdMob with timeout to prevent blocking app startup
+        // This is especially important on first install when AdMob might hang
         if (ADMOB_CONFIG.adsEnabled && mobileAds && adMobAvailable) {
           try {
-            await mobileAds().initialize();
+            // Add timeout to AdMob initialization (5 seconds max)
+            const adMobInitPromise = mobileAds().initialize();
+            const timeoutPromise = new Promise((_, reject) => 
+              setTimeout(() => reject(new Error('AdMob initialization timeout')), 5000)
+            );
+            
+            await Promise.race([adMobInitPromise, timeoutPromise]);
             console.log('AdMob initialized successfully');
           } catch (adError) {
-            console.warn('AdMob initialization error:', adError);
-            // Continue even if AdMob fails to initialize
+            console.warn('AdMob initialization error or timeout:', adError);
+            // Continue even if AdMob fails to initialize or times out
+            // AdMob can initialize later in the background
           }
         } else {
           if (!ADMOB_CONFIG.adsEnabled) {
@@ -107,12 +115,12 @@ function AppContent() {
           }
         }, 800);
         
-        // Initialize database
+        // Initialize database - this is critical and must complete
         const success = await initDatabase();
         if (!isMounted) return;
         setIsDbInitialized(success);
       } catch (e) {
-        console.warn(e);
+        console.warn('Error during app initialization:', e);
         if (isMounted) {
           setIsDbInitialized(false);
         }
