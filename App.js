@@ -41,15 +41,36 @@ function AppContent() {
     let isMounted = true;
     let pulseTimeoutId = null;
     let appReadyTimeoutId = null;
+    let maxTimeoutId = null;
 
     async function prepare() {
       const startTime = Date.now();
       const minDisplayTime = 2000; // Minimum 2 seconds
+      const maxWaitTime = 15000; // Maximum 15 seconds - force proceed after this
       
+      // Safety timeout - force app to proceed after maximum wait time
+      maxTimeoutId = setTimeout(() => {
+        if (isMounted) {
+          console.warn('Maximum initialization timeout reached - forcing app to proceed');
+          setIsLoading(false);
+          setAppIsReady(true);
+          // Assume database initialized if we've waited this long
+          setIsDbInitialized(true);
+        }
+      }, maxWaitTime);
+      
+      // Hide native splash screen early to prevent it from blocking
       try {
-        // Initialize AdMob with timeout to prevent blocking app startup
-        // This is especially important on first install when AdMob might hang
-        if (ADMOB_CONFIG.adsEnabled && mobileAds && adMobAvailable) {
+        await SplashScreen.hideAsync();
+      } catch (e) {
+        console.warn('Error hiding splash screen:', e);
+      }
+      
+      // Initialize AdMob in background (non-blocking) - don't await it
+      // This prevents AdMob from blocking app startup on first install
+      if (ADMOB_CONFIG.adsEnabled && mobileAds && adMobAvailable) {
+        // Run AdMob initialization in background without blocking
+        (async () => {
           try {
             // Add timeout to AdMob initialization (5 seconds max)
             const adMobInitPromise = mobileAds().initialize();
@@ -61,84 +82,91 @@ function AppContent() {
             console.log('AdMob initialized successfully');
           } catch (adError) {
             console.warn('AdMob initialization error or timeout:', adError);
-            // Continue even if AdMob fails to initialize or times out
-            // AdMob can initialize later in the background
+            // AdMob can initialize later in the background - not critical for app startup
           }
+        })();
+      } else {
+        if (!ADMOB_CONFIG.adsEnabled) {
+          console.log('AdMob disabled in config');
         } else {
-          if (!ADMOB_CONFIG.adsEnabled) {
-            console.log('AdMob disabled in config');
-          } else {
-            console.log('AdMob not available (running in Expo Go or module not loaded)');
-          }
+          console.log('AdMob not available (running in Expo Go or module not loaded)');
         }
-        
-        if (!isMounted) return;
-        
-        // Start animations
-        Animated.parallel([
-          Animated.timing(fadeAnim, {
-            toValue: 1,
-            duration: 800,
-            useNativeDriver: true,
-          }),
-          Animated.spring(scaleAnim, {
-            toValue: 1,
-            friction: 4,
-            tension: 40,
-            useNativeDriver: true,
-          }),
-          Animated.timing(titleFadeAnim, {
-            toValue: 1,
-            duration: 1000,
-            delay: 300,
-            useNativeDriver: true,
-          }),
-        ]).start();
+      }
+      
+      if (!isMounted) return;
+      
+      // Start animations
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          friction: 4,
+          tension: 40,
+          useNativeDriver: true,
+        }),
+        Animated.timing(titleFadeAnim, {
+          toValue: 1,
+          duration: 1000,
+          delay: 300,
+          useNativeDriver: true,
+        }),
+      ]).start();
 
-        // Pulse animation for icon (start after initial scale animation)
-        pulseTimeoutId = setTimeout(() => {
-          if (isMounted) {
-            Animated.loop(
-              Animated.sequence([
-                Animated.timing(pulseAnim, {
-                  toValue: 1.05,
-                  duration: 1500,
-                  useNativeDriver: true,
-                }),
-                Animated.timing(pulseAnim, {
-                  toValue: 1,
-                  duration: 1500,
-                  useNativeDriver: true,
-                }),
-              ])
-            ).start();
-          }
-        }, 800);
-        
-        // Initialize database - this is critical and must complete
-        const success = await initDatabase();
-        if (!isMounted) return;
-        setIsDbInitialized(success);
-      } catch (e) {
-        console.warn('Error during app initialization:', e);
+      // Pulse animation for icon (start after initial scale animation)
+      pulseTimeoutId = setTimeout(() => {
         if (isMounted) {
+          Animated.loop(
+            Animated.sequence([
+              Animated.timing(pulseAnim, {
+                toValue: 1.05,
+                duration: 1500,
+                useNativeDriver: true,
+              }),
+              Animated.timing(pulseAnim, {
+                toValue: 1,
+                duration: 1500,
+                useNativeDriver: true,
+              }),
+            ])
+          ).start();
+        }
+      }, 800);
+      
+      // Initialize database with timeout to prevent hanging
+      try {
+        const dbInitPromise = initDatabase();
+        const dbTimeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Database initialization timeout')), 10000)
+        );
+        
+        const success = await Promise.race([dbInitPromise, dbTimeoutPromise]);
+        if (!isMounted) return;
+        setIsDbInitialized(success === true || success === undefined);
+      } catch (dbError) {
+        console.error('Database initialization error or timeout:', dbError);
+        if (isMounted) {
+          // Try to continue anyway - database might still work
           setIsDbInitialized(false);
         }
-      } finally {
-        if (!isMounted) return;
-        setIsLoading(false);
-        
-        // Calculate remaining time to ensure minimum 2 seconds display
-        const elapsedTime = Date.now() - startTime;
-        const remainingTime = Math.max(0, minDisplayTime - elapsedTime);
-        
-        // Wait for remaining time before transitioning
-        appReadyTimeoutId = setTimeout(() => {
-          if (isMounted) {
-            setAppIsReady(true);
-          }
-        }, remainingTime);
       }
+      
+      if (!isMounted) return;
+      setIsLoading(false);
+      
+      // Calculate remaining time to ensure minimum 2 seconds display
+      const elapsedTime = Date.now() - startTime;
+      const remainingTime = Math.max(0, minDisplayTime - elapsedTime);
+      
+      // Wait for remaining time before transitioning
+      appReadyTimeoutId = setTimeout(() => {
+        if (isMounted) {
+          setAppIsReady(true);
+        }
+      }, remainingTime);
     }
 
     prepare();
@@ -151,6 +179,9 @@ function AppContent() {
       }
       if (appReadyTimeoutId) {
         clearTimeout(appReadyTimeoutId);
+      }
+      if (maxTimeoutId) {
+        clearTimeout(maxTimeoutId);
       }
     };
   }, []);
@@ -170,6 +201,7 @@ function AppContent() {
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.splashContainer}
+          onLayout={onLayoutRootView}
         >
           <Image 
             source={require('./assets/icon.png')} 

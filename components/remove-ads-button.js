@@ -16,7 +16,8 @@ const RemoveAdsButton = () => {
     error: iapError,
     purchaseProduct, 
     restorePurchases,
-    fetchProducts 
+    fetchProducts,
+    clearError: clearIAPError
   } = useIAP();
   const [modalVisible, setModalVisible] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -141,6 +142,27 @@ const RemoveAdsButton = () => {
     }
   }, [modalVisible, refreshStatus]);
 
+  // Reset processing states when IAP error indicates cancellation
+  useEffect(() => {
+    if (iapError && (iapError.includes('cancel') || iapError.includes('cancelled'))) {
+      // User cancelled - reset all processing states
+      setPurchaseInProgress(false);
+      setIsProcessing(false);
+    }
+  }, [iapError]);
+
+  // Reset states when modal closes
+  useEffect(() => {
+    if (!modalVisible) {
+      setPurchaseInProgress(false);
+      setIsProcessing(false);
+      // Clear any error when modal closes
+      if (clearIAPError) {
+        clearIAPError();
+      }
+    }
+  }, [modalVisible, clearIAPError]);
+
   const isLoading = iapLoading || isProcessing;
 
   // Don't show button if already purchased (but allow it to show while loading)
@@ -186,20 +208,30 @@ const RemoveAdsButton = () => {
           setModalVisible(false);
           setPurchaseInProgress(false);
           setIsProcessing(false);
+          // Clear error when dismissing
+          if (clearIAPError) {
+            clearIAPError();
+          }
         }}
       >
         <TouchableOpacity 
           style={styles.modalOverlay}
           activeOpacity={1}
           onPress={() => {
-            if (!isProcessing && !purchaseInProgress) {
-              setModalVisible(false);
-              setPurchaseInProgress(false);
-              setIsProcessing(false);
+            // Always allow dismissing by tapping overlay
+            setModalVisible(false);
+            setPurchaseInProgress(false);
+            setIsProcessing(false);
+            // Clear error when dismissing
+            if (clearIAPError) {
+              clearIAPError();
             }
           }}
         >
-          <View style={styles.modalContent} onStartShouldSetResponder={() => true}>
+          <View 
+            style={styles.modalContent}
+            onStartShouldSetResponder={() => true}
+          >
             <View style={styles.modalHeader}>
               <View style={styles.iconContainer}>
                 <Ionicons name="star" size={32} color="#FFD700" />
@@ -268,6 +300,10 @@ const RemoveAdsButton = () => {
                   setModalVisible(false);
                   setPurchaseInProgress(false);
                   setIsProcessing(false);
+                  // Clear error when canceling
+                  if (clearIAPError) {
+                    clearIAPError();
+                  }
                 }}
               >
                 <Text style={styles.cancelButtonText}>{t('common.cancel')}</Text>
@@ -275,7 +311,7 @@ const RemoveAdsButton = () => {
             </View>
 
             <Text style={styles.disclaimer}>{t('purchase.disclaimer')}</Text>
-          </View>
+          </TouchableOpacity>
         </TouchableOpacity>
       </Modal>
     </>

@@ -499,6 +499,10 @@ export const useIAP = () => {
     }
   };
 
+  const clearError = useCallback(() => {
+    setError(null);
+  }, []);
+
   return {
     isConnected,
     isLoading,
@@ -507,5 +511,6 @@ export const useIAP = () => {
     purchaseProduct,
     restorePurchases,
     fetchProducts,
+    clearError,
   };
 };
