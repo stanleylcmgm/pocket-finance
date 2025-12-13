@@ -70,7 +70,9 @@ const RemoveAdsButton = () => {
       } else if (result.canceled) {
         // User canceled
         setPurchaseInProgress(false);
+        setIsProcessing(false);
         console.log('Purchase canceled by user');
+        // Don't show alert for cancel, just allow user to dismiss modal
       } else {
         // Purchase failed
         setPurchaseInProgress(false);
@@ -180,10 +182,24 @@ const RemoveAdsButton = () => {
         animationType="slide"
         transparent={true}
         visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
+        onRequestClose={() => {
+          setModalVisible(false);
+          setPurchaseInProgress(false);
+          setIsProcessing(false);
+        }}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+        <TouchableOpacity 
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => {
+            if (!isProcessing && !purchaseInProgress) {
+              setModalVisible(false);
+              setPurchaseInProgress(false);
+              setIsProcessing(false);
+            }
+          }}
+        >
+          <View style={styles.modalContent} onStartShouldSetResponder={() => true}>
             <View style={styles.modalHeader}>
               <View style={styles.iconContainer}>
                 <Ionicons name="star" size={32} color="#FFD700" />
@@ -248,8 +264,11 @@ const RemoveAdsButton = () => {
               
               <TouchableOpacity
                 style={styles.cancelButton}
-                onPress={() => setModalVisible(false)}
-                disabled={isLoading}
+                onPress={() => {
+                  setModalVisible(false);
+                  setPurchaseInProgress(false);
+                  setIsProcessing(false);
+                }}
               >
                 <Text style={styles.cancelButtonText}>{t('common.cancel')}</Text>
               </TouchableOpacity>
@@ -257,7 +276,7 @@ const RemoveAdsButton = () => {
 
             <Text style={styles.disclaimer}>{t('purchase.disclaimer')}</Text>
           </View>
-        </View>
+        </TouchableOpacity>
       </Modal>
     </>
   );

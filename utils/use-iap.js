@@ -217,7 +217,19 @@ export const useIAP = () => {
         }
         purchaseErrorSubscription = RNIap.purchaseErrorListener((error) => {
           console.error('Purchase error:', error);
-          setError(error.message || 'Purchase failed');
+          setIsLoading(false);
+          
+          // Check if user canceled
+          const isCanceled = error.code === 'E_USER_CANCELLED' || 
+                           error.code === 'E_USER_CANCELED' || 
+                           error.message?.toLowerCase().includes('cancel') ||
+                           error.message?.toLowerCase().includes('cancelled');
+          
+          if (isCanceled) {
+            setError('User cancelled the operation');
+          } else {
+            setError(error.message || 'Purchase failed');
+          }
         });
         
       } catch (err) {
