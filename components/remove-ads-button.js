@@ -311,7 +311,7 @@ const RemoveAdsButton = () => {
             </View>
 
             <Text style={styles.disclaimer}>{t('purchase.disclaimer')}</Text>
-          </TouchableOpacity>
+          </View>
         </TouchableOpacity>
       </Modal>
     </>
